@@ -23,12 +23,17 @@ public class ManageBowlGamesAction extends ActionSupport {
 	public String execute() throws Exception {
 		try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (Exception ex) {
+        } 
+		catch (Exception ex) {
         }
 		Connection conn = null;
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/bowlpool" + this.year + "?" +
-			    "user=root&password=PASSWORD");
+			String connString = "jdbc:mysql://localhost/bowlpool";
+		    if (this.year != null) {
+		    	connString += this.year;
+		    }
+		    connString += "?user=root&password=PASSWORD";
+		    conn = DriverManager.getConnection(connString);
 		}
 		catch (SQLException ex) {
 		    System.out.println("SQLException: " + ex.getMessage());

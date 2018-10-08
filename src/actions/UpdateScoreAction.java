@@ -3,7 +3,6 @@ package actions;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,15 +32,19 @@ public class UpdateScoreAction extends ActionSupport {
         }
 		Connection conn = null;
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/bowlpool" + this.year + "?" +
-				"user=root&password=PASSWORD");
+			String connString = "jdbc:mysql://localhost/bowlpool";
+		    if (this.year != null) {
+		    	connString += this.year;
+		    }
+		    connString += "?user=root&password=PASSWORD";
+		    conn = DriverManager.getConnection(connString);
 		}
 		catch (SQLException ex) {
 		    System.out.println("SQLException: " + ex.getMessage());
 		    System.out.println("SQLState: " + ex.getSQLState());
 		    System.out.println("VendorError: " + ex.getErrorCode());
 		}
-		updateScore(conn, favoriteScore, underDogScore, gameId, favorite, underdog);
+		DAO.updateScore(conn, favoriteScore, underDogScore, gameId, favorite, underdog);
 		
 		List<BowlGame> bowlGameList = DAO.getBowlGamesList(conn);
 		
@@ -108,21 +111,6 @@ public class UpdateScoreAction extends ActionSupport {
 
 	public void setChampGame(boolean champGame) {
 		this.champGame = champGame;
-	}
-
-	// DB
-	private void updateScore(Connection conn, Integer favoriteScore, Integer underDogScore, Integer gameId, String favorite, String underdog) {
-		String champUpdate = "";
-		if (favorite != null && favorite.length() > 0 && underdog != null && underdog.length() > 0) {
-			champUpdate += ", Favorite = '" + favorite + "', Underdog = '" + underdog + "'";
-		}
-		try {
-			Statement stmt = conn.createStatement();
-			stmt.execute("UPDATE BowlGame SET FavoriteScore = " + favoriteScore + ", UnderDogScore = " +  underDogScore + ", Completed = true" + champUpdate + " WHERE GameId = " + gameId);
-		}
-		catch (SQLException e) {
-		}
-		return;
 	}
 
 }

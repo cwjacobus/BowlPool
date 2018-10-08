@@ -10,9 +10,10 @@ public class BowlGame {
 	private int favoriteScore;
 	private int underDogScore;
 	private boolean completed;
+	private int year;
 	
 	public BowlGame (int gameId, String bowlName, String favorite, String underdog, 
-			double spread, int favoriteScore, int underDogScore, boolean completed) {
+			double spread, int favoriteScore, int underDogScore, boolean completed, int year) {
 		this.gameId = gameId;
 		this.bowlName = bowlName;
 		this.favorite = favorite;
@@ -21,6 +22,7 @@ public class BowlGame {
 		this.favoriteScore = favoriteScore;
 		this.underDogScore = underDogScore;
 		this.completed = completed;
+		this.year = year;
 	}
 	
 	public int getGameId() {
@@ -70,6 +72,14 @@ public class BowlGame {
 	}
 	public void setCompleted(boolean completed) {
 		this.completed = completed;
+	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
 	}
 
 }

@@ -7,13 +7,15 @@ public class User {
 	private String lastName;
 	private String firstName;
 	private String email;
+	private Integer year;
 	
-	public User (int userId, String userName, String lastName, String firstName, String email) {
+	public User (int userId, String userName, String lastName, String firstName, String email, int year) {
 		this.userId = userId;
 		this.userName = userName;
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.email = email;
+		this.year = year;
 	}
 
 	public int getUserId() {
@@ -54,6 +56,14 @@ public class User {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Integer getYear() {
+		return year;
+	}
+
+	public void setYear(Integer year) {
+		this.year = year;
 	}
 	
 	

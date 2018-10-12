@@ -38,7 +38,7 @@ public class GetStandingsAction extends ActionSupport {
 		Connection conn = null;
 		try {
 			String connString = "jdbc:mysql://localhost/bowlpool";
-		    if (this.year != null) {
+		    if (this.year.intValue() < 17) { // only append year before 2017
 		    	connString += this.year;
 		    }
 		    connString += "?user=root&password=PASSWORD";
@@ -49,6 +49,7 @@ public class GetStandingsAction extends ActionSupport {
 		    System.out.println("SQLState: " + ex.getSQLState());
 		    System.out.println("VendorError: " + ex.getErrorCode());
 		}
+		DAO.year = year;
 		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(conn);
 		Map<Integer, ChampPick> champPicksMap = DAO.getChampPicksMap(conn);
 		TreeMap<String, Integer> standings = DAO.getStandings(conn);

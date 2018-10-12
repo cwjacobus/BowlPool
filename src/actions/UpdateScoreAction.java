@@ -33,7 +33,7 @@ public class UpdateScoreAction extends ActionSupport {
 		Connection conn = null;
 		try {
 			String connString = "jdbc:mysql://localhost/bowlpool";
-		    if (this.year != null) {
+			if (Integer.parseInt(this.year) < 17) { // only append year before 2017
 		    	connString += this.year;
 		    }
 		    connString += "?user=root&password=PASSWORD";
@@ -44,6 +44,7 @@ public class UpdateScoreAction extends ActionSupport {
 		    System.out.println("SQLState: " + ex.getSQLState());
 		    System.out.println("VendorError: " + ex.getErrorCode());
 		}
+		DAO.year = Integer.parseInt(year);
 		DAO.updateScore(conn, favoriteScore, underDogScore, gameId, favorite, underdog);
 		
 		List<BowlGame> bowlGameList = DAO.getBowlGamesList(conn);

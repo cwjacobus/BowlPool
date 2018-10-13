@@ -26,18 +26,22 @@ public class DAO {
 		System.out.println("Year: " + year);
 		try { 
 			Statement stmt1 = conn.createStatement();
-			ResultSet rs1 = stmt1.executeQuery("SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
-				"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and (p.Favorite = true and " + (useYearClause() ? getYearClause("bg") + " and ": "") + 
-				"(bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) " + 
-				"group by u.UserName");
+			String query1String = "SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
+					"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and " + (useYearClause() ? getYearClause("bg") + " and ": "") + "(p.Favorite = true and " +  
+					"(bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) " + 
+					"group by u.UserName";
+			ResultSet rs1 = stmt1.executeQuery(query1String);
 			// Get who picked champ game correct
-			Statement stmt2 = conn.createStatement();
-			ResultSet rs2 = stmt2.executeQuery("SELECT u.UserId, count(*) from ChampPick p, User u, BowlGame bg where " + 
-				"p.userId = u.userId and bg.gameId = p.gameId and bg.completed = true and " + (useYearClause() ? getYearClause("bg") + " and ": "") +
-				"(bg.Favorite = p.Winner and (bg.FavoriteScore > bg.UnderdogScore) or (bg.Underdog = p.Winner and (bg.UnderdogScore > bg.FavoriteScore))) " + 
-				"group by u.UserName");
-			while (rs2.next()) {
-				champGameWinners.put(rs2.getInt(1), rs2.getInt(2));
+			if (useYearClause()) { // ChampPick did not exist until 2017
+				Statement stmt2 = conn.createStatement();
+				String query2String = "SELECT u.UserId, count(*) from ChampPick p, User u, BowlGame bg where " + 
+						"p.userId = u.userId and bg.gameId = p.gameId and bg.completed = true and " + (useYearClause() ? getYearClause("bg") + " and ": "") +
+						"(bg.Favorite = p.Winner and (bg.FavoriteScore > bg.UnderdogScore) or (bg.Underdog = p.Winner and (bg.UnderdogScore > bg.FavoriteScore))) " + 
+						"group by u.UserName";
+				ResultSet rs2 = stmt2.executeQuery(query2String);
+				while (rs2.next()) {
+					champGameWinners.put(rs2.getInt(1), rs2.getInt(2));
+				}
 			}
 			while (rs1.next()) {
 				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? 1 : 0; 
@@ -69,7 +73,7 @@ public class DAO {
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
 						rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"));
+						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), (useYearClause() ? rs.getInt("Year") : 0));
 				bowlGameList.add(bowlGame);
 			}
 		}
@@ -126,8 +130,9 @@ public class DAO {
 		Integer totalPts = null;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select cp.* from ChampPick cp, BowlGame bg where cp.GameId = bg.GameId " +
-				(useYearClause() ? "and " + getYearClause("bg") : "") + " order by cp.UserId");
+			String queryString = "select cp.* from ChampPick cp, BowlGame bg where cp.GameId = bg.GameId " +
+					(useYearClause() ? "and " + getYearClause("bg") : "") + " order by cp.UserId";
+			ResultSet rs = stmt.executeQuery(queryString);
 			while (rs.next()) {
 				userId = rs.getInt("UserId");
 				gameId = rs.getInt("GameId");
@@ -151,7 +156,7 @@ public class DAO {
 			User user;
 			while (rs.next()) {
 				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"),
-					rs.getString("FirstName"), rs.getString("Email"), rs.getInt("Year"));
+					rs.getString("FirstName"), rs.getString("Email"), (useYearClause() ? rs.getInt("Year") : 0));
 				userList.add(user);
 			}
 		}

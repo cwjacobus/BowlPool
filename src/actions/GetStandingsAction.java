@@ -155,8 +155,10 @@ public class GetStandingsAction extends ActionSupport {
 				diffPicks++;
 			}
 		}
-		if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(conn)) {
-			diffPicks++;
+		if (userChampPick1 != null && userChampPick2 != null) {
+			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(conn)) {
+				diffPicks++;
+			}
 		}
 		return diffPicks;	
 	}

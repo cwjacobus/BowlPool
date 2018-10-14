@@ -1,8 +1,5 @@
 package actions;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,31 +28,14 @@ public class GetStandingsAction extends ActionSupport {
 	int lastGamePlayedIndex = 9;
 
 	public String execute() throws Exception {
-		try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (Exception ex) {
-        }
-		Connection conn = null;
-		try {
-			String connString = "jdbc:mysql://localhost/bowlpool";
-		    if (this.year.intValue() < 17) { // only append year before 2017
-		    	connString += this.year;
-		    }
-		    connString += "?user=root&password=PASSWORD";
-		    conn = DriverManager.getConnection(connString);
-		}
-		catch (SQLException ex) {
-		    System.out.println("SQLException: " + ex.getMessage());
-		    System.out.println("SQLState: " + ex.getSQLState());
-		    System.out.println("VendorError: " + ex.getErrorCode());
-		}
 		DAO.year = year;
-		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(conn);
-		Map<Integer, ChampPick> champPicksMap = DAO.getChampPicksMap(conn);
-		TreeMap<String, Integer> standings = DAO.getStandings(conn);
+		DAO.setConnection();
+		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap();
+		Map<Integer, ChampPick> champPicksMap = DAO.getChampPicksMap();
+		TreeMap<String, Integer> standings = DAO.getStandings();
 		TreeMap<String, Standings> displayStandings = new TreeMap<String, Standings>(Collections.reverseOrder());
 		
-		numOfBowlGames = DAO.getBowlGamesList(conn).size();
+		numOfBowlGames = DAO.getBowlGamesList().size();
 		
 		//Iterate through standings to make formatted display string
 		Iterator<Entry<String, Integer>> it = standings.entrySet().iterator();
@@ -88,7 +68,7 @@ public class GetStandingsAction extends ActionSupport {
 					List<Pick> userPicks2 = picksMap.get(userId2);
 					ChampPick userChampPick1 = champPicksMap.get(userId);
 					ChampPick userChampPick2 = champPicksMap.get(userId2);
-					int diffPicks =  getUsersRemainingDifferentPicks(conn, userPicks1, userPicks2, userChampPick1, userChampPick2);
+					int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2);
 					if ((wins + diffPicks) < wins2) {
 						eliminatedByCount++;
 					}
@@ -144,9 +124,9 @@ public class GetStandingsAction extends ActionSupport {
 	   this.year = year;
 	}
 		
-	private int getUsersRemainingDifferentPicks(Connection conn, List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2) {
+	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2) {
 		int diffPicks = 0;
-		int afterGameIndex = DAO.getNumberOfCompletedGames(conn);
+		int afterGameIndex = DAO.getNumberOfCompletedGames();
 		
 		for (int i = afterGameIndex; i < numOfBowlGames; i++) {
 			Pick p1 = userPicks1.get(i);
@@ -156,7 +136,7 @@ public class GetStandingsAction extends ActionSupport {
 			}
 		}
 		if (userChampPick1 != null && userChampPick2 != null) {
-			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(conn)) {
+			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted()) {
 				diffPicks++;
 			}
 		}

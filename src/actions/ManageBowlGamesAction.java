@@ -1,8 +1,5 @@
 package actions;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,27 +18,7 @@ public class ManageBowlGamesAction extends ActionSupport {
 	private String year;
 
 	public String execute() throws Exception {
-		try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } 
-		catch (Exception ex) {
-        }
-		Connection conn = null;
-		try {
-			String connString = "jdbc:mysql://localhost/bowlpool";
-			if (Integer.parseInt(this.year) < 17) { // only append year before 2017
-		    	connString += this.year;
-		    }
-		    connString += "?user=root&password=PASSWORD";
-		    conn = DriverManager.getConnection(connString);
-		}
-		catch (SQLException ex) {
-		    System.out.println("SQLException: " + ex.getMessage());
-		    System.out.println("SQLState: " + ex.getSQLState());
-		    System.out.println("VendorError: " + ex.getErrorCode());
-		}
-		DAO.year = Integer.parseInt(year);
-		List<BowlGame> bowlGameList = DAO.getBowlGamesList(conn);
+		List<BowlGame> bowlGameList = DAO.getBowlGamesList();
 		
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();

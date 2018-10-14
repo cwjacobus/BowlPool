@@ -34,5 +34,19 @@
 	</table>
   	<br>
   	<a href="/BowlPoolWeb/manageBowlGames?year=${year}">Manage Bowl Games</a>
+  	<br>
+  	<h3>Import Data</h3>
+  	<form action="import">
+  		<input type="file" name="inputFileName" accept=".xls" /><br>
+  		<input type="checkbox" name="usersCB" value="Users"> Users<br>
+		<input type="checkbox" name="gamesCB" value="Games"> Games<br>
+		<input type="checkbox" name="picksCB" value="Picks"> Picks<br>
+		<input type="submit" value="Import">
+  	</form>
+  	<br>
+  	<!--<s:form action="import" method="post" enctype="multipart/form-data" >
+        <s:file name="inputFile2" accept=".xls" />
+        <s:submit />
+    </s:form>-->
 	</body>
 </html>

@@ -1,6 +1,7 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,8 +20,9 @@ import data.User;
 public class DAO {
 	
 	public static Integer year = null;
+	public static Connection conn; 
 	
-	public static TreeMap<String, Integer> getStandings(Connection conn) {
+	public static TreeMap<String, Integer> getStandings() {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
 		System.out.println("Year: " + year);
@@ -54,7 +56,7 @@ public class DAO {
 		}
 		catch (SQLException e) {
 		}
-		List<User> usersList = DAO.getUsersList(conn);
+		List<User> usersList = DAO.getUsersList();
 		// Merge any users with 0 wins
 		for (User u : usersList) {
 			if (!standings.containsValue(u.getUserId())) {
@@ -64,7 +66,7 @@ public class DAO {
 		return standings;
 	}
 	
-	public static List<BowlGame> getBowlGamesList(Connection conn) {
+	public static List<BowlGame> getBowlGamesList() {
 		List<BowlGame>bowlGameList = new ArrayList<BowlGame>();
 		try {
 			Statement stmt = conn.createStatement();
@@ -82,7 +84,7 @@ public class DAO {
 		return bowlGameList;
 	}
 	
-	public static Map<Integer, List<Pick>> getPicksMap(Connection conn) {
+	public static Map<Integer, List<Pick>> getPicksMap() {
 		Map<Integer, List<Pick>> picksMap = new HashMap<Integer, List<Pick>>();
 		ArrayList<Pick> picksList = new ArrayList<Pick>();
 		Integer prevUserId = null; 
@@ -120,7 +122,7 @@ public class DAO {
 		return picksMap;
 	}
 	
-	public static Map<Integer, ChampPick> getChampPicksMap(Connection conn) {
+	public static Map<Integer, ChampPick> getChampPicksMap() {
 		Map<Integer, ChampPick> picksMap = new HashMap<Integer, ChampPick>();
 		ChampPick champPick = new ChampPick();
 		Integer userId = null;
@@ -148,7 +150,7 @@ public class DAO {
 		return picksMap;
 	}
 	
-	public static List<User> getUsersList(Connection conn) {
+	public static List<User> getUsersList() {
 		List<User>userList = new ArrayList<User>();
 		try {
 			Statement stmt = conn.createStatement();
@@ -165,7 +167,7 @@ public class DAO {
 		return userList;
 	}
 	
-	public static int getNumberOfCompletedGames(Connection conn) {
+	public static int getNumberOfCompletedGames() {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
@@ -178,7 +180,7 @@ public class DAO {
 		return numberOfCompletedGames;
 	}
 	
-	public static boolean isChampGameCompleted(Connection conn) {
+	public static boolean isChampGameCompleted() {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
@@ -191,7 +193,7 @@ public class DAO {
 		return numberOfCompletedGames > 0;
 	}
 	
-	public static void updateScore(Connection conn, Integer favoriteScore, Integer underDogScore, Integer gameId, String favorite, String underdog) {
+	public static void updateScore(Integer favoriteScore, Integer underDogScore, Integer gameId, String favorite, String underdog) {
 		String champUpdate = "";
 		if (favorite != null && favorite.length() > 0 && underdog != null && underdog.length() > 0) {
 			champUpdate += ", Favorite = '" + favorite + "', Underdog = '" + underdog + "'";
@@ -220,5 +222,27 @@ public class DAO {
 	
 	private static String getYearClause(String prefix) {
 		return prefix + ".year = " + year;
+	}
+	
+	public static Connection setConnection() {
+		try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+        } 
+		catch (Exception ex) {
+        }
+		try {
+			String connString = "jdbc:mysql://localhost/bowlpool";
+			if (year.intValue() < 17) { // only append year before 2017
+			    connString += year;
+			}
+			connString += "?user=root&password=PASSWORD&useSSL=false";
+			conn = DriverManager.getConnection(connString);
+		}
+		catch (SQLException ex) {
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+		}
+		return conn;
 	}
 }

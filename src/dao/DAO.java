@@ -180,6 +180,20 @@ public class DAO {
 		return numberOfCompletedGames;
 	}
 	
+	public static boolean isThereDataForAYear(int year) {
+		int totalDataCount = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select (select count(*) from BowlGame where year = " +
+				year + ") + (select count(*) from User where year = " + year + ") as total_rows from dual");
+			rs.next();
+			totalDataCount = rs.getInt(1);
+		}
+		catch (SQLException e) {
+		}
+		return totalDataCount == 0;
+	}
+	
 	public static boolean isChampGameCompleted() {
 		int numberOfCompletedGames = 0;
 		try {
@@ -226,7 +240,7 @@ public class DAO {
 	
 	public static Connection setConnection() {
 		try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
         } 
 		catch (Exception ex) {
         }

@@ -1,0 +1,92 @@
+CREATE TABLE User
+(
+UserId int(11) PRIMARY KEY AUTO_INCREMENT,
+UserName varchar(255) NOT NULL,
+LastName varchar(255),
+FirstName varchar(255),
+Email varchar(255),
+Year int(5)
+);
+
+CREATE TABLE BowlGame
+(
+GameId int(11) PRIMARY KEY AUTO_INCREMENT,
+BowlName varchar(255) NOT NULL,
+Favorite varchar(255),
+Underdog varchar(255),
+Spread decimal(4,1),
+FavoriteScore int(11),
+UnderDogScore int(11),
+Completed boolean,
+Year int(5)
+);
+
+CREATE TABLE Pick
+(
+PickId int(11) PRIMARY KEY AUTO_INCREMENT,
+UserId int(11),
+GameId int(11),
+Favorite boolean
+);
+
+CREATE TABLE ChampPick
+(
+PickId int(11) PRIMARY KEY AUTO_INCREMENT,
+UserId int(11),
+GameId int(11),
+Winner varchar(255),
+TotalPoints int(11)
+);
+
+
+
+
+
+
+INSERT INTO User (UserName, LastName, FirstName, Email) VALUES ('Jacobus', 'Jacobus', 'Chris', 'cjacobus@austin.rr.com');
+
+INSERT INTO User (UserName, LastName, FirstName, Email) VALUES ('dummy', '', '', '');
+INSERT INTO Pick (UserId, GameId, Favorite) VALUES ((select UserId from User where UserName = 'dummy'), 1, false);
+
+INSERT INTO BowlGame (BowlName) VALUES ('Championship');
+
+// Should be equal to number of users * number of bowl games
+select count(*) from pick;
+
+// Gets a pick count for each user in case above number is wrong
+select u.UserName, count(*) from Pick p, User u where p.UserId = u.UserId group by u.UserName;
+
+select p.* from Pick p, User u where p.userId= u.userId and u.userName = 'Jacobus'
+
+update BowlGame set FavoriteScore=16, UnderdogScore=3, Completed=true where GameId=1;
+update BowlGame set FavoriteScore=21, UnderdogScore=6, Completed=true where GameId=2;
+update BowlGame set FavoriteScore=45, UnderdogScore=10, Completed=true where GameId=3;
+update BowlGame set FavoriteScore=24, UnderdogScore=38, Completed=true where GameId=4;
+update BowlGame set FavoriteScore=28, UnderdogScore=33, Completed=true where GameId=5;
+update BowlGame set FavoriteScore=55, UnderdogScore=48, Completed=true where GameId=6;
+update BowlGame set FavoriteScore=52, UnderdogScore=23, Completed=true where GameId=7;
+update BowlGame set FavoriteScore=16, UnderdogScore=17, Completed=true where GameId=8;
+update BowlGame set FavoriteScore=49, UnderdogScore=48, Completed=true where GameId=9;
+update BowlGame set FavoriteScore=30, UnderdogScore=6, Completed=true where GameId=10;
+update BowlGame set FavoriteScore=35, UnderdogScore=18, Completed=true where GameId=11;
+update BowlGame set FavoriteScore=, UnderdogScore=, Completed=true where GameId=12;
+update BowlGame set FavoriteScore=, UnderdogScore=, Completed=true where GameId=13;
+update BowlGame set FavoriteScore=, UnderdogScore=, Completed=true where GameId=14;
+
+// Get Users with correct picks
+select u.UserName, bg.BowlName from Pick p, User u, BowlGame bg where p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and 
+(p.Favorite = true and (bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) order by u.UserName;
+
+// Get standings
+select u.UserName, count(*) from Pick p, User u, BowlGame bg where p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and 
+(p.Favorite = true and (bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) 
+group by u.UserName order by count(*) desc, u.UserName;
+
+// Trying to use outer join
+SELECT User.userName, count(*)
+FROM Pick LEFT OUTER JOIN User ON User.UserId = Pick.UserId JOIN BowlGame ON BowlGame.gameId = Pick.gameId
+WHERE BowlGame.completed = true and (Pick.Favorite = true and (BowlGame.FavoriteScore - BowlGame.Spread > BowlGame.UnderdogScore) or (Pick.Favorite = false and (BowlGame.UnderdogScore + BowlGame.Spread > BowlGame.FavoriteScore))) 
+group by User.UserName order by count(*) desc, User.UserName;
+
+// Get pick distribution
+select bg.bowlName, p.Favorite, count(*) from Pick p, BowlGame bg where bg.gameId = p.gameId group by bg.bowlName, p.Favorite order by bg.gameId, p.Favorite desc;

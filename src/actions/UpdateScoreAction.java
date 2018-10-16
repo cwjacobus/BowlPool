@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.struts2.interceptor.SessionAware;
+
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.util.ValueStack;
@@ -11,7 +13,7 @@ import com.opensymphony.xwork2.util.ValueStack;
 import dao.DAO;
 import data.BowlGame;
 
-public class UpdateScoreAction extends ActionSupport {
+public class UpdateScoreAction extends ActionSupport implements SessionAware {
 	
 	private static final long serialVersionUID = 1L;
 	private Integer favoriteScore;
@@ -21,11 +23,17 @@ public class UpdateScoreAction extends ActionSupport {
 	private Integer gameId;
 	private String year;
 	private boolean champGame;
+	
+	Map<String, Object> userSession;
 
 	public String execute() throws Exception {
+		if (userSession == null || userSession.size() == 0) {
+			return "invalidSession";
+		}
+		Integer year = (Integer) userSession.get("year");
 		DAO.updateScore(favoriteScore, underDogScore, gameId, favorite, underdog);
 		
-		List<BowlGame> bowlGameList = DAO.getBowlGamesList();
+		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
 		
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
@@ -91,5 +99,10 @@ public class UpdateScoreAction extends ActionSupport {
 	public void setChampGame(boolean champGame) {
 		this.champGame = champGame;
 	}
+	
+	@Override
+    public void setSession(Map<String, Object> sessionMap) {
+        this.userSession = sessionMap;
+    }
 
 }

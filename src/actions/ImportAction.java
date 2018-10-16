@@ -15,6 +15,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.struts2.interceptor.SessionAware;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
@@ -24,39 +25,57 @@ import dao.DAO;
 import data.BowlGame;
 import data.User;
 
-public class ImportAction extends ActionSupport {
+public class ImportAction extends ActionSupport implements SessionAware {
 	
 	private static final long serialVersionUID = 1L;
 	private String usersCB;
 	private String gamesCB;
 	private String picksCB;
 	private String inputFileName;
-	private String year;
 	
 	boolean usersImport = false;
 	boolean picksImport = false;
 	boolean bowlGamesImport = false;
+	
+	Map<String, Object> userSession;
+	
+	Integer year;
 
 	public String execute() throws Exception {
+		if (userSession == null || userSession.size() == 0) {
+			return "invalidSession";
+		}
+		year = (Integer) userSession.get("year");
+		System.out.println("Import: " + year);
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
 	    System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + inputFileName);
 	    if (usersCB == null && gamesCB == null && picksCB == null) {
 	    	context.put("errorMsg", "Nothing selected to import!");
+	    	// return "error";
 	    }
 	    else if (inputFileName == null || inputFileName.length() == 0) {
 	    	context.put("errorMsg", "No file selected to import!");
+	    	// return "error";
 	    }
 	    else {
-	    	// TBD Check for data already imported
 	    	if (usersCB != null) {
 	    		usersImport = true; 
+	    		// TBD Check for users already imported
+	    		// context.put("errorMsg", "Users already imported!");
+	    		// return "error"
 	    	}
 	    	if (picksCB != null) {
-	    		picksImport = true; 
+	    		picksImport = true;
+	    		// TBD Check for picks already imported
+	    		// context.put("errorMsg", "Picks already imported!");
+	    		// return "error"
 	    	}
 	    	if (gamesCB != null) {
 	    		bowlGamesImport = true; 
+	    		// TBD Check for games already imported
+	    		// context.put("errorMsg", "Games already imported!");
+	    		// return "error"
 	    	}
 	    	if (usersImport || picksImport || bowlGamesImport) {
 	    		File inputFile = new File("c:\\Football\\" + inputFileName);
@@ -78,8 +97,8 @@ public class ImportAction extends ActionSupport {
 	}
 	
 	private void importUsersAndPicks(HSSFWorkbook hWorkbook, Connection conn) {
-		List<BowlGame> bowlGameList = DAO.getBowlGamesList();
-		List<User> userList = DAO.getUsersList();
+		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
+		List<User> userList = DAO.getUsersList(year);
 		try {  
 			Statement stmt;
 			HashMap<Integer, String> bowlGameNameMap = null;
@@ -330,4 +349,9 @@ public class ImportAction extends ActionSupport {
 	public void setInputFileName(String inputFileName) {
 		this.inputFileName = inputFileName;
 	}
+	
+	@Override
+    public void setSession(Map<String, Object> sessionMap) {
+        this.userSession = sessionMap;
+    }
 }

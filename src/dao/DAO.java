@@ -19,25 +19,24 @@ import data.User;
 
 public class DAO {
 	
-	public static Integer year = null;
 	public static Connection conn; 
 	
-	public static TreeMap<String, Integer> getStandings() {
+	public static TreeMap<String, Integer> getStandings(Integer year) {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
 		System.out.println("Year: " + year);
 		try { 
 			Statement stmt1 = conn.createStatement();
 			String query1String = "SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
-					"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and " + (useYearClause() ? getYearClause("bg") + " and ": "") + "(p.Favorite = true and " +  
+					"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and " + (useYearClause(year) ? getYearClause("bg", year) + " and ": "") + "(p.Favorite = true and " +  
 					"(bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) " + 
 					"group by u.UserName";
 			ResultSet rs1 = stmt1.executeQuery(query1String);
 			// Get who picked champ game correct
-			if (useYearClause()) { // ChampPick did not exist until 2017
+			if (useYearClause(year)) { // ChampPick did not exist until 2017
 				Statement stmt2 = conn.createStatement();
 				String query2String = "SELECT u.UserId, count(*) from ChampPick p, User u, BowlGame bg where " + 
-						"p.userId = u.userId and bg.gameId = p.gameId and bg.completed = true and " + (useYearClause() ? getYearClause("bg") + " and ": "") +
+						"p.userId = u.userId and bg.gameId = p.gameId and bg.completed = true and " + (useYearClause(year) ? getYearClause("bg", year) + " and ": "") +
 						"(bg.Favorite = p.Winner and (bg.FavoriteScore > bg.UnderdogScore) or (bg.Underdog = p.Winner and (bg.UnderdogScore > bg.FavoriteScore))) " + 
 						"group by u.UserName";
 				ResultSet rs2 = stmt2.executeQuery(query2String);
@@ -56,7 +55,7 @@ public class DAO {
 		}
 		catch (SQLException e) {
 		}
-		List<User> usersList = DAO.getUsersList();
+		List<User> usersList = DAO.getUsersList(year);
 		// Merge any users with 0 wins
 		for (User u : usersList) {
 			if (!standings.containsValue(u.getUserId())) {
@@ -66,16 +65,16 @@ public class DAO {
 		return standings;
 	}
 	
-	public static List<BowlGame> getBowlGamesList() {
+	public static List<BowlGame> getBowlGamesList(Integer year) {
 		List<BowlGame>bowlGameList = new ArrayList<BowlGame>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame" + (useYearClause() ? " where " + getYearClause(): ""));
+			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame" + (useYearClause(year) ? " where " + getYearClause(year): ""));
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
 						rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), (useYearClause() ? rs.getInt("Year") : 0));
+						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), (useYearClause(year) ? rs.getInt("Year") : 0));
 				bowlGameList.add(bowlGame);
 			}
 		}
@@ -84,7 +83,7 @@ public class DAO {
 		return bowlGameList;
 	}
 	
-	public static Map<Integer, List<Pick>> getPicksMap() {
+	public static Map<Integer, List<Pick>> getPicksMap(Integer year) {
 		Map<Integer, List<Pick>> picksMap = new HashMap<Integer, List<Pick>>();
 		ArrayList<Pick> picksList = new ArrayList<Pick>();
 		Integer prevUserId = null; 
@@ -95,7 +94,7 @@ public class DAO {
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select p.* from Pick p, BowlGame bg where p.GameId = bg.GameId " +
-				(useYearClause() ? "and " + getYearClause("bg") : "") + " order by p.UserId, p.GameId");
+				(useYearClause(year) ? "and " + getYearClause("bg", year) : "") + " order by p.UserId, p.GameId");
 			while (rs.next()) {
 				userId = rs.getInt("UserId");
 				gameId = rs.getInt("GameId");
@@ -122,7 +121,7 @@ public class DAO {
 		return picksMap;
 	}
 	
-	public static Map<Integer, ChampPick> getChampPicksMap() {
+	public static Map<Integer, ChampPick> getChampPicksMap(Integer year) {
 		Map<Integer, ChampPick> picksMap = new HashMap<Integer, ChampPick>();
 		ChampPick champPick = new ChampPick();
 		Integer userId = null;
@@ -133,7 +132,7 @@ public class DAO {
 		try {
 			Statement stmt = conn.createStatement();
 			String queryString = "select cp.* from ChampPick cp, BowlGame bg where cp.GameId = bg.GameId " +
-					(useYearClause() ? "and " + getYearClause("bg") : "") + " order by cp.UserId";
+					(useYearClause(year) ? "and " + getYearClause("bg", year) : "") + " order by cp.UserId";
 			ResultSet rs = stmt.executeQuery(queryString);
 			while (rs.next()) {
 				userId = rs.getInt("UserId");
@@ -150,15 +149,15 @@ public class DAO {
 		return picksMap;
 	}
 	
-	public static List<User> getUsersList() {
+	public static List<User> getUsersList(Integer year) {
 		List<User>userList = new ArrayList<User>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM User" + (useYearClause() ? " where " + getYearClause(): ""));
+			ResultSet rs = stmt.executeQuery("SELECT * FROM User" + (useYearClause(year) ? " where " + getYearClause(year): ""));
 			User user;
 			while (rs.next()) {
 				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"),
-					rs.getString("FirstName"), rs.getString("Email"), (useYearClause() ? rs.getInt("Year") : 0));
+					rs.getString("FirstName"), rs.getString("Email"), (useYearClause(year) ? rs.getInt("Year") : 0));
 				userList.add(user);
 			}
 		}
@@ -167,11 +166,11 @@ public class DAO {
 		return userList;
 	}
 	
-	public static int getNumberOfCompletedGames() {
+	public static int getNumberOfCompletedGames(Integer year) {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1" + (useYearClause() ? " and " + getYearClause(): ""));
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1" + (useYearClause(year) ? " and " + getYearClause(year): ""));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}
@@ -194,11 +193,11 @@ public class DAO {
 		return totalDataCount == 0;
 	}
 	
-	public static boolean isChampGameCompleted() {
+	public static boolean isChampGameCompleted(Integer year) {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and BowlName like '%Championship%'" + (useYearClause() ? " and " + getYearClause(): ""));
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and BowlName like '%Championship%'" + (useYearClause(year) ? " and " + getYearClause(year): ""));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}
@@ -221,7 +220,7 @@ public class DAO {
 		return;
 	}
 	
-	private static boolean useYearClause() {
+	private static boolean useYearClause(Integer year) {
 		boolean yearClause = false;
 		
 		if (year.intValue() >= 17) {
@@ -230,15 +229,15 @@ public class DAO {
 		return yearClause;
 	}
 	
-	private static String getYearClause() {
+	private static String getYearClause(Integer year) {
 		return "year = " + year;
 	}
 	
-	private static String getYearClause(String prefix) {
+	private static String getYearClause(String prefix, Integer year) {
 		return prefix + ".year = " + year;
 	}
 	
-	public static Connection setConnection() {
+	public static Connection setConnection(Integer year) {
 		try {
             Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
         } 

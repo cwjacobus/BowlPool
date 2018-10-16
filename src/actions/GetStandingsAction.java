@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.struts2.interceptor.SessionAware;
+
 import java.util.Map.Entry;
 
 import com.opensymphony.xwork2.util.ValueStack;
@@ -19,23 +22,25 @@ import data.ChampPick;
 import data.Pick;
 import data.Standings;
 
-public class GetStandingsAction extends ActionSupport {
+public class GetStandingsAction extends ActionSupport implements SessionAware {
 	
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private Integer year = null;
 	int numOfBowlGames = 1;
 	int lastGamePlayedIndex = 9;
+	
+	Map<String, Object> userSession;
 
 	public String execute() throws Exception {
-		DAO.year = year;
-		DAO.setConnection();
-		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap();
-		Map<Integer, ChampPick> champPicksMap = DAO.getChampPicksMap();
-		TreeMap<String, Integer> standings = DAO.getStandings();
+		userSession.put("year", year);
+		DAO.setConnection(year);
+		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(year);
+		Map<Integer, ChampPick> champPicksMap = DAO.getChampPicksMap(year);
+		TreeMap<String, Integer> standings = DAO.getStandings(year);
 		TreeMap<String, Standings> displayStandings = new TreeMap<String, Standings>(Collections.reverseOrder());
 		
-		numOfBowlGames = DAO.getBowlGamesList().size();
+		numOfBowlGames = DAO.getBowlGamesList(year).size();
 		
 		//Iterate through standings to make formatted display string
 		Iterator<Entry<String, Integer>> it = standings.entrySet().iterator();
@@ -126,7 +131,7 @@ public class GetStandingsAction extends ActionSupport {
 		
 	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2) {
 		int diffPicks = 0;
-		int afterGameIndex = DAO.getNumberOfCompletedGames();
+		int afterGameIndex = DAO.getNumberOfCompletedGames(year);
 		
 		for (int i = afterGameIndex; i < numOfBowlGames; i++) {
 			Pick p1 = userPicks1.get(i);
@@ -136,10 +141,14 @@ public class GetStandingsAction extends ActionSupport {
 			}
 		}
 		if (userChampPick1 != null && userChampPick2 != null) {
-			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted()) {
+			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(year)) {
 				diffPicks++;
 			}
 		}
 		return diffPicks;	
+	}
+
+	public void setSession(Map<String, Object> session) {
+	   this.userSession = session ;
 	}
 }

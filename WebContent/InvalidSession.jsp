@@ -4,10 +4,10 @@
 
 <html>
 	<head>
-		<title>Import Results</title>
+		<title>Invalid Session</title>
 	</head>
 	<body>
-		<h2>Import Results</h2>
-		${errorMsg}
+		Session has expired!<br>
+		return to: <a href="/BowlPoolWeb">Login</a>
 	</body>
 </html>

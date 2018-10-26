@@ -179,6 +179,46 @@ public class DAO {
 		return numberOfCompletedGames;
 	}
 	
+	public static int getUsersCount(Integer year) {
+		int numberOfUsers = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from User" + (useYearClause(year) ? " where " + getYearClause(year): ""));
+			rs.next();
+			numberOfUsers = rs.getInt(1);
+		}
+		catch (SQLException e) {
+		}
+		return numberOfUsers;
+	}
+	
+	public static int getBowlGamesCount(Integer year) {
+		int numberOfBowlGames = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame" + (useYearClause(year) ? " where " + getYearClause(year): ""));
+			rs.next();
+			numberOfBowlGames = rs.getInt(1);
+		}
+		catch (SQLException e) {
+		}
+		return numberOfBowlGames;
+	}
+	
+	public static int getPicksCount(Integer year) {
+		int numberOfPicks = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from Pick" + 
+				(useYearClause(year) ? " p, BowlGame bg where p.gameId = bg.gameId and bg.year = " + year: ""));
+			rs.next();
+			numberOfPicks = rs.getInt(1);
+		}
+		catch (SQLException e) {
+		}
+		return numberOfPicks;
+	}
+	
 	public static boolean isThereDataForAYear(int year) {
 		int totalDataCount = 0;
 		try {

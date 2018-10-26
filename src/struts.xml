@@ -9,24 +9,25 @@
             class="actions.ManageBowlGamesAction" 
             method="execute">
             <result name="success">/ManageBowlGames.jsp</result>
-            <result name="invalidSession">/InvalidSession.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
       </action>
       <action name="updateScore" 
             class="actions.UpdateScoreAction" 
             method="execute">
             <result name="success">/ManageBowlGames.jsp</result>
-            <result name="invalidSession">/InvalidSession.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
       </action>
       <action name="getStandings" 
             class="actions.GetStandingsAction" 
             method="execute">
             <result name="success">/Standings.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
       </action>
       <action name="import" 
             class="actions.ImportAction" 
             method="execute">
             <result name="success">/ImportResults.jsp</result>
-            <result name="invalidSession">/InvalidSession.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
       </action>
    </package>
 </struts>

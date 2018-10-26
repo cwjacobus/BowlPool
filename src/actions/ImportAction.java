@@ -42,40 +42,53 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	Integer year;
 
 	public String execute() throws Exception {
+		ValueStack stack = ActionContext.getContext().getValueStack();
+	    Map<String, Object> context = new HashMap<String, Object>();
 		if (userSession == null || userSession.size() == 0) {
-			return "invalidSession";
+			context.put("errorMsg", "Session has expired!");
+			stack.push(context);
+			return "error";
 		}
 		year = (Integer) userSession.get("year");
 		System.out.println("Import: " + year);
-		ValueStack stack = ActionContext.getContext().getValueStack();
-	    Map<String, Object> context = new HashMap<String, Object>();
 	    System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + inputFileName);
 	    if (usersCB == null && gamesCB == null && picksCB == null) {
 	    	context.put("errorMsg", "Nothing selected to import!");
-	    	// return "error";
+	    	stack.push(context);
+	    	return "error";
 	    }
 	    else if (inputFileName == null || inputFileName.length() == 0) {
 	    	context.put("errorMsg", "No file selected to import!");
-	    	// return "error";
+	    	stack.push(context);
+	    	return "error";
 	    }
 	    else {
 	    	if (usersCB != null) {
 	    		usersImport = true; 
-	    		// TBD Check for users already imported
-	    		// context.put("errorMsg", "Users already imported!");
-	    		// return "error"
+	    		// Check for users already imported
+	    		if (DAO.getUsersCount(year) > 0) {
+	    			context.put("errorMsg", "Users already imported for 20" + year + "!  Delete and reimport.");
+	    			stack.push(context);
+	    			return "error";
+	    		}
 	    	}
 	    	if (picksCB != null) {
 	    		picksImport = true;
-	    		// TBD Check for picks already imported
-	    		// context.put("errorMsg", "Picks already imported!");
-	    		// return "error"
+	    		// Check for picks already imported
+	    		if (DAO.getPicksCount(year) > 0) {
+	    			context.put("errorMsg", "Picks already imported for 20" + year + "!  Delete and reimport.");
+	    			stack.push(context);
+	    			return "error";
+	    		}
 	    	}
 	    	if (gamesCB != null) {
 	    		bowlGamesImport = true; 
-	    		// TBD Check for games already imported
-	    		// context.put("errorMsg", "Games already imported!");
-	    		// return "error"
+	    		// Check for games already imported
+	    		if (DAO.getBowlGamesCount(year) > 0) {
+	    			context.put("errorMsg", "Bowl Ganes already imported for 20" + year + "!  Delete and reimport.");
+	    			stack.push(context);
+	    			return "error";
+	    		}
 	    	}
 	    	if (usersImport || picksImport || bowlGamesImport) {
 	    		File inputFile = new File("c:\\Football\\" + inputFileName);

@@ -8,6 +8,6 @@
 	</head>
 	<body>
 		<h2>Import Results</h2>
-		${errorMsg}
+		Data was successfully imported.
 	</body>
 </html>

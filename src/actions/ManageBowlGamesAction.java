@@ -22,15 +22,15 @@ public class ManageBowlGamesAction extends ActionSupport implements SessionAware
 	Map<String, Object> userSession;
 
 	public String execute() throws Exception {
+		ValueStack stack = ActionContext.getContext().getValueStack();
+	    Map<String, Object> context = new HashMap<String, Object>();
 		if (userSession == null || userSession.size() == 0) {
-			return "invalidSession";
+			context.put("errorMsg", "Session has expired!");
+			stack.push(context);
+			return "error";
 		}
 		Integer year = (Integer) userSession.get("year");
 		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
-		
-		ValueStack stack = ActionContext.getContext().getValueStack();
-	    Map<String, Object> context = new HashMap<String, Object>();
-
 	    context.put("bowlGameList", bowlGameList);
 	    stack.push(context);
 	    return "success";

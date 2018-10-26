@@ -21,6 +21,36 @@ public class DAO {
 	
 	public static Connection conn; 
 	
+	public static void createBowlGame(String gameName, String favorite, String underdog, double line, Integer year) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year) VALUES ('" + 
+					gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", 0, 0, false, " + year + ");";
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static int createUser(String userName, Integer year) {
+		int userId = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate("INSERT INTO User (UserName, LastName, FirstName, Email) VALUES ('" + 
+				userName + "', '', '', '');");
+			ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID()");
+			if (rs.next()) {
+		       userId = rs.getInt(1);
+			}
+			//System.out.println("ID: " + userId);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return userId;
+	}
+	
 	public static TreeMap<String, Integer> getStandings(Integer year) {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
@@ -54,6 +84,7 @@ public class DAO {
 			}
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		List<User> usersList = DAO.getUsersList(year);
 		// Merge any users with 0 wins
@@ -79,6 +110,7 @@ public class DAO {
 			}
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return bowlGameList;
 	}
@@ -117,6 +149,7 @@ public class DAO {
 			}
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return picksMap;
 	}
@@ -145,6 +178,7 @@ public class DAO {
 			}
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return picksMap;
 	}
@@ -162,6 +196,7 @@ public class DAO {
 			}
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return userList;
 	}
@@ -175,6 +210,7 @@ public class DAO {
 			numberOfCompletedGames = rs.getInt(1);
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return numberOfCompletedGames;
 	}
@@ -188,6 +224,7 @@ public class DAO {
 			numberOfUsers = rs.getInt(1);
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return numberOfUsers;
 	}
@@ -201,6 +238,7 @@ public class DAO {
 			numberOfBowlGames = rs.getInt(1);
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return numberOfBowlGames;
 	}
@@ -215,6 +253,7 @@ public class DAO {
 			numberOfPicks = rs.getInt(1);
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return numberOfPicks;
 	}
@@ -229,6 +268,7 @@ public class DAO {
 			totalDataCount = rs.getInt(1);
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return totalDataCount == 0;
 	}
@@ -242,6 +282,7 @@ public class DAO {
 			numberOfCompletedGames = rs.getInt(1);
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return numberOfCompletedGames > 0;
 	}
@@ -256,6 +297,7 @@ public class DAO {
 			stmt.execute("UPDATE BowlGame SET FavoriteScore = " + favoriteScore + ", UnderDogScore = " +  underDogScore + ", Completed = true" + champUpdate + " WHERE GameId = " + gameId);
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return;
 	}

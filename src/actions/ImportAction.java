@@ -85,7 +85,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    		bowlGamesImport = true; 
 	    		// Check for games already imported
 	    		if (DAO.getBowlGamesCount(year) > 0) {
-	    			context.put("errorMsg", "Bowl Ganes already imported for 20" + year + "!  Delete and reimport.");
+	    			context.put("errorMsg", "Bowl Games already imported for 20" + year + "!  Delete and reimport.");
 	    			stack.push(context);
 	    			return "error";
 	    		}
@@ -100,7 +100,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    			//importUsersAndPicks(hWorkbook);
 	    		}
 	    		if (bowlGamesImport) {
-	    			//importBowlGames(hWorkbook);
+	    			importBowlGames(hWorkbook);
 	    		} 
 	    	}
 	    }
@@ -140,17 +140,10 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        	}
 	        	if (userName != null) {
 	        		System.out.println(userName);
-	        		int userId = 0;
 	        		stmt = conn.createStatement();
 	        		if (usersImport) {
-	        			stmt.executeUpdate("INSERT INTO User (UserName, LastName, FirstName, Email) VALUES ('" + 
-	        				userName + "', '', '', '');");
+	        			DAO.createUser(userName, year);
 	        			userCreationStarted = true;
-	        			ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID()");
-	        			if (rs.next()) {
-	        		        userId = rs.getInt(1);
-	        		    }
-	        			//System.out.println("ID: " + userId);
 	        		}
 	        		if (picksImport) {
 	        			//Iterator<Entry<Integer, String>> it = bowlGameNameMap.entrySet().iterator();
@@ -226,49 +219,40 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    }
 	}
 	
-	private void importBowlGames(HSSFWorkbook hWorkbook, Connection conn) {	
-		try {  
-			Statement stmt;
-			HSSFSheet sheet = hWorkbook.getSheetAt(1);
-	        System.out.println(sheet.getSheetName());
-	        Iterator<Row> rowIterator = sheet.iterator();
-	        boolean gamesFound = false;
-	        String prevGame = null;
-	        while (rowIterator.hasNext()) {
-	        	Row row = rowIterator.next();
-	        	String gameName = getStringFromCell(row, 1);
-	        	if (gameName!= null && gameName.equalsIgnoreCase("Bowl")) {
-	        		gamesFound = true;
-	        		continue;
-	        	}
-	        	if (!gamesFound) {
-	        		continue;
-	        	}
-	        	if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
-	        		// Create a blank Championship game place holder and break;
-	        		stmt = conn.createStatement();
-	        		stmt.execute("INSERT INTO BowlGame (BowlName, Completed) VALUES ('Championship', 0);");
-	        		break;
-	        	}
-	        	if (gameName != null) {
-	        		System.out.println(gameName);
-	        		String favorite = getStringFromCell(row, 3).trim();
-	        		String lineString = getStringFromCell(row, 5).trim();
-	        		double line = 0;
-	        		if (!lineString.equalsIgnoreCase("pick")) {
-	        			lineString = lineString.replace("-", "");
-	        			line = Double.parseDouble(lineString);
-	        		}
-	        		String underdog = getStringFromCell(row, 7).trim();
-	        		stmt = conn.createStatement();
-	        		stmt.execute("INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed) VALUES ('" + 
-	        			gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", 0, 0, false);");
-	        	}
-	        	prevGame = gameName;
+	private void importBowlGames(HSSFWorkbook hWorkbook) {	
+		HSSFSheet sheet = hWorkbook.getSheetAt(1);
+	    System.out.println(sheet.getSheetName());
+	    Iterator<Row> rowIterator = sheet.iterator();
+	    boolean gamesFound = false;
+	    String prevGame = null;
+	    while (rowIterator.hasNext()) {
+	        Row row = rowIterator.next();
+	        String gameName = getStringFromCell(row, 1);
+	        if (gameName!= null && gameName.equalsIgnoreCase("Bowl")) {
+	        	gamesFound = true;
+	        	continue;
 	        }
-	    }
-	    catch (Exception e) {
-	    	e.printStackTrace();
+	        if (!gamesFound) {
+	        	continue;
+	        }
+	        if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
+	        	// Create a blank Championship game place holder and break;
+	        	DAO.createBowlGame("Championship", "", "", 0.0, year);
+	        	break;
+	        }
+	        if (gameName != null) {
+	        	System.out.println(gameName);
+	        	String favorite = getStringFromCell(row, 3).trim();
+	        	String lineString = getStringFromCell(row, 5).trim();
+	        	double line = 0;
+	        	if (!lineString.equalsIgnoreCase("pick")) {
+	        		lineString = lineString.replace("-", "");
+	        		line = Double.parseDouble(lineString);
+	        	}
+	        	String underdog = getStringFromCell(row, 7).trim();
+	        	DAO.createBowlGame(gameName, favorite, underdog, line, year);
+	        }
+	        prevGame = gameName;
 	    }
 	}
 	

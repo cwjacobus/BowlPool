@@ -2,9 +2,6 @@ package actions;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -74,6 +71,12 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	}
 	    	if (picksCB != null) {
 	    		picksImport = true;
+	    		// Check for games imported
+	    		if (DAO.getBowlGamesCount(year) == 0) {
+	    			context.put("errorMsg", "Bowl Games not imported for 20" + year + "!  Import Bowl Games.");
+	    			stack.push(context);
+	    			return "error";
+	    		}
 	    		// Check for picks already imported
 	    		if (DAO.getPicksCount(year) > 0) {
 	    			context.put("errorMsg", "Picks already imported for 20" + year + "!  Delete and reimport.");
@@ -97,7 +100,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    		//Create Workbook instance holding reference to .xls file
 	    		HSSFWorkbook hWorkbook = new HSSFWorkbook(spreadSheetFile);
 	    		if (usersImport || picksImport) {
-	    			//importUsersAndPicks(hWorkbook);
+	    			importUsersAndPicks(hWorkbook);
 	    		}
 	    		if (bowlGamesImport) {
 	    			importBowlGames(hWorkbook);
@@ -109,11 +112,10 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    return "success";
 	}
 	
-	private void importUsersAndPicks(HSSFWorkbook hWorkbook, Connection conn) {
+	private void importUsersAndPicks(HSSFWorkbook hWorkbook) {
 		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
 		List<User> userList = DAO.getUsersList(year);
 		try {  
-			Statement stmt;
 			HashMap<Integer, String> bowlGameNameMap = null;
 			HSSFSheet sheet = hWorkbook.getSheetAt(0);
 	        System.out.println(sheet.getSheetName());
@@ -140,7 +142,6 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        	}
 	        	if (userName != null) {
 	        		System.out.println(userName);
-	        		stmt = conn.createStatement();
 	        		if (usersImport) {
 	        			DAO.createUser(userName, year);
 	        			userCreationStarted = true;
@@ -178,27 +179,24 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 == 0)) {
 	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create fav Pick
-	        						stmt.executeUpdate("INSERT INTO Pick (UserId, GameId, Favorite) VALUES (" + user.getUserId() + 
-	        								", " + bowlGame.getGameId() + ", " + true + ");");
+	        						DAO.createPick(user.getUserId(), bowlGame.getGameId(), true);
 	        					}
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 != 0)) {
 	        						System.out.print("DOG-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create dog Pick
-	        						stmt.executeUpdate("INSERT INTO Pick (UserId, GameId, Favorite) VALUES (" + user.getUserId() + 
-	        								", " + bowlGame.getGameId() + ", " + false + ");");
+	        						DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
 	        					}
 	        				}
 	        				else {
 	        					if (cell.getColumnIndex() % 2 == 0) {
 	        						System.out.print("CHAMP WINNER-" + pick + " ");
 	        						// create Winner ChampPick
-	        						stmt.executeUpdate("INSERT INTO ChampPick (UserId, GameId, Winner) VALUES (" + user.getUserId() + 
-	        								", " + bowlGame.getGameId() + ", '" + pick + "');");
+	        						DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
 	        					}
 	        					else if (cell.getColumnIndex() % 2 != 0) { // Assumes ChampPick record has been created previously to update
 	        						System.out.print("CHAMP TOTAL POINTS-" + pick + " ");
 	        						// create Winner ChampPick
-	        						stmt.executeUpdate("UPDATE ChampPick SET TotalPoints=" + pick + " where UserId=" + user.getUserId() + ";");
+	        						DAO.updateChampPickTotPts(user.getUserId(), pick);
 	        					}
 	        				}
 	        				if (cell.getColumnIndex() % 2 != 0) {

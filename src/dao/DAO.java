@@ -21,11 +21,35 @@ public class DAO {
 	
 	public static Connection conn; 
 	
-	public static void createBowlGame(String gameName, String favorite, String underdog, double line, Integer year) {
+	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year) {
 		try {
 			Statement stmt = conn.createStatement();
 			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year) VALUES ('" + 
-					gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", 0, 0, false, " + year + ");";
+				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", 0, 0, false, " + year + ");";
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void createPick(Integer userId, Integer gameId, Boolean favorite) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "INSERT INTO Pick (UserId, GameId, Favorite) VALUES (" + 
+				userId + ", " + gameId + ", " + favorite + ");";
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void createChampPick(Integer userId, Integer gameId, String winner) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner) VALUES (" + 
+				userId + ", " + gameId + ", '" + winner + "');";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -37,8 +61,8 @@ public class DAO {
 		int userId = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			stmt.executeUpdate("INSERT INTO User (UserName, LastName, FirstName, Email) VALUES ('" + 
-				userName + "', '', '', '');");
+			stmt.executeUpdate("INSERT INTO User (UserName, LastName, FirstName, Email, Year) VALUES ('" + 
+				userName + "', '', '', '', " + year + ");");
 			ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID()");
 			if (rs.next()) {
 		       userId = rs.getInt(1);
@@ -339,5 +363,16 @@ public class DAO {
 			System.out.println("VendorError: " + ex.getErrorCode());
 		}
 		return conn;
+	}
+	
+	public static void updateChampPickTotPts(Integer userId, String totPts) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "UPDATE ChampPick SET TotalPoints=" + totPts + " where UserId=" + userId + ";";
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

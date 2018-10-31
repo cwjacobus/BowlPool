@@ -2,10 +2,12 @@ package actions;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -20,6 +22,8 @@ import com.opensymphony.xwork2.util.ValueStack;
 
 import dao.DAO;
 import data.BowlGame;
+import data.ChampPick;
+import data.Pick;
 import data.User;
 
 public class ImportAction extends ActionSupport implements SessionAware {
@@ -115,6 +119,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	private void importUsersAndPicks(HSSFWorkbook hWorkbook) {
 		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
 		List<User> userList = DAO.getUsersList(year);
+		List<Pick> picksList = new ArrayList<Pick>();
+		HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
 		try {  
 			HashMap<Integer, String> bowlGameNameMap = null;
 			HSSFSheet sheet = hWorkbook.getSheetAt(0);
@@ -179,24 +185,32 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 == 0)) {
 	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create fav Pick
-	        						DAO.createPick(user.getUserId(), bowlGame.getGameId(), true);
+	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), true);
+	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), true));
 	        					}
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 != 0)) {
 	        						System.out.print("DOG-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create dog Pick
-	        						DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
+	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
+	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), false));
 	        					}
 	        				}
 	        				else {
 	        					if (cell.getColumnIndex() % 2 == 0) {
 	        						System.out.print("CHAMP WINNER-" + pick + " ");
 	        						// create Winner ChampPick
-	        						DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
+	        						//DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
+	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0));
 	        					}
 	        					else if (cell.getColumnIndex() % 2 != 0) { // Assumes ChampPick record has been created previously to update
 	        						System.out.print("CHAMP TOTAL POINTS-" + pick + " ");
 	        						// create Winner ChampPick
-	        						DAO.updateChampPickTotPts(user.getUserId(), pick);
+	        						//DAO.updateChampPickTotPts(user.getUserId(), pick);
+	        						ChampPick cp = champPicksMap.get(user.getUserId());
+	        						if (cp != null) {
+	        							cp.setTotalPoints(Double.parseDouble(pick));
+	        							champPicksMap.put(cp.getUserId(), cp);
+	        						}
 	        					}
 	        				}
 	        				if (cell.getColumnIndex() % 2 != 0) {
@@ -210,6 +224,12 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        		}
 	        	}
 	        	prevUser = userName;
+	        }
+	        if (picksList.size() > 0) {
+	        	DAO.createBatchPicks(picksList);
+	        }
+	        if (champPicksMap.size() > 0) {
+	        	DAO.createBatchChampPicks(champPicksMap);
 	        }
 	    }
 	    catch (Exception e) {

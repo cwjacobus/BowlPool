@@ -6,12 +6,12 @@ public class ChampPick {
 	private int userId;
 	private int gameId;
 	private String winner;
-	private int totalPoints;
+	private double totalPoints;
 	
 	public ChampPick () {
 	}
 	
-	public ChampPick (int pickId, int userId, int gameId, String winner, int totalPoints) {
+	public ChampPick (int pickId, int userId, int gameId, String winner, double totalPoints) {
 		this.gameId = gameId;
 		this.userId = userId;
 		this.pickId = pickId;
@@ -51,11 +51,11 @@ public class ChampPick {
 		this.winner = winner;
 	}
 
-	public int getTotalPoints() {
+	public double getTotalPoints() {
 		return totalPoints;
 	}
 
-	public void setTotalPoints(int totalPoints) {
+	public void setTotalPoints(double totalPoints) {
 		this.totalPoints = totalPoints;
 	}
 

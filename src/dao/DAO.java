@@ -8,9 +8,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import data.BowlGame;
 import data.ChampPick;
@@ -33,6 +35,64 @@ public class DAO {
 		}
 	}
 	
+	public static void createBatchPicks(List<Pick> picksList) {
+		try {
+			conn.setAutoCommit(false);
+			Statement stmt = conn.createStatement();
+			int picksCount = 0;
+			for (Pick p : picksList) {
+				String insertSQL = "INSERT INTO Pick (UserId, GameId, Favorite) VALUES (" + 
+					p.getUserId() + ", " + p.getGameId() + ", " + p.getFavorite() + ");";
+				stmt.addBatch(insertSQL);
+				picksCount++;
+				// Every 500 lines, insert the records
+				if (picksCount % 250 == 0) {
+					System.out.println("Insert picks " + (picksCount - 250) + " : " + picksCount);
+					stmt.executeBatch();
+					conn.commit();
+					stmt.close();
+					stmt = conn.createStatement();
+				}
+			}
+			// Insert the remaining records
+			System.out.println("Insert remaining picks " + (picksCount - (picksCount % 250)) + " : " + picksCount);
+			stmt.executeBatch();
+			conn.commit();
+			conn.setAutoCommit(true); // set auto commit back to true for next inserts
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void createBatchChampPicks(HashMap<Integer, ChampPick> champPicksMap) {
+		try {
+			conn.setAutoCommit(false);
+			Statement stmt = conn.createStatement();
+			Iterator<Entry<Integer, ChampPick>> it = champPicksMap.entrySet().iterator();
+			/*while (it.hasNext()) {
+				Map.Entry<Integer, ChampPick> cp = (Map.Entry<Integer, ChampPick>)it.next();
+				System.out.println("cp: user: " + cp.getKey() + " game: " + cp.getValue().getGameId() + " winner: " + 
+					cp.getValue().getWinner() + " pts: " + cp.getValue().getTotalPoints());
+			}*/
+			while (it.hasNext()) {
+				Map.Entry<Integer, ChampPick> cp = (Map.Entry<Integer, ChampPick>)it.next();
+				String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner, TotalPoints) VALUES (" + 
+					cp.getValue().getUserId() + ", " + cp.getValue().getGameId() + ", '" + cp.getValue().getWinner() + "', " 
+						+ cp.getValue().getTotalPoints() + ");";
+				stmt.addBatch(insertSQL);
+			}
+			System.out.println("Insert all ChampPick records");
+			stmt.executeBatch();
+			conn.commit();
+			conn.setAutoCommit(true); // set auto commit back to true for next inserts
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/*
 	public static void createPick(Integer userId, Integer gameId, Boolean favorite) {
 		try {
 			Statement stmt = conn.createStatement();
@@ -55,7 +115,7 @@ public class DAO {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 	
 	public static int createUser(String userName, Integer year) {
 		int userId = 0;
@@ -365,6 +425,7 @@ public class DAO {
 		return conn;
 	}
 	
+	/*
 	public static void updateChampPickTotPts(Integer userId, String totPts) {
 		try {
 			Statement stmt = conn.createStatement();
@@ -374,5 +435,5 @@ public class DAO {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

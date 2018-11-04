@@ -121,8 +121,9 @@ public class DAO {
 		int userId = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			stmt.executeUpdate("INSERT INTO User (UserName, LastName, FirstName, Email, Year) VALUES ('" + 
-				userName + "', '', '', '', " + year + ");");
+			boolean admin = userName.equalsIgnoreCase("Jacobus") ? true : false;
+			stmt.executeUpdate("INSERT INTO User (UserName, LastName, FirstName, Email, Year, admin) VALUES ('" + 
+				userName + "', '', '', '', " + year + "," + admin + ");");
 			ResultSet rs = stmt.executeQuery("SELECT LAST_INSERT_ID()");
 			if (rs.next()) {
 		       userId = rs.getInt(1);
@@ -267,6 +268,23 @@ public class DAO {
 		return picksMap;
 	}
 	
+	public static User getUser(String name, Integer year) {
+		User user = null;
+		try {
+			Statement stmt = conn.createStatement();
+			String sql = "SELECT * FROM User where userName = '" + name + "'" + (useYearClause(year) ? " and " + getYearClause(year): "");
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"), rs.getString("FirstName"), 
+					rs.getString("Email"), (useYearClause(year) ? rs.getInt("Year") : 0), (useYearClause(year) ? rs.getBoolean("admin" ): false));
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return user;
+	}
+	
 	public static List<User> getUsersList(Integer year) {
 		List<User>userList = new ArrayList<User>();
 		try {
@@ -274,8 +292,8 @@ public class DAO {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM User" + (useYearClause(year) ? " where " + getYearClause(year): ""));
 			User user;
 			while (rs.next()) {
-				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"),
-					rs.getString("FirstName"), rs.getString("Email"), (useYearClause(year) ? rs.getInt("Year") : 0));
+				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"), rs.getString("FirstName"), 
+					rs.getString("Email"), (useYearClause(year) ? rs.getInt("Year") : 0), (useYearClause(year) ? rs.getBoolean("admin" ): false));
 				userList.add(user);
 			}
 		}
@@ -386,7 +404,7 @@ public class DAO {
 		return;
 	}
 	
-	private static boolean useYearClause(Integer year) {
+	public static boolean useYearClause(Integer year) {
 		boolean yearClause = false;
 		
 		if (year.intValue() >= 17) {

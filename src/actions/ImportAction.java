@@ -2,18 +2,20 @@ package actions;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
 
 import com.opensymphony.xwork2.ActionContext;
@@ -52,6 +54,12 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		}
 		year = (Integer) userSession.get("year");
 		System.out.println("Import: " + year);
+		
+		InputStream input = ServletActionContext.getServletContext().getResourceAsStream("/WEB-INF/BowlPool.properties");
+		Properties prop = new Properties();
+		prop.load(input);
+		System.out.println("Input file path: " + prop.getProperty("inputFilePath"));
+		
 	    System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + inputFileName);
 	    if (usersCB == null && gamesCB == null && picksCB == null) {
 	    	context.put("errorMsg", "Nothing selected to import!");
@@ -98,7 +106,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    		}
 	    	}
 	    	if (usersImport || picksImport || bowlGamesImport) {
-	    		File inputFile = new File("c:\\Football\\" + inputFileName);
+	    		File inputFile = new File(prop.getProperty("inputFilePath") + inputFileName);
 	    		FileInputStream spreadSheetFile = new FileInputStream(inputFile);
 	     
 	    		//Create Workbook instance holding reference to .xls file

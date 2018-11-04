@@ -8,14 +8,16 @@ public class User {
 	private String firstName;
 	private String email;
 	private Integer year;
+	private boolean admin;
 	
-	public User (int userId, String userName, String lastName, String firstName, String email, int year) {
+	public User (int userId, String userName, String lastName, String firstName, String email, int year, boolean admin) {
 		this.userId = userId;
 		this.userName = userName;
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.email = email;
 		this.year = year;
+		this.admin = admin;
 	}
 
 	public int getUserId() {
@@ -64,6 +66,14 @@ public class User {
 
 	public void setYear(Integer year) {
 		this.year = year;
+	}
+
+	public boolean isAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
 	}
 	
 	

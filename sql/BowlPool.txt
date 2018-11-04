@@ -5,7 +5,8 @@ UserName varchar(255) NOT NULL,
 LastName varchar(255),
 FirstName varchar(255),
 Email varchar(255),
-Year int(5)
+Year int(5),
+admin boolean,
 );
 
 CREATE TABLE BowlGame
@@ -43,9 +44,9 @@ TotalPoints int(11)
 
 
 
-INSERT INTO User (UserName, LastName, FirstName, Email) VALUES ('Jacobus', 'Jacobus', 'Chris', 'cjacobus@austin.rr.com');
+INSERT INTO User (UserName, LastName, FirstName, Email, year, admin) VALUES ('Jacobus', 'Jacobus', 'Chris', 'cjacobus65@gmail.com', 18, 1);
 
-INSERT INTO User (UserName, LastName, FirstName, Email) VALUES ('dummy', '', '', '');
+INSERT INTO User (UserName, LastName, FirstName, Email, year, admin) VALUES ('dummy', '', '', '', 18, 0);
 INSERT INTO Pick (UserId, GameId, Favorite) VALUES ((select UserId from User where UserName = 'dummy'), 1, false);
 
 INSERT INTO BowlGame (BowlName) VALUES ('Championship');

@@ -421,7 +421,7 @@ public class DAO {
 		return prefix + ".year = " + year;
 	}
 	
-	public static Connection setConnection(Integer year) {
+	public static void setConnection(Integer year) {
 		try {
             Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
         } 
@@ -440,7 +440,6 @@ public class DAO {
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 		}
-		return conn;
 	}
 	
 	/*

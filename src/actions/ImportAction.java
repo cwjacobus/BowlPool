@@ -1,8 +1,12 @@
 package actions;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,6 +21,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
@@ -35,6 +41,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	private String gamesCB;
 	private String picksCB;
 	private String inputFileName;
+	private String fromWS;
 	
 	boolean usersImport = false;
 	boolean picksImport = false;
@@ -60,13 +67,14 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		prop.load(input);
 		System.out.println("Input file path: " + prop.getProperty("inputFilePath"));
 		
-	    System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + inputFileName);
+	    System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + fromWS + " " + inputFileName);
 	    if (usersCB == null && gamesCB == null && picksCB == null) {
 	    	context.put("errorMsg", "Nothing selected to import!");
 	    	stack.push(context);
 	    	return "error";
 	    }
-	    else if (inputFileName == null || inputFileName.length() == 0) {
+	    else if ((inputFileName == null || inputFileName.length() == 0) && 
+	    		(usersCB != null || picksCB != null || (gamesCB != null && fromWS == null))) {
 	    	context.put("errorMsg", "No file selected to import!");
 	    	stack.push(context);
 	    	return "error";
@@ -105,7 +113,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    			return "error";
 	    		}
 	    	}
-	    	if (usersImport || picksImport || bowlGamesImport) {
+	    	if (usersImport || picksImport || (bowlGamesImport && fromWS == null)) {
 	    		File inputFile = new File(prop.getProperty("inputFilePath") + inputFileName);
 	    		FileInputStream spreadSheetFile = new FileInputStream(inputFile);
 	     
@@ -115,8 +123,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    			importUsersAndPicks(hWorkbook);
 	    		}
 	    		if (bowlGamesImport) {
-	    			importBowlGames(hWorkbook);
+	    			importBowlGamesFromFile(hWorkbook);
 	    		} 
+	    	}
+	    	else if (bowlGamesImport && fromWS != null) {
+	    		importBowlGamesFromWS();
 	    	}
 	    }
 	    stack.push(context);
@@ -245,41 +256,79 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    }
 	}
 	
-	private void importBowlGames(HSSFWorkbook hWorkbook) {	
+	private void importBowlGamesFromFile(HSSFWorkbook hWorkbook) {	
 		HSSFSheet sheet = hWorkbook.getSheetAt(1);
-	    System.out.println(sheet.getSheetName());
-	    Iterator<Row> rowIterator = sheet.iterator();
-	    boolean gamesFound = false;
-	    String prevGame = null;
-	    while (rowIterator.hasNext()) {
-	        Row row = rowIterator.next();
-	        String gameName = getStringFromCell(row, 1);
-	        if (gameName!= null && gameName.equalsIgnoreCase("Bowl")) {
-	        	gamesFound = true;
-	        	continue;
-	        }
-	        if (!gamesFound) {
-	        	continue;
-	        }
-	        if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
-	        	// Create a blank Championship game place holder and break;
-	        	DAO.createBowlGame("Championship", "", "", 0.0, year);
-	        	break;
-	        }
-	        if (gameName != null) {
-	        	System.out.println(gameName);
-	        	String favorite = getStringFromCell(row, 3).trim();
-	        	String lineString = getStringFromCell(row, 5).trim();
-	        	double line = 0;
-	        	if (!lineString.equalsIgnoreCase("pick")) {
-	        		lineString = lineString.replace("-", "");
-	        		line = Double.parseDouble(lineString);
-	        	}
-	        	String underdog = getStringFromCell(row, 7).trim();
-	        	DAO.createBowlGame(gameName, favorite, underdog, line, year);
-	        }
-	        prevGame = gameName;
-	    }
+		System.out.println(sheet.getSheetName());
+		Iterator<Row> rowIterator = sheet.iterator();
+		boolean gamesFound = false;
+		String prevGame = null;
+		while (rowIterator.hasNext()) {
+			Row row = rowIterator.next();
+			String gameName = getStringFromCell(row, 1);
+			if (gameName!= null && gameName.equalsIgnoreCase("Bowl")) {
+				gamesFound = true;
+				continue;
+			}
+			if (!gamesFound) {
+				continue;
+			}
+			if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
+				// Create a blank Championship game place holder and break;
+				DAO.createBowlGame("Championship", "", "", 0.0, year);
+				break;
+			}
+			if (gameName != null) {
+				System.out.println(gameName);
+				String favorite = getStringFromCell(row, 3).trim();
+				String lineString = getStringFromCell(row, 5).trim();
+				double line = 0;
+				if (!lineString.equalsIgnoreCase("pick")) {
+					lineString = lineString.replace("-", "");
+					line = Double.parseDouble(lineString);
+				}
+				String underdog = getStringFromCell(row, 7).trim();
+				DAO.createBowlGame(gameName, favorite, underdog, line, year);
+			}
+			prevGame = gameName;
+		}
+	}
+	
+	private void importBowlGamesFromWS() {
+		System.out.println("Import games from web service");
+		try {
+			String uRL;
+			uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
+			URL obj = new URL(uRL);
+			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
+			int responseCode = con.getResponseCode();
+			//System.out.println("Response Code : " + responseCode);
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream())); 
+			JSONArray all = new JSONArray(in.readLine());
+			in .close();
+			System.out.println(all.length() + " games");
+			for (int i = 0; i < all.length(); i++) {
+				JSONObject game = all.getJSONObject(i);
+				System.out.print(game.getString("AwayTeamName") + " at " + game.getString("HomeTeamName"));
+				System.out.println(" (" + game.getString("DateTime") + ")");
+				JSONArray preGameOddsArray = game.getJSONArray("PregameOdds");
+				String ou = "O/U: ";
+				String spread = "Spd: ";
+				double avgHomeSpread = 0;
+				for (int j = 0; j < preGameOddsArray.length(); j++) {
+					JSONObject gameOdds = preGameOddsArray.getJSONObject(j);
+					ou += formatNumber(gameOdds.getString("OverUnder")) + "(" + gameOdds.getString("Sportsbook") + ")"+ " ";
+					spread += game.getString("HomeTeamName") + " " + formatSpread(gameOdds.getString("HomePointSpread")) + "(" + gameOdds.getString("Sportsbook") + ")"+ " ";
+					avgHomeSpread += Double.parseDouble(gameOdds.getString("HomePointSpread"));
+				}
+				avgHomeSpread = avgHomeSpread/preGameOddsArray.length();
+				System.out.println(ou);
+				System.out.println(spread);
+				System.out.println("Avg home spread: " + roundToHalf(avgHomeSpread));
+			}
+		 }
+		catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 	}
 	
 	private HashMap<Integer, String> createBowlGameNameMap(Row row) {	
@@ -340,6 +389,36 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	   }
 	    return cellNumber; 
 	}
+	
+	private static String formatNumber(String oldNum) {
+		String numPart1 = "";
+		String numPart2 = "";
+		String[] numArray = oldNum.split("\\.");
+		numPart1 = numArray[0].replaceAll("-", ""); // Remove the -
+		if (Integer.parseInt(numArray[1]) >= 4 && Integer.parseInt(numArray[1]) <= 7) {
+			numPart2 = ".5";	
+		}
+		else if (Integer.parseInt(numArray[1]) >= 8){
+			numPart1 = Integer.toString(Integer.parseInt(numPart1) + 1);
+		}
+		if (oldNum.indexOf("-") != -1) { // Put the - back on for favs
+			numPart1 = "-" + numPart1;
+		}
+		return numPart1 + numPart2;
+	}
+	
+	private static String formatSpread(String oldNum) { 
+		String formattedNumber = formatNumber(oldNum);
+		
+		if (formattedNumber.indexOf("-") == -1) { // Add a + for dogs
+			formattedNumber = "+" + formattedNumber;
+		}
+		return formattedNumber;
+	}
+	
+	private double roundToHalf(double d) {
+	    return Math.round(d * 2) / 2.0;
+	}
 
 	public String getUsersCB() {
 		return usersCB;
@@ -363,6 +442,14 @@ public class ImportAction extends ActionSupport implements SessionAware {
 
 	public void setPicksCB(String picksCB) {
 		this.picksCB = picksCB;
+	}
+	
+	public String getFromWS() {
+		return fromWS;
+	}
+
+	public void setFromWS(String fromWS) {
+		this.fromWS = fromWS;
 	}
 
 	public String getInputFileName() {

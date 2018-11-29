@@ -41,7 +41,8 @@
   		<form action="import">
   			<input type="file" name="inputFileName" accept=".xls" /><br>
   			<input type="checkbox" name="usersCB" value="Users"> Users<br>
-			<input type="checkbox" name="gamesCB" value="Games"> Games<br>
+			<input type="checkbox" name="gamesCB" value="Games"> Games
+			(<input type="checkbox" name="fromWS" value="FromWS"> from WS)<br>
 			<input type="checkbox" name="picksCB" value="Picks"> Picks<br>
 			<input type="submit" value="Import">
   		</form>

@@ -17,6 +17,12 @@
             <result name="success">/ManageBowlGames.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
       </action>
+      <action name="makePicks" 
+            class="actions.MakePicksAction" 
+            method="execute">
+            <result name="success">/MakePicks.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
       <action name="getStandings" 
             class="actions.GetStandingsAction" 
             method="execute">

@@ -3,40 +3,44 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-<title>Bowl Pool - Update Scores</title>
+<title>Bowl Pool - Make Picks</title>
 </head>
 <body>
-	Update Bowl Game Scores<br><br>
+	<form action="makePicks">
+	<table>
+	<tr><th>Bowl</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
+	<tr><td>
 	<s:iterator value="bowlGameList" var="bowlGame">
-  		<form action="updateScore">
-  		<table><tr>
+  		<tr>
       		<td width=100 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=100><s:property value="#bowlGame.favorite"/></td>
+      			<td width=150><input type="radio" name="<s:property value="#bowlGame.gameId"/>" value="favorite"><s:property value="#bowlGame.favorite"/></td>
       			<input type="hidden" name="favorite" value=""/>
       		</c:when>
       		<c:otherwise>
       			<td><input type="text" name="favorite" value="<s:property value='#bowlGame.favorite'/>" size=10/></td>
       		</c:otherwise>
       		</c:choose>
-      		<td><input type="text" name="favoriteScore" value="<s:property value="#bowlGame.favoriteScore"/>" size=2/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=100><s:property value="#bowlGame.underdog"/></td>
+      			<td width=150><input type="radio" name="<s:property value="#bowlGame.gameId"/>" value="underdog"><s:property value="#bowlGame.underdog"/></td>
       			<input type="hidden" name="underdog" value=""/>
       		</c:when>
       		<c:otherwise>
-      			<td><input type="text" name="underdog" value="<s:property value='#bowlGame.underdog'/>" size=10/></td>
+      			<td></td>
       		</c:otherwise>
       		</c:choose>
-      		<td><input type="text" name="underDogScore" value="<s:property value="#bowlGame.underDogScore"/>" size=2/></td>
-      		<td><input type="submit" value="Set Score"/></td>
-      	</tr></table>
+      		<c:if test="${bowlGame.bowlName != 'Championship'}">
+      			<td width=50 align=center><s:property value='#bowlGame.Spread'/></td>
+      		</c:if>
+      	</tr>
       	<input type="hidden" name="gameId" value="<s:property value="#bowlGame.gameId"/>"/>
       	<input type="hidden" name="year" value="${year}"/>
       	<input type="hidden" name="champGame" value="${bowlGame.bowlName == 'Championship'}"/>
-  		</form>
   	</s:iterator>
+  	</td></tr></table>
+  	<input type="submit" value="Make Picks"/>
+  	</form>
 	</body>
 </html>

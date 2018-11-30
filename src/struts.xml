@@ -23,6 +23,12 @@
             <result name="success">/MakePicks.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
       </action>
+      <action name="savePicks" 
+            class="actions.SavePicksAction" 
+            method="execute">
+            <result name="success">/PicksSaved.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
       <action name="getStandings" 
             class="actions.GetStandingsAction" 
             method="execute">

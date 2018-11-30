@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import data.BowlGame;
 import data.ChampPick;
 import data.Pick;
+import data.Pool;
 import data.User;
 
 public class DAO {
@@ -283,6 +284,22 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return user;
+	}
+	
+	public static Pool getPool(Integer poolId) {
+		Pool pool = null;
+		try {
+			Statement stmt = conn.createStatement();
+			String sql = "SELECT * FROM Pool where poolId = " + poolId;
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads"));
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return pool;
 	}
 	
 	public static List<User> getUsersList(Integer year) {

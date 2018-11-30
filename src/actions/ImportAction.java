@@ -300,7 +300,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
 			URL obj = new URL(uRL);
 			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
-			int responseCode = con.getResponseCode();
+			//int responseCode = con.getResponseCode();
 			//System.out.println("Response Code : " + responseCode);
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream())); 
 			JSONArray all = new JSONArray(in.readLine());
@@ -324,7 +324,12 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				System.out.println(ou);
 				System.out.println(spread);
 				System.out.println("Avg home spread: " + roundToHalf(avgHomeSpread));
+				String favorite = avgHomeSpread < 0.0 ? game.getString("HomeTeamName") : game.getString("AwayTeamName");
+				String underdog = avgHomeSpread < 0.0 ? game.getString("AwayTeamName") : game.getString("HomeTeamName");
+				double pointSpread = avgHomeSpread != 0.0 ? Math.abs(roundToHalf(avgHomeSpread)) : 0.0;
+				DAO.createBowlGame("", favorite, underdog, pointSpread, year);
 			}
+			// TBD Create Champ Game
 		 }
 		catch (Exception e) {
             System.out.println(e.getMessage());

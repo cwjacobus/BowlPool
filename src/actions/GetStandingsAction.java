@@ -20,6 +20,7 @@ import com.opensymphony.xwork2.ActionSupport;
 
 import data.ChampPick;
 import data.Pick;
+import data.Pool;
 import data.Standings;
 import data.User;
 
@@ -28,6 +29,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private Integer year = null;
+	private Integer poolId = null;
 	int numOfBowlGames = 1;
 	int lastGamePlayedIndex = 9;
 	Map<String, Object> userSession;
@@ -38,6 +40,12 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	    
 		userSession.put("year", year);
 		DAO.setConnection(year);
+		
+		if (DAO.useYearClause(year)) {
+			System.out.println("PoolID: " + poolId);
+			Pool pool = DAO.getPool(poolId);
+			userSession.put("pool", pool);
+		}
 		
 		System.out.println("Login: " + name);
 		User user  = DAO.getUser(name, year);
@@ -151,6 +159,14 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 
 	public void setYear(Integer year) {
 	   this.year = year;
+	}
+	
+	public Integer getPoolId() {
+		return poolId;
+	}
+
+	public void setPoolId(Integer poolId) {
+	   this.poolId = poolId;
 	}
 		
 	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2) {

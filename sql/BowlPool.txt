@@ -7,6 +7,7 @@ FirstName varchar(255),
 Email varchar(255),
 Year int(5),
 admin boolean,
+PoolId int(5)
 );
 
 CREATE TABLE BowlGame
@@ -27,7 +28,8 @@ CREATE TABLE Pick
 PickId int(11) PRIMARY KEY AUTO_INCREMENT,
 UserId int(11),
 GameId int(11),
-Favorite boolean
+Favorite boolean,
+PoolId int(5)
 );
 
 CREATE TABLE ChampPick
@@ -36,7 +38,8 @@ PickId int(11) PRIMARY KEY AUTO_INCREMENT,
 UserId int(11),
 GameId int(11),
 Winner varchar(255),
-TotalPoints int(11)
+TotalPoints int(11),
+PoolId int(5)
 );
 
 CREATE TABLE Pool
@@ -47,16 +50,18 @@ Year int(5) NOT NULL,
 UsePointSpreads boolean NOT NULL
 );
 
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (1, 'Sculley 2017', 17, true);
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (2, 'Sculley 2018', 18, true);
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (3, 'Jacobus 2018', 18, false);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (1, 'Sculley 2014', 14, true);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (2, 'Sculley 2015', 15, true);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (3, 'Jacobus 2016', 16, false);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (4, 'Sculley 2017', 17, true);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (5, 'Sculley 2018', 18, true);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (6, 'Jacobus 2018', 18, false);
 
 
 
+INSERT INTO User (UserName, LastName, FirstName, Email, year, admin, PoolId) VALUES ('Jacobus', 'Jacobus', 'Chris', 'cjacobus65@gmail.com', 18, 1, 5);
 
-INSERT INTO User (UserName, LastName, FirstName, Email, year, admin) VALUES ('Jacobus', 'Jacobus', 'Chris', 'cjacobus65@gmail.com', 18, 1);
-
-INSERT INTO User (UserName, LastName, FirstName, Email, year, admin) VALUES ('dummy', '', '', '', 18, 0);
+INSERT INTO User (UserName, LastName, FirstName, Email, year, admin) VALUES ('dummy', '', '', '', 18, 0, 5);
 INSERT INTO Pick (UserId, GameId, Favorite) VALUES ((select UserId from User where UserName = 'dummy'), 1, false);
 
 INSERT INTO BowlGame (BowlName) VALUES ('Championship');

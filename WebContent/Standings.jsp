@@ -33,9 +33,15 @@
     	</c:if>
 	</s:iterator> 
 	</table>
+	${numOfCompletedGames} completed games ${numOfRemainingGames} remaining
   	<br>
+  	<br>
+  	<c:if test = "${makePicksLink}">
+  		<a href="/BowlPoolWeb/makePicks">Make Picks</a>
+  		<br><br>
+  	</c:if>
   	<c:if test = "${allowAdmin}">
-  		<a href="/BowlPoolWeb/manageBowlGames?year=${year}">Manage Bowl Games</a>
+  		<a href="/BowlPoolWeb/manageBowlGames">Manage Bowl Games</a>
   		<br>
   		<h3>Import Data</h3>
   		<form action="import">

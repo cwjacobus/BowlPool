@@ -7,16 +7,18 @@ public class ChampPick {
 	private int gameId;
 	private String winner;
 	private double totalPoints;
+	private int poolId;
 	
 	public ChampPick () {
 	}
 	
-	public ChampPick (int pickId, int userId, int gameId, String winner, double totalPoints) {
+	public ChampPick (int pickId, int userId, int gameId, String winner, double totalPoints, int poolId) {
 		this.gameId = gameId;
 		this.userId = userId;
 		this.pickId = pickId;
 		this.winner = winner;
 		this.totalPoints = totalPoints;
+		this.poolId = poolId;
 	}
 	
 	public int getPickId() {
@@ -57,6 +59,14 @@ public class ChampPick {
 
 	public void setTotalPoints(double totalPoints) {
 		this.totalPoints = totalPoints;
+	}
+
+	public int getPoolId() {
+		return poolId;
+	}
+
+	public void setPoolId(int poolId) {
+		this.poolId = poolId;
 	}
 
 }

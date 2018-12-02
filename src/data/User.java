@@ -9,8 +9,9 @@ public class User {
 	private String email;
 	private Integer year;
 	private boolean admin;
+	private int poolId;
 	
-	public User (int userId, String userName, String lastName, String firstName, String email, int year, boolean admin) {
+	public User (int userId, String userName, String lastName, String firstName, String email, int year, boolean admin, int poolId) {
 		this.userId = userId;
 		this.userName = userName;
 		this.lastName = lastName;
@@ -18,6 +19,7 @@ public class User {
 		this.email = email;
 		this.year = year;
 		this.admin = admin;
+		this.poolId = poolId;
 	}
 
 	public int getUserId() {
@@ -74,6 +76,14 @@ public class User {
 
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
+	}
+
+	public int getPoolId() {
+		return poolId;
+	}
+
+	public void setPoolId(int poolId) {
+		this.poolId = poolId;
 	}
 	
 	

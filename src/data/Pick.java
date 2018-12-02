@@ -6,15 +6,17 @@ public class Pick {
 	private int userId;
 	private int gameId;
 	private boolean favorite;
+	int poolId;
 	
 	public Pick () {
 	}
 	
-	public Pick (int pickId, int userId, int gameId, boolean favorite) {
+	public Pick (int pickId, int userId, int gameId, boolean favorite, int poolId) {
 		this.gameId = gameId;
 		this.userId = userId;
 		this.pickId = pickId;
 		this.favorite = favorite;
+		this.poolId = poolId;
 	}
 	
 	public int getPickId() {
@@ -47,6 +49,14 @@ public class Pick {
 	
 	public void setFavorite(boolean favorite) {
 		this.favorite = favorite;
+	}
+
+	public int getPoolId() {
+		return poolId;
+	}
+
+	public void setPoolId(int poolId) {
+		this.poolId = poolId;
 	}
 
 }

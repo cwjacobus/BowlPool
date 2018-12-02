@@ -1,6 +1,9 @@
 package actions;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +33,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	private String name;
 	private Integer year = null;
 	private Integer poolId = null;
+	private Pool pool;
 	int numOfBowlGames = 1;
 	int lastGamePlayedIndex = 9;
 	Map<String, Object> userSession;
@@ -43,13 +47,13 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 		
 		if (DAO.useYearClause(year)) {
 			System.out.println("PoolID: " + poolId);
-			Pool pool = DAO.getPool(poolId);
+			pool = DAO.getPool(poolId);
 			userSession.put("pool", pool);
 		}
 		
 		System.out.println("Login: " + name);
-		User user  = DAO.getUser(name, year);
-		if (user != null || name.equalsIgnoreCase("Jacobus")) { // Always allow me to login to import users
+		User user  = DAO.getUser(name, year, poolId);
+		if (user != null || name.equalsIgnoreCase("admin")) { // Always allow admin to login to import users
 			userSession.put("user", user);
 		}
 		else {
@@ -58,15 +62,16 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 			return "error";
 		}
 		
-		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(year);
+		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(year, poolId);
 		Map<Integer, ChampPick> champPicksMap = null;
 		if (DAO.useYearClause(year)) {
-			champPicksMap = DAO.getChampPicksMap(year);
+			champPicksMap = DAO.getChampPicksMap(year, poolId);
 		}
-		TreeMap<String, Integer> standings = DAO.getStandings(year);
+		TreeMap<String, Integer> standings = DAO.getStandings(year, pool);
 		TreeMap<String, Standings> displayStandings = new TreeMap<String, Standings>(Collections.reverseOrder());
 		
 		numOfBowlGames = DAO.getBowlGamesList(year).size();
+		int numOfCompletedGames = DAO.getNumberOfCompletedGames(year);
 		
 		//Iterate through standings to make formatted display string
 		Iterator<Entry<String, Integer>> it = standings.entrySet().iterator();
@@ -103,7 +108,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 						userChampPick1 = champPicksMap.get(userId);
 						userChampPick2 = champPicksMap.get(userId2);
 					}
-					int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2);
+					int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2, numOfCompletedGames);
 					if ((wins + diffPicks) < wins2) {
 						eliminatedByCount++;
 					}
@@ -139,9 +144,19 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	    if ((user != null && user.isAdmin()) || name.equalsIgnoreCase("Jacobus")) {
 	    	allowAdmin = true;
 	    }
-	    context.put("allowAdmin", allowAdmin);
+	    context.put("allowAdmin", allowAdmin);  
+	    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
+	    Date date1 = sdf.parse("12-15 07:30");
+	    Calendar cal = Calendar.getInstance();
+	    boolean makePicksLink = false;
+	    //TBD check times of games
+	    if (numOfBowlGames > 0 && cal.get(Calendar.MONTH) == Calendar.DECEMBER && date1.before(cal.getTime())) {
+	    	makePicksLink = true;
+	    }
+	    context.put("numOfCompletedGames", numOfCompletedGames);
+	    context.put("numOfRemainingGames", numOfBowlGames-numOfCompletedGames);
+	    context.put("makePicksLink", makePicksLink);
 	    stack.push(context);
-	    //System.out.println("User: " + this.name + " Year: " + this.year);
 	    return "success";
 	}
 	   
@@ -169,11 +184,16 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	   this.poolId = poolId;
 	}
 		
-	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2) {
-		int diffPicks = 0;
-		int afterGameIndex = DAO.getNumberOfCompletedGames(year);
-		
-		for (int i = afterGameIndex; i < numOfBowlGames; i++) {
+	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, 
+		ChampPick userChampPick1, ChampPick userChampPick2, int numOfCompletedGames) {
+		int diffPicks = 0;	
+		if (userPicks1 == null) {
+			return userPicks2.size();
+		}
+		else if (userPicks2 == null) {
+			return userPicks1.size();
+		}
+		for (int i = numOfCompletedGames; i < numOfBowlGames; i++) {
 			Pick p1 = userPicks1.get(i);
 			Pick p2 = userPicks2.get(i);
 			if (p1.getFavorite() != p2.getFavorite()) {

@@ -19,13 +19,14 @@
       			<!--  <input type="hidden" name="favorite" value=""/> -->
       		</c:when>
       		<c:otherwise>
-      			<td><input type="text" name="favorite" value="<s:property value='#bowlGame.favorite'/>" size=10/></td>
+      			<td><input type="text" name="champGame" value="" size=10/></td>
+      			<td><input type="text" name="champTotPts" value="" size=4/></td>
+      			<input type="hidden" name="champGameId" value="<s:property value="#bowlGame.gameId"/>"/>
       		</c:otherwise>
       		</c:choose>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
       			<td width=150><input type="checkbox" name="underdog" value="<s:property value="#bowlGame.gameId"/>"><s:property value="#bowlGame.underdog"/></td>
-      			<!--  <input type="hidden" name="underdog" value=""/>-->
       		</c:when>
       		<c:otherwise>
       			<td></td>
@@ -35,8 +36,6 @@
       			<td width=50 align=center><s:property value='#bowlGame.Spread'/></td>
       		</c:if>
       	</tr>
-      	<!--  <input type="hidden" name="gameId" value="<s:property value="#bowlGame.gameId"/>"/>-->
-      	<!--  <input type="hidden" name="champGame" value="${bowlGame.bowlName == 'Championship'}"/>-->
   	</s:iterator>
   	</td></tr></table>
   	<input type="submit" value="Make Picks"/>

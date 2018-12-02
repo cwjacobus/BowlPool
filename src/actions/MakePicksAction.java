@@ -16,8 +16,6 @@ import data.BowlGame;
 public class MakePicksAction extends ActionSupport implements SessionAware {
 	
 	private static final long serialVersionUID = 1L;
-	private String name;
-	private String year;
 	
 	Map<String, Object> userSession;
 
@@ -34,22 +32,6 @@ public class MakePicksAction extends ActionSupport implements SessionAware {
 	    context.put("bowlGameList", bowlGameList);
 	    stack.push(context);
 	    return "success";
-	}
-	   
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-	   this.name = name;
-	}
-	
-	public String getYear() {
-		return year;
-	}
-
-	public void setYear(String year) {
-	   this.year = year;
 	}
 	
 	@Override

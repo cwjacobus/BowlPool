@@ -32,6 +32,7 @@ import dao.DAO;
 import data.BowlGame;
 import data.ChampPick;
 import data.Pick;
+import data.Pool;
 import data.User;
 
 public class ImportAction extends ActionSupport implements SessionAware {
@@ -50,6 +51,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	Map<String, Object> userSession;
 	
 	Integer year;
+	Pool pool;
 
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
@@ -59,8 +61,9 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			stack.push(context);
 			return "error";
 		}
+		pool = (Pool) userSession.get("pool");
 		year = (Integer) userSession.get("year");
-		System.out.println("Import: " + year);
+		System.out.println("Import: " + year + " " + pool.getPoolName());
 		
 		InputStream input = ServletActionContext.getServletContext().getResourceAsStream("/WEB-INF/BowlPool.properties");
 		Properties prop = new Properties();
@@ -83,7 +86,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	if (usersCB != null) {
 	    		usersImport = true; 
 	    		// Check for users already imported
-	    		if (DAO.getUsersCount(year) > 0) {
+	    		if (DAO.getUsersCount(year, pool.getPoolId()) > 0) {
 	    			context.put("errorMsg", "Users already imported for 20" + year + "!  Delete and reimport.");
 	    			stack.push(context);
 	    			return "error";
@@ -137,7 +140,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	
 	private void importUsersAndPicks(HSSFWorkbook hWorkbook) {
 		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
-		List<User> userList = DAO.getUsersList(year);
+		List<User> userList = DAO.getUsersList(year, pool.getPoolId());
 		List<Pick> picksList = new ArrayList<Pick>();
 		HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
 		try {  
@@ -168,7 +171,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        	if (userName != null) {
 	        		System.out.println(userName);
 	        		if (usersImport) {
-	        			DAO.createUser(userName, year);
+	        			DAO.createUser(userName, year, pool.getPoolId());
 	        			userCreationStarted = true;
 	        		}
 	        		if (picksImport) {
@@ -205,13 +208,13 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create fav Pick
 	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), true);
-	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), true));
+	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), true, pool.getPoolId()));
 	        					}
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 != 0)) {
 	        						System.out.print("DOG-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create dog Pick
 	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
-	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), false));
+	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), false, pool.getPoolId()));
 	        					}
 	        				}
 	        				else {
@@ -219,7 +222,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						System.out.print("CHAMP WINNER-" + pick + " ");
 	        						// create Winner ChampPick
 	        						//DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
-	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0));
+	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0, pool.getPoolId()));
 	        					}
 	        					else if (cell.getColumnIndex() % 2 != 0) { // Assumes ChampPick record has been created previously to update
 	        						System.out.print("CHAMP TOTAL POINTS-" + pick + " ");
@@ -245,10 +248,10 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        	prevUser = userName;
 	        }
 	        if (picksList.size() > 0) {
-	        	DAO.createBatchPicks(picksList);
+	        	DAO.createBatchPicks(picksList, pool.getPoolId());
 	        }
 	        if (champPicksMap.size() > 0) {
-	        	DAO.createBatchChampPicks(champPicksMap);
+	        	DAO.createBatchChampPicks(champPicksMap, pool.getPoolId());
 	        }
 	    }
 	    catch (Exception e) {

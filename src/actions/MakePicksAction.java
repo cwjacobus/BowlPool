@@ -12,6 +12,10 @@ import com.opensymphony.xwork2.ActionSupport;
 
 import dao.DAO;
 import data.BowlGame;
+import data.ChampPick;
+import data.Pick;
+import data.Pool;
+import data.User;
 
 public class MakePicksAction extends ActionSupport implements SessionAware {
 	
@@ -27,9 +31,17 @@ public class MakePicksAction extends ActionSupport implements SessionAware {
 			stack.push(context);
 			return "error";
 		}
+		Pool pool = (Pool) userSession.get("pool");
+		User user = (User) userSession.get("user");
 		Integer year = (Integer) userSession.get("year");
 		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
 	    context.put("bowlGameList", bowlGameList);
+	    Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(year, pool.getPoolId());
+	    List<Pick> userPicks = picksMap.get(user.getUserId());
+	    context.put("userPicks", userPicks);
+	    Map<Integer, ChampPick> champPicks =  DAO.getChampPicksMap(year, pool.getPoolId());
+	    ChampPick champPick = champPicks.get(user.getUserId());
+	    context.put("champPick", champPick);
 	    stack.push(context);
 	    return "success";
 	}

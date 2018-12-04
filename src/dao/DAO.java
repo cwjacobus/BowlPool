@@ -137,6 +137,28 @@ public class DAO {
 		return userId;
 	}
 	
+	public static void deleteChampPickByUserIdAndPoolId(Integer userId, Integer poolId) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "DELETE from ChampPick WHERE userId = " + userId + " and poolId = " + poolId;
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void deletePicksByUserIdAndPoolId(Integer userId, Integer poolId) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "DELETE from Pick WHERE userId = " + userId + " and poolId = " + poolId;
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static TreeMap<String, Integer> getStandings(Integer year, Pool pool) {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();

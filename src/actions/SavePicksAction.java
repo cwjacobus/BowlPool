@@ -63,9 +63,15 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 				picksList.add(new Pick(0, user.getUserId(), u, false, pool.getPoolId()));
 			}
 		}
+		if (picksList.size() > 0) {
+			DAO.deletePicksByUserIdAndPoolId(user.getUserId(), pool.getPoolId());
+		}
+		Thread.sleep(1000);
 		DAO.createBatchPicks(picksList, pool.getPoolId());
 		if (champGame != null && champGame.trim().length() > 0) {
 			System.out.println(champGame + " " + champGameId + " " + champTotPts + " " + user.getUserId() + " " + pool.getPoolId() + " " + year);
+			DAO.deleteChampPickByUserIdAndPoolId(user.getUserId(), pool.getPoolId());
+			Thread.sleep(1000);
 			DAO.createChampPick(user.getUserId(), champGameId, champGame, champTotPts, pool.getPoolId());
 		}
 	    stack.push(context);

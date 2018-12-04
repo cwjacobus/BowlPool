@@ -300,7 +300,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		System.out.println("Import games from web service");
 		try {
 			String uRL;
-			uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
+			//uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
+			uRL = "https://api.fantasydata.net/v3/cfb/scores/json/GamesByWeek/2018POST/1?key=712e473edfa34aaf82cdf73469a772b7";
 			URL obj = new URL(uRL);
 			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
 			//int responseCode = con.getResponseCode();
@@ -309,30 +310,47 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			JSONArray all = new JSONArray(in.readLine());
 			in .close();
 			System.out.println(all.length() + " games");
+			
 			for (int i = 0; i < all.length(); i++) {
 				JSONObject game = all.getJSONObject(i);
+				String bowlGameTitle = "";
 				System.out.print(game.getString("AwayTeamName") + " at " + game.getString("HomeTeamName"));
 				System.out.println(" (" + game.getString("DateTime") + ")");
-				JSONArray preGameOddsArray = game.getJSONArray("PregameOdds");
-				String ou = "O/U: ";
-				String spread = "Spd: ";
-				double avgHomeSpread = 0;
-				for (int j = 0; j < preGameOddsArray.length(); j++) {
-					JSONObject gameOdds = preGameOddsArray.getJSONObject(j);
-					ou += formatNumber(gameOdds.getString("OverUnder")) + "(" + gameOdds.getString("Sportsbook") + ")"+ " ";
-					spread += game.getString("HomeTeamName") + " " + formatSpread(gameOdds.getString("HomePointSpread")) + "(" + gameOdds.getString("Sportsbook") + ")"+ " ";
-					avgHomeSpread += Double.parseDouble(gameOdds.getString("HomePointSpread"));
+				JSONArray preGameOddsArray = null;
+				try {
+					preGameOddsArray = game.getJSONArray("PregameOdds");
 				}
-				avgHomeSpread = avgHomeSpread/preGameOddsArray.length();
-				System.out.println(ou);
-				System.out.println(spread);
+				catch (Exception e) {
+		        }
+				String ous = "O/U: ";
+				String spreads = "Spd: ";
+				double avgHomeSpread = 0;
+				if (preGameOddsArray != null && preGameOddsArray.length() > 0) {
+					for (int j = 0; j < preGameOddsArray.length(); j++) {
+						JSONObject gameOdds = preGameOddsArray.getJSONObject(j);
+						ous += formatNumber(gameOdds.getString("OverUnder")) + "(" + gameOdds.getString("Sportsbook") + ")"+ " ";
+						spreads += game.getString("HomeTeamName") + " " + formatSpread(gameOdds.getString("HomePointSpread")) + "(" + gameOdds.getString("Sportsbook") + ")"+ " ";
+						avgHomeSpread += Double.parseDouble(gameOdds.getString("HomePointSpread"));
+					}
+					avgHomeSpread = avgHomeSpread/preGameOddsArray.length();
+					System.out.println(ous);
+					System.out.println(spreads);
+				}
+				else {
+					String pointSpreadString = game.getString("PointSpread");
+					if (!pointSpreadString.equalsIgnoreCase("null")) {
+						avgHomeSpread = Double.parseDouble(game.getString("PointSpread"));
+					}
+					bowlGameTitle = game.getString("Title").replaceAll("'", "");
+				}
+				System.out.println(bowlGameTitle);
 				System.out.println("Avg home spread: " + roundToHalf(avgHomeSpread));
 				String favorite = avgHomeSpread < 0.0 ? game.getString("HomeTeamName") : game.getString("AwayTeamName");
 				String underdog = avgHomeSpread < 0.0 ? game.getString("AwayTeamName") : game.getString("HomeTeamName");
 				double pointSpread = avgHomeSpread != 0.0 ? Math.abs(roundToHalf(avgHomeSpread)) : 0.0;
-				DAO.createBowlGame("", favorite, underdog, pointSpread, year);
+				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year);
 			}
-			// TBD Create Champ Game
+			DAO.createBowlGame("Championship", "", "", 0.0, year);
 		 }
 		catch (Exception e) {
             System.out.println(e.getMessage());

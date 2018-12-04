@@ -22,10 +22,10 @@
   			</c:if>
 		</c:forEach>
   		<tr>
-      		<td width=100 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
+      		<td width=200 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=150><input type="checkbox" name="favorite" value="<s:property value="#bowlGame.gameId"/>" ${favChecked}><s:property value="#bowlGame.favorite"/></td>
+      			<td width=200><input type="checkbox" name="favorite" value="<s:property value="#bowlGame.gameId"/>" ${favChecked}><s:property value="#bowlGame.favorite"/></td>
       			<!--  <input type="hidden" name="favorite" value=""/> -->
       		</c:when>
       		<c:otherwise>
@@ -36,7 +36,7 @@
       		</c:choose>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=150><input type="checkbox" name="underdog" value="<s:property value="#bowlGame.gameId"/>"${dogChecked}><s:property value="#bowlGame.underdog"/></td>
+      			<td width=200><input type="checkbox" name="underdog" value="<s:property value="#bowlGame.gameId"/>"${dogChecked}><s:property value="#bowlGame.underdog"/></td>
       		</c:when>
       		<c:otherwise>
       			<td></td>

@@ -10,10 +10,10 @@
 	<s:iterator value="bowlGameList" var="bowlGame">
   		<form action="updateScore">
   		<table><tr>
-      		<td width=100 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
+      		<td width=200 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=100><s:property value="#bowlGame.favorite"/></td>
+      			<td width=200><s:property value="#bowlGame.favorite"/></td>
       			<input type="hidden" name="favorite" value=""/>
       		</c:when>
       		<c:otherwise>
@@ -23,7 +23,7 @@
       		<td><input type="text" name="favoriteScore" value="<s:property value="#bowlGame.favoriteScore"/>" size=2/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=100><s:property value="#bowlGame.underdog"/></td>
+      			<td width=200><s:property value="#bowlGame.underdog"/></td>
       			<input type="hidden" name="underdog" value=""/>
       		</c:when>
       		<c:otherwise>

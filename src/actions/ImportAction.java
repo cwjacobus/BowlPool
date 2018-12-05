@@ -7,7 +7,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -277,7 +280,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			}
 			if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
 				// Create a blank Championship game place holder and break;
-				DAO.createBowlGame("Championship", "", "", 0.0, year);
+				DAO.createBowlGame("Championship", "", "", 0.0, year, null);
 				break;
 			}
 			if (gameName != null) {
@@ -290,7 +293,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					line = Double.parseDouble(lineString);
 				}
 				String underdog = getStringFromCell(row, 7).trim();
-				DAO.createBowlGame(gameName, favorite, underdog, line, year);
+				DAO.createBowlGame(gameName, favorite, underdog, line, year, null);
 			}
 			prevGame = gameName;
 		}
@@ -310,12 +313,19 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			JSONArray all = new JSONArray(in.readLine());
 			in .close();
 			System.out.println(all.length() + " games");
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date parsedDate;
+			Timestamp timestamp;
 			
 			for (int i = 0; i < all.length(); i++) {
 				JSONObject game = all.getJSONObject(i);
 				String bowlGameTitle = "";
-				System.out.print(game.getString("AwayTeamName") + " at " + game.getString("HomeTeamName"));
+				parsedDate = dateFormat.parse(game.getString("DateTime").replaceAll("T", " "));
+			    timestamp = new Timestamp(parsedDate.getTime());
+				System.out.print(game.getString("AwayTeamName") + " at " + parsedDate);
 				System.out.println(" (" + game.getString("DateTime") + ")");
+				
+			    
 				JSONArray preGameOddsArray = null;
 				try {
 					preGameOddsArray = game.getJSONArray("PregameOdds");
@@ -324,8 +334,9 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		        }
 				String ous = "O/U: ";
 				String spreads = "Spd: ";
-				double avgHomeSpread = 0;
+				Double avgHomeSpread = null;
 				if (preGameOddsArray != null && preGameOddsArray.length() > 0) {
+					avgHomeSpread = 0.0;
 					for (int j = 0; j < preGameOddsArray.length(); j++) {
 						JSONObject gameOdds = preGameOddsArray.getJSONObject(j);
 						ous += formatNumber(gameOdds.getString("OverUnder")) + "(" + gameOdds.getString("Sportsbook") + ")"+ " ";
@@ -344,16 +355,27 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					bowlGameTitle = game.getString("Title").replaceAll("'", "");
 				}
 				System.out.println(bowlGameTitle);
-				System.out.println("Avg home spread: " + roundToHalf(avgHomeSpread));
-				String favorite = avgHomeSpread < 0.0 ? game.getString("HomeTeamName") : game.getString("AwayTeamName");
-				String underdog = avgHomeSpread < 0.0 ? game.getString("AwayTeamName") : game.getString("HomeTeamName");
-				double pointSpread = avgHomeSpread != 0.0 ? Math.abs(roundToHalf(avgHomeSpread)) : 0.0;
-				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year);
+				System.out.println("Avg home spread: " + (avgHomeSpread != null ? roundToHalf(avgHomeSpread) : "N/L"));
+				
+				String favorite;
+				String underdog;
+				if (avgHomeSpread == null || avgHomeSpread < 0.0) {
+					favorite = game.getString("HomeTeamName");
+					underdog = game.getString("AwayTeamName");
+				}
+				else {
+					favorite = game.getString("AwayTeamName");
+					underdog = game.getString("HomeTeamName");
+				}
+				Double pointSpread = avgHomeSpread != null ? Math.abs(roundToHalf(avgHomeSpread)) : null;
+				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp);
 			}
-			DAO.createBowlGame("Championship", "", "", 0.0, year);
+			parsedDate = dateFormat.parse("2019-01-15 21:00:00");
+		    timestamp = new Timestamp(parsedDate.getTime());
+			DAO.createBowlGame("Championship", "", "", null, year, timestamp);
 		 }
 		catch (Exception e) {
-            System.out.println(e.getMessage());
+			e.printStackTrace();
         }
 	}
 	

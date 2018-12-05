@@ -1,14 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+
 <html>
 <head>
 <title>Bowl Pool - Make Picks</title>
 </head>
 <body>
 	<form action="savePicks">
-	<table>
-	<tr><th>Bowl</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
+	<table border=1 cellspacing=0 cellpadding=0>
+	<tr><th>Bowl</th><th>Time</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
 	<tr><td>
 	<s:iterator value="bowlGameList" var="bowlGame">
 		<c:set var="favChecked" value = ""/>
@@ -23,6 +25,7 @@
 		</c:forEach>
   		<tr>
       		<td width=200 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
+      		<td width=130><fmt:formatDate type='both' dateStyle='short' timeStyle='short' value='${bowlGame.dateTime}'/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
       			<td width=200><input type="checkbox" name="favorite" value="<s:property value="#bowlGame.gameId"/>" ${favChecked}><s:property value="#bowlGame.favorite"/></td>
@@ -43,11 +46,21 @@
       		</c:otherwise>
       		</c:choose>
       		<c:if test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=50 align=center><s:property value='#bowlGame.Spread'/></td>
+      			<td width=50 align=center>
+      			<c:choose>
+      				<c:when test="${bowlGame.spread != ''}">
+      					<s:property value='#bowlGame.Spread'/>
+      				</c:when>
+      				<c:otherwise>
+      					N/L
+      				</c:otherwise>
+      			</c:choose>
+      			</td>
       		</c:if>
       	</tr>
   	</s:iterator>
   	</td></tr></table>
+  	<br>
   	<input type="submit" value="Make Picks"/>
   	</form>
 	</body>

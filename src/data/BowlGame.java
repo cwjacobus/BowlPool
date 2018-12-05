@@ -1,5 +1,7 @@
 package data;
 
+import java.sql.Timestamp;
+
 public class BowlGame {
 	
 	private int gameId;
@@ -11,9 +13,10 @@ public class BowlGame {
 	private int underDogScore;
 	private boolean completed;
 	private int year;
+	private Timestamp dateTime;
 	
 	public BowlGame (int gameId, String bowlName, String favorite, String underdog, 
-			double spread, int favoriteScore, int underDogScore, boolean completed, int year) {
+			double spread, int favoriteScore, int underDogScore, boolean completed, int year, Timestamp dateTime) {
 		this.gameId = gameId;
 		this.bowlName = bowlName;
 		this.favorite = favorite;
@@ -23,6 +26,7 @@ public class BowlGame {
 		this.underDogScore = underDogScore;
 		this.completed = completed;
 		this.year = year;
+		this.dateTime = dateTime;
 	}
 	
 	public int getGameId() {
@@ -80,6 +84,14 @@ public class BowlGame {
 
 	public void setYear(int year) {
 		this.year = year;
+	}
+
+	public Timestamp getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(Timestamp dateTime) {
+		this.dateTime = dateTime;
 	}
 
 }

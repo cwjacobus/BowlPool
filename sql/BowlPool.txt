@@ -20,7 +20,8 @@ Spread decimal(4,1),
 FavoriteScore int(11),
 UnderDogScore int(11),
 Completed boolean,
-Year int(5)
+Year int(5),
+DateTime timestamp
 );
 
 CREATE TABLE Pick
@@ -63,8 +64,6 @@ INSERT INTO User (UserName, LastName, FirstName, Email, year, admin, PoolId) VAL
 
 INSERT INTO User (UserName, LastName, FirstName, Email, year, admin) VALUES ('dummy', '', '', '', 18, 0, 5);
 INSERT INTO Pick (UserId, GameId, Favorite) VALUES ((select UserId from User where UserName = 'dummy'), 1, false);
-
-INSERT INTO BowlGame (BowlName) VALUES ('Championship');
 
 // Should be equal to number of users * number of bowl games
 select count(*) from pick;
@@ -112,3 +111,14 @@ delete from champpick where gameid in (select gameid from bowlgame where year = 
 delete from pick where gameid in (select gameid from bowlgame where year = X);
 delete from bowlgame where year = X;
 delete from user where year = X;
+
+
+
+// My SQL commands
+C:\Program Files\MySQL\MySQL Server 5.7\bin>mysql -u root -pPASSWORD
+// Copy a database
+mysqldump -u root -pPASSWORD db1 > dump.sql
+mysqladmin -u root -pPASSWORD create db2
+mysql -u root -pPASSWORD db2 < dump.sql
+// Change password
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('PASSWORD')

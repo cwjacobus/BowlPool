@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,11 +25,12 @@ public class DAO {
 	
 	public static Connection conn; 
 	
-	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year) {
+	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year) VALUES ('" + 
-				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", 0, 0, false, " + year + ");";
+			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime) VALUES ('" + 
+				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", 0, 0, false, " + year + "," +
+				(dateTime != null ? "'" + dateTime + "'" : null) + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -106,7 +108,7 @@ public class DAO {
 		}
 	}*/
 	
-	public static void createChampPick(Integer userId, Integer gameId, String winner, Integer totalPoints, Integer poolId) {
+	public static void createChampPick(Integer userId, Integer gameId, String winner, Double totalPoints, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
 			String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner, TotalPoints, PoolId) VALUES (" + 
@@ -212,12 +214,14 @@ public class DAO {
 		List<BowlGame>bowlGameList = new ArrayList<BowlGame>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame" + (useYearClause(year) ? " where " + getYearClause(year, null): ""));
+			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame" + 
+					(useYearClause(year) ? " where " + getYearClause(year, null) + " order by DateTime": ""));
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
 						rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), (useYearClause(year) ? rs.getInt("Year") : 0));
+						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), (useYearClause(year) ? rs.getInt("Year") : 0),
+						(useYearClause(year) ? rs.getTimestamp("DateTime") : null));
 				bowlGameList.add(bowlGame);
 			}
 		}

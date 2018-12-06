@@ -32,8 +32,8 @@
       			<!--  <input type="hidden" name="favorite" value=""/> -->
       		</c:when>
       		<c:otherwise>
-      			<td><input type="text" name="champGame" value="${champPick.winner}" size=10/></td>
-      			<td><input type="text" name="champTotPts" value="${champPick.totalPoints}" size=4/></td>
+      			<td><input type="text" name="champGame" value="${champPick.winner}" size=24/></td>
+      			<td><input type="number" name="champTotPts" value="${champPick.totalPoints}" min="0" max="175" size=2/></td>
       			<input type="hidden" name="champGameId" value="<s:property value="#bowlGame.gameId"/>"/>
       		</c:otherwise>
       		</c:choose>

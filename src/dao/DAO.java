@@ -108,7 +108,7 @@ public class DAO {
 		}
 	}*/
 	
-	public static void createChampPick(Integer userId, Integer gameId, String winner, Double totalPoints, Integer poolId) {
+	public static void createChampPick(Integer userId, Integer gameId, String winner, Integer totalPoints, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
 			String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner, TotalPoints, PoolId) VALUES (" + 

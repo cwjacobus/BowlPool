@@ -23,7 +23,7 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 	private List<Integer> favorite;
 	private List<Integer> underdog;
 	private String champGame;
-	private Double champTotPts;
+	private Integer champTotPts;
 	private Integer champGameId;
 	
 	Map<String, Object> userSession;
@@ -102,11 +102,11 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 		this.champGame = champGame;
 	}
 	
-	public Double getChampTotPts() {
+	public Integer getChampTotPts() {
 		return champTotPts;
 	}
 
-	public void setChampTotPts(Double champTotPts) {
+	public void setChampTotPts(Integer champTotPts) {
 		this.champTotPts = champTotPts;
 	}
 

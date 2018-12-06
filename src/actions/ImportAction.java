@@ -233,7 +233,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						//DAO.updateChampPickTotPts(user.getUserId(), pick);
 	        						ChampPick cp = champPicksMap.get(user.getUserId());
 	        						if (cp != null) {
-	        							cp.setTotalPoints(Double.parseDouble(pick));
+	        							cp.setTotalPoints(Integer.parseInt(pick));
 	        							champPicksMap.put(cp.getUserId(), cp);
 	        						}
 	        					}

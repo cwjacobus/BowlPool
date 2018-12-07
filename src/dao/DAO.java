@@ -44,8 +44,8 @@ public class DAO {
 			Statement stmt = conn.createStatement();
 			int picksCount = 0;
 			for (Pick p : picksList) {
-				String insertSQL = "INSERT INTO Pick (UserId, GameId, Favorite, PoolId) VALUES (" + 
-					p.getUserId() + ", " + p.getGameId() + ", " + p.getFavorite() + ", " + poolId + ");";
+				String insertSQL = "INSERT INTO Pick (UserId, GameId, Favorite, PoolId, CreatedTime) VALUES (" + 
+					p.getUserId() + ", " + p.getGameId() + ", " + p.getFavorite() + ", " + poolId + ", NOW());";
 				stmt.addBatch(insertSQL);
 				picksCount++;
 				// Every 500 lines, insert the records
@@ -80,9 +80,9 @@ public class DAO {
 			}*/
 			while (it.hasNext()) {
 				Map.Entry<Integer, ChampPick> cp = (Map.Entry<Integer, ChampPick>)it.next();
-				String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner, TotalPoints, PoolId) VALUES (" + 
+				String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner, TotalPoints, PoolId, CreatedTime) VALUES (" + 
 					cp.getValue().getUserId() + ", " + cp.getValue().getGameId() + ", '" + cp.getValue().getWinner() + "', " 
-						+ cp.getValue().getTotalPoints() + ", " + poolId + ");";
+						+ cp.getValue().getTotalPoints() + ", " + poolId + ", NOW());";
 				stmt.addBatch(insertSQL);
 			}
 			System.out.println("Insert all ChampPick records");
@@ -95,24 +95,11 @@ public class DAO {
 		}
 	}
 	
-	/*
-	public static void createPick(Integer userId, Integer gameId, Boolean favorite) {
-		try {
-			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO Pick (UserId, GameId, Favorite) VALUES (" + 
-				userId + ", " + gameId + ", " + favorite + ");";
-			stmt.execute(insertSQL);
-		}
-		catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}*/
-	
 	public static void createChampPick(Integer userId, Integer gameId, String winner, Integer totalPoints, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner, TotalPoints, PoolId) VALUES (" + 
-				userId + ", " + gameId + ", '" + winner + "'," + totalPoints + ", " + poolId + ");";
+			String insertSQL = "INSERT INTO ChampPick (UserId, GameId, Winner, TotalPoints, PoolId, CreatedTime) VALUES (" + 
+				userId + ", " + gameId + ", '" + winner + "'," + totalPoints + ", " + poolId + ", NOW());";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -255,7 +242,7 @@ public class DAO {
 					//}
 					picksList = new ArrayList<Pick>();
 				}
-				Pick p = new Pick(pickId, userId, gameId, favorite.intValue() == 1, poolId);
+				Pick p = new Pick(pickId, userId, gameId, favorite.intValue() == 1, poolId, null);
 				picksList.add(p);
 				prevUserId = userId;
 			}
@@ -289,7 +276,7 @@ public class DAO {
 				pickId = rs.getInt("PickId");
 				winner = rs.getString("Winner");
 				totalPts = rs.getInt("TotalPoints");
-				champPick = new ChampPick(pickId, userId, gameId, winner, totalPts, poolId);
+				champPick = new ChampPick(pickId, userId, gameId, winner, totalPts, poolId, null);
 				picksMap.put(userId, champPick);
 			}
 		}
@@ -395,12 +382,12 @@ public class DAO {
 		return numberOfBowlGames;
 	}
 	
-	public static int getPicksCount(Integer year) {
+	public static int getPicksCount(Integer year, Integer poolId) {
 		int numberOfPicks = 0;
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from Pick" + 
-				(useYearClause(year) ? " p, BowlGame bg where p.gameId = bg.gameId and bg.year = " + year: ""));
+				(useYearClause(year) ? " p, BowlGame bg where p.gameId = bg.gameId and bg.year = " + year + " and p.poolId = " + poolId: ""));
 			rs.next();
 			numberOfPicks = rs.getInt(1);
 		}
@@ -439,7 +426,18 @@ public class DAO {
 		return numberOfCompletedGames > 0;
 	}
 	
-	public static void updateScore(Integer favoriteScore, Integer underDogScore, Integer gameId, String favorite, String underdog) {
+	public static void updateBowlGameSpread(Integer gameId, Double spread) {
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.execute("UPDATE BowlGame SET Spread = " + spread + " WHERE GameId = " + gameId);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return;
+	}
+	
+	public static void updateBowlGameScore(Integer favoriteScore, Integer underDogScore, Integer gameId, String favorite, String underdog) {
 		String champUpdate = "";
 		if (favorite != null && favorite.length() > 0 && underdog != null && underdog.length() > 0) {
 			champUpdate += ", Favorite = '" + favorite + "', Underdog = '" + underdog + "'";

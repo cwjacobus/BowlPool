@@ -10,7 +10,7 @@
 <body>
 	<form action="savePicks">
 	<table border=1 cellspacing=0 cellpadding=0>
-	<tr><th>Bowl</th><th>Time</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
+	<tr><th>Bowl</th><th>Time(EST)</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
 	<tr><td>
 	<s:iterator value="bowlGameList" var="bowlGame">
 		<c:set var="favChecked" value = ""/>

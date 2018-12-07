@@ -73,7 +73,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		prop.load(input);
 		System.out.println("Input file path: " + prop.getProperty("inputFilePath"));
 		
-	    System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + fromWS + " " + inputFileName);
+		System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + fromWS + " " + inputFileName);
 	    if (usersCB == null && gamesCB == null && picksCB == null) {
 	    	context.put("errorMsg", "Nothing selected to import!");
 	    	stack.push(context);
@@ -104,19 +104,21 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    			return "error";
 	    		}
 	    		// Check for picks already imported
-	    		if (DAO.getPicksCount(year) > 0) {
-	    			context.put("errorMsg", "Picks already imported for 20" + year + "!  Delete and reimport.");
+	    		if (DAO.getPicksCount(year, pool.getPoolId()) > 0) {
+	    			context.put("errorMsg", "Picks already imported for pool " + pool.getPoolName() + " in 20" + year + "!  Delete and reimport.");
 	    			stack.push(context);
 	    			return "error";
 	    		}
 	    	}
-	    	if (gamesCB != null) {
+	    	if (gamesCB != null) { // Import bowl games
 	    		bowlGamesImport = true; 
-	    		// Check for games already imported
-	    		if (DAO.getBowlGamesCount(year) > 0) {
-	    			context.put("errorMsg", "Bowl Games already imported for 20" + year + "!  Delete and reimport.");
-	    			stack.push(context);
-	    			return "error";
+	    		int bowlGamesCount = DAO.getBowlGamesCount(year);
+	    		if (fromWS != null) {  // from WS
+	    			if (bowlGamesCount > 0) {
+	    				context.put("errorMsg", "Bowl Games already imported for 20" + year + "!  Delete and reimport.");
+	    				stack.push(context);
+	    				return "error";
+	    			}
 	    		}
 	    	}
 	    	if (usersImport || picksImport || (bowlGamesImport && fromWS == null)) {
@@ -211,13 +213,13 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create fav Pick
 	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), true);
-	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), true, pool.getPoolId()));
+	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), true, pool.getPoolId(), null));
 	        					}
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 != 0)) {
 	        						System.out.print("DOG-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create dog Pick
 	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
-	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), false, pool.getPoolId()));
+	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), false, pool.getPoolId(), null));
 	        					}
 	        				}
 	        				else {
@@ -225,7 +227,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						System.out.print("CHAMP WINNER-" + pick + " ");
 	        						// create Winner ChampPick
 	        						//DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
-	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0, pool.getPoolId()));
+	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0, pool.getPoolId(), null));
 	        					}
 	        					else if (cell.getColumnIndex() % 2 != 0) { // Assumes ChampPick record has been created previously to update
 	        						System.out.print("CHAMP TOTAL POINTS-" + pick + " ");
@@ -268,6 +270,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		Iterator<Row> rowIterator = sheet.iterator();
 		boolean gamesFound = false;
 		String prevGame = null;
+		List<BowlGame> bowlGamesList = DAO.getBowlGamesList(year);
+		boolean updateBowlGames = bowlGamesList.size() > 0;
 		while (rowIterator.hasNext()) {
 			Row row = rowIterator.next();
 			String gameName = getStringFromCell(row, 1);
@@ -280,20 +284,28 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			}
 			if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
 				// Create a blank Championship game place holder and break;
-				DAO.createBowlGame("Championship", "", "", 0.0, year, null);
+				if (!updateBowlGames) {
+					DAO.createBowlGame("Championship", "", "", null, year, null);
+				}
 				break;
 			}
 			if (gameName != null) {
 				System.out.println(gameName);
-				String favorite = getStringFromCell(row, 3).trim();
 				String lineString = getStringFromCell(row, 5).trim();
 				double line = 0;
-				if (!lineString.equalsIgnoreCase("pick")) {
+				if (!lineString.equalsIgnoreCase("pick") && !lineString.equalsIgnoreCase("p")) {
 					lineString = lineString.replace("-", "");
 					line = Double.parseDouble(lineString);
 				}
-				String underdog = getStringFromCell(row, 7).trim();
-				DAO.createBowlGame(gameName, favorite, underdog, line, year, null);
+				if (!updateBowlGames) {
+					String favorite = getStringFromCell(row, 3).trim();
+					
+					String underdog = getStringFromCell(row, 7).trim();
+					DAO.createBowlGame(gameName, favorite, underdog, line, year, null);
+				}
+				else {
+					DAO.updateBowlGameSpread(getBowlGameIdFromShortName(bowlGamesList, gameName), line);
+				}
 			}
 			prevGame = gameName;
 		}
@@ -462,6 +474,19 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			formattedNumber = "+" + formattedNumber;
 		}
 		return formattedNumber;
+	}
+	
+	private Integer getBowlGameIdFromShortName(List<BowlGame> bowlGamesList, String shortName) {
+		Integer gameId = null;
+		
+		for (BowlGame bg : bowlGamesList) {
+			if (bg.getBowlName() != null && bg.getBowlName().contains(shortName)) {
+				return bg.getGameId();
+			}
+		}
+		System.out.println("Bowl game not found: " + shortName);
+				
+		return gameId;
 	}
 	
 	private double roundToHalf(double d) {

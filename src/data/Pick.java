@@ -1,5 +1,7 @@
 package data;
 
+import java.sql.Timestamp;
+
 public class Pick {
 	
 	private int pickId;
@@ -7,16 +9,18 @@ public class Pick {
 	private int gameId;
 	private boolean favorite;
 	int poolId;
+	Timestamp createdTime;
 	
 	public Pick () {
 	}
 	
-	public Pick (int pickId, int userId, int gameId, boolean favorite, int poolId) {
+	public Pick (int pickId, int userId, int gameId, boolean favorite, int poolId, Timestamp createdTime) {
 		this.gameId = gameId;
 		this.userId = userId;
 		this.pickId = pickId;
 		this.favorite = favorite;
 		this.poolId = poolId;
+		this.createdTime = createdTime;
 	}
 	
 	public int getPickId() {
@@ -57,6 +61,14 @@ public class Pick {
 
 	public void setPoolId(int poolId) {
 		this.poolId = poolId;
+	}
+
+	public Timestamp getCreatedTime() {
+		return createdTime;
+	}
+
+	public void setCreatedTime(Timestamp createdTime) {
+		this.createdTime = createdTime;
 	}
 
 }

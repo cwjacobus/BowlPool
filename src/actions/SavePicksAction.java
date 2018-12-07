@@ -54,13 +54,13 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 		if (favorite != null) {
 			for (Integer f : favorite) {
 				System.out.println(f + " " + user.getUserId() + " " + pool.getPoolId() + " " + year);
-				picksList.add(new Pick(0, user.getUserId(), f, true, pool.getPoolId()));
+				picksList.add(new Pick(0, user.getUserId(), f, true, pool.getPoolId(), null));
 			}
 		}
 		if (underdog != null) {
 			for (Integer u : underdog) {
 				System.out.println(u + " " + user.getUserId() + " " + pool.getPoolId() + " " + year);
-				picksList.add(new Pick(0, user.getUserId(), u, false, pool.getPoolId()));
+				picksList.add(new Pick(0, user.getUserId(), u, false, pool.getPoolId(), null));
 			}
 		}
 		if (picksList.size() > 0) {

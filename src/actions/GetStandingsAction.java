@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.util.Map.Entry;
@@ -38,6 +39,8 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	int lastGamePlayedIndex = 9;
 	Map<String, Object> userSession;
 	
+	final static Logger logger = Logger.getLogger(GetStandingsAction.class);
+	
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
@@ -52,6 +55,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 		}
 		
 		System.out.println("Login: " + name);
+		logger.info("Login: " + name + " year: " + year + " poolId: " + poolId);
 		User user  = DAO.getUser(name, year, poolId);
 		if (user != null || name.equalsIgnoreCase("admin")) { // Always allow admin to login to import users
 			userSession.put("user", user);

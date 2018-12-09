@@ -207,6 +207,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						break;
 	        					}
 	        				}
+	        				// TBD replace above bowl game search with
+	        				// Integer bowlGameId = getBowlGameIdFromShortName(bowlGamesList, bowlGameNameMap.get(gameIndex))
+	        				// if (bowlGameId == null) {
+	        				// 	skip to next game
+	        				// }
 	        				boolean champPick = bowlGame.getBowlName().equalsIgnoreCase("Championship");
 	        				if (!champPick) {
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 == 0)) {

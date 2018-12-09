@@ -68,6 +68,7 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 		}
 		Thread.sleep(1000);
 		DAO.createBatchPicks(picksList, pool.getPoolId());
+		//TBD move delete deleteChampPickByUserIdAndPoolId pick here
 		if (champGame != null && champGame.trim().length() > 0) {
 			System.out.println(champGame + " " + champGameId + " " + champTotPts + " " + user.getUserId() + " " + pool.getPoolId() + " " + year);
 			DAO.deleteChampPickByUserIdAndPoolId(user.getUserId(), pool.getPoolId());

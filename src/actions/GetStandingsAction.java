@@ -145,12 +145,12 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 
 	    context.put("standings", displayStandings);
 	    boolean allowAdmin = false;
-	    if ((user != null && user.isAdmin()) || name.equalsIgnoreCase("Jacobus")) {
+	    if ((user != null && user.isAdmin()) || name.equalsIgnoreCase("admin") || name.equalsIgnoreCase("Jacobus")) {
 	    	allowAdmin = true;
 	    }
 	    context.put("allowAdmin", allowAdmin);  
 	    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-	    Date date1 = sdf.parse("12-15 07:30");
+	    Date date1 = sdf.parse("12-15 12:30");
 	    Calendar cal = Calendar.getInstance();
 	    boolean makePicksLink = false;
 	    //TBD check times of games

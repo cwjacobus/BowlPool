@@ -104,7 +104,7 @@ WHERE BowlGame.completed = true and (Pick.Favorite = true and (BowlGame.Favorite
 group by User.UserName order by count(*) desc, User.UserName;
 
 // Get pick distribution
-select bg.bowlName, p.Favorite, count(*) from Pick p, BowlGame bg where bg.gameId = p.gameId group by bg.bowlName, p.Favorite order by bg.gameId, p.Favorite desc;
+select bg.bowlName, p.Favorite, count(*) from Pick p, BowlGame bg where bg.gameId = p.gameId and p.poolid = 6 group by bg.bowlName, p.Favorite order by bg.gameId, p.Favorite desc;
 
 // Delete all users, picks and games for a given year (for a reimport)
 delete from champpick where gameid in (select gameid from bowlgame where year = X);

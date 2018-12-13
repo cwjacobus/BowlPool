@@ -200,18 +200,13 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        					continue;
 	        				}
 	        				String pick = getStringFromCell(row, cell.getColumnIndex());
-	        				BowlGame bowlGame = null;
-	        				for (BowlGame bg : bowlGameList) {
-	        					if (bg.getBowlName().equalsIgnoreCase(bowlGameNameMap.get(gameIndex))) {
-	        						bowlGame = bg;
-	        						break;
-	        					}
+	        				BowlGame bowlGame = getBowlGameFromShortName(bowlGameList, bowlGameNameMap.get(gameIndex));
+	        				if (bowlGame == null) {
+	        					if (cell.getColumnIndex() % 2 != 0) {
+		        					gameIndex++;
+		        				}
+	        					continue;
 	        				}
-	        				// TBD replace above bowl game search with
-	        				// Integer bowlGameId = getBowlGameIdFromShortName(bowlGamesList, bowlGameNameMap.get(gameIndex))
-	        				// if (bowlGameId == null) {
-	        				// 	skip to next game
-	        				// }
 	        				boolean champPick = bowlGame.getBowlName().equalsIgnoreCase("Championship");
 	        				if (!champPick) {
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 == 0)) {
@@ -240,7 +235,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						//DAO.updateChampPickTotPts(user.getUserId(), pick);
 	        						ChampPick cp = champPicksMap.get(user.getUserId());
 	        						if (cp != null) {
-	        							cp.setTotalPoints(Integer.parseInt(pick));
+	        							Integer totPts = new Double(pick).intValue();
+	        							cp.setTotalPoints(totPts);
 	        							champPicksMap.put(cp.getUserId(), cp);
 	        						}
 	        					}
@@ -309,7 +305,10 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					DAO.createBowlGame(gameName, favorite, underdog, line, year, null);
 				}
 				else {
-					DAO.updateBowlGameSpread(getBowlGameIdFromShortName(bowlGamesList, gameName), line);
+					BowlGame bg = getBowlGameFromShortName(bowlGamesList, gameName);
+					if (bg != null) {
+						DAO.updateBowlGameSpread(bg.getGameId(), line);
+					}
 				}
 			}
 			prevGame = gameName;
@@ -481,17 +480,34 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		return formattedNumber;
 	}
 	
-	private Integer getBowlGameIdFromShortName(List<BowlGame> bowlGamesList, String shortName) {
-		Integer gameId = null;
+	private BowlGame getBowlGameFromShortName(List<BowlGame> bowlGamesList, String shortName) {
+		BowlGame bowlGame = null;
 		
 		for (BowlGame bg : bowlGamesList) {
-			if (bg.getBowlName() != null && bg.getBowlName().contains(shortName)) {
-				return bg.getGameId();
+			if (bg.getBowlName() != null && bg.getBowlName().contains(getAlternativeShortName(shortName))) {
+				return bg;
 			}
 		}
 		System.out.println("Bowl game not found: " + shortName);
 				
-		return gameId;
+		return bowlGame;
+	}
+	
+	private String getAlternativeShortName(String shortName) {
+		// Special cases where bowl name spellings differ in Sculley spreadsheet v WS data
+		String altShortName = shortName;
+		if (shortName.equalsIgnoreCase("Camelia")) {
+			altShortName = "Camellia";
+		}
+		else if (shortName.equalsIgnoreCase("Cheese-It")) {
+			altShortName = "Cheez-it";
+		}
+		else if (shortName.equalsIgnoreCase("Tax Slayer")) {
+			altShortName = "TaxSlayer";
+		}
+		
+		return altShortName;
+		
 	}
 	
 	private double roundToHalf(double d) {

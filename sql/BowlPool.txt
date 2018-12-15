@@ -104,7 +104,15 @@ WHERE BowlGame.completed = true and (Pick.Favorite = true and (BowlGame.Favorite
 group by User.UserName order by count(*) desc, User.UserName;
 
 // Get pick distribution
-select bg.bowlName, p.Favorite, count(*) from Pick p, BowlGame bg where bg.gameId = p.gameId and p.poolid = 6 group by bg.bowlName, p.Favorite order by bg.gameId, p.Favorite desc;
+select bg.bowlName, if(p.favorite, bg.favorite, bg.underdog), count(*) from Pick p, BowlGame bg where bg.gameId = p.gameId and p.poolid = 6 group by bg.bowlName, p.Favorite order by bg.dateTime, bg.gameid, p.Favorite desc;
+// Show a user's picks
+select bg.bowlname, if(p.favorite, upper(bg.favorite), bg.underdog), if(po.usepointspreads, bg.spread, "") from pick p, bowlgame bg, pool po where p.gameid = bg.gameid and p.poolid = po.poolid and p.userid = 439 order by bg.datetime, bg.gameid;
+
+// Get table counts for each table by year and pool
+select year, count(*) from bowlgame group by year;
+select year, poolid, count(*) from user group by year, poolid;
+select bg.year, p.poolid, count(*) from pick p, bowlgame bg where p.gameid = bg.gameid group by bg.year, p.poolid;
+select bg.year, p.poolid, count(*) from champpick p, bowlgame bg where p.gameid = bg.gameid group by bg.year, p.poolid;
 
 // Delete all users, picks and games for a given year (for a reimport)
 delete from champpick where gameid in (select gameid from bowlgame where year = X);

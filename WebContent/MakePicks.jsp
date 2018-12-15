@@ -5,7 +5,17 @@
 
 <html>
 <head>
-<title>Bowl Pool - Make Picks</title>
+	<title>Bowl Pool - Make Picks</title>
+	<style type="text/css">
+	.win {
+		color: green;
+		font-weight: bold;
+	}
+	.lose {
+		color: red;
+		font-weight: bold;
+	}
+</style>
 </head>
 <body>
 	<form action="savePicks">
@@ -15,21 +25,41 @@
 	<s:iterator value="bowlGameList" var="bowlGame">
 		<c:set var="favChecked" value = ""/>
 		<c:set var="dogChecked" value = ""/>
+		<c:set var="winLoseClass" value=""/>
+		<c:set var="spread" value="0"/>
+		<c:if test="${sessionScope.pool.usePointSpreads}">
+ 			<c:set var="spread" value="${bowlgame.spread}"/>
+ 		</c:if>
 		<c:forEach var="pick" items="${userPicks}">
  			<c:if test="${pick.gameId == bowlGame.gameId && pick.favorite}">
+ 				<c:if test="${bowlGame.completed && (bowlGame.favoriteScore > (bowlGame.underDogScore + spread))}">
+ 					<c:set var="winLoseClass" value="class='win'" />
+ 				</c:if>
+ 				<c:if test="${bowlGame.completed && (bowlGame.favoriteScore <= (bowlGame.underDogScore + spread))}">
+ 					<c:set var="winLoseClass" value="class='lose'" />
+ 				</c:if>
     			<c:set var="favChecked" value="checked" />
   			</c:if>
   			<c:if test="${pick.gameId == bowlGame.gameId && !pick.favorite}">
+  				<c:if test="${bowlGame.completed && (bowlGame.favoriteScore >= (bowlGame.underDogScore + spread))}">
+ 					<c:set var="winLoseClass" value="class='lose'" />
+ 				</c:if>
+ 				<c:if test="${bowlGame.completed && (bowlGame.favoriteScore < (bowlGame.underDogScore + spread))}">
+ 					<c:set var="winLoseClass" value="class='win'" />
+ 				</c:if>
     			<c:set var="dogChecked" value="checked" />
   			</c:if>
 		</c:forEach>
-  		<tr>
+		<c:set var="disabled" value="" />
+		<c:if test="${sessionScope.readOnly}">
+			<c:set var="disabled" value="disabled" />
+		</c:if>
+  		<tr ${winLoseClass}>
       		<td width=200 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
       		<td width=130><fmt:formatDate type='both' dateStyle='short' timeStyle='short' value='${bowlGame.dateTime}'/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=200><input type="checkbox" name="favorite" value="<s:property value="#bowlGame.gameId"/>" ${favChecked}><s:property value="#bowlGame.favorite"/></td>
-      			<!--  <input type="hidden" name="favorite" value=""/> -->
+      			<td width=200><input type="checkbox" name="favorite" value="<s:property value="#bowlGame.gameId"/>" ${favChecked} ${disabled}><s:property value="#bowlGame.favorite"/></td>
       		</c:when>
       		<c:otherwise>
       			<td><input type="text" name="champGame" value="${champPick.winner}" size=24/></td>
@@ -39,7 +69,7 @@
       		</c:choose>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=200><input type="checkbox" name="underdog" value="<s:property value="#bowlGame.gameId"/>"${dogChecked}><s:property value="#bowlGame.underdog"/></td>
+      			<td width=200><input type="checkbox" name="underdog" value="<s:property value="#bowlGame.gameId"/>"${dogChecked} ${disabled}><s:property value="#bowlGame.underdog"/></td>
       		</c:when>
       		<c:otherwise>
       			<td></td>

@@ -152,7 +152,7 @@ public class DAO {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
 		System.out.println("Year: " + year);
-		boolean useSpreads = pool != null ? pool.isUseSpreads() : true;
+		boolean useSpreads = pool != null ? pool.isUsePointSpreads() : true;
 		try { 
 			Statement stmt1 = conn.createStatement();
 			String query1String = "SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +

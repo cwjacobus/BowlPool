@@ -149,17 +149,22 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	    	allowAdmin = true;
 	    }
 	    context.put("allowAdmin", allowAdmin);  
-	    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm");
-	    Date date1 = sdf.parse("12-15 12:30");
+	    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm");
+	    Date date1 = sdf.parse("12-15-20" + year + " 11:00");
 	    Calendar cal = Calendar.getInstance();
-	    boolean makePicksLink = false;
-	    //TBD check times of games
-	    if (numOfBowlGames > 0 && cal.get(Calendar.MONTH) == Calendar.DECEMBER && date1.before(cal.getTime())) {
-	    	makePicksLink = true;
+	   //TBD check times of games
+	    if (user.isAdmin() || (numOfBowlGames > 0 && date1.after(cal.getTime()))) {
+	    	userSession.put("readOnly", false);
+	    }
+	    else {
+	    	userSession.put("readOnly", true);
 	    }
 	    context.put("numOfCompletedGames", numOfCompletedGames);
-	    context.put("numOfRemainingGames", numOfBowlGames-numOfCompletedGames);
-	    context.put("makePicksLink", makePicksLink);
+	    int numOfRemainingGames = numOfBowlGames-numOfCompletedGames;
+	    if (pool != null && pool.getPoolId() == 5) {
+	    	numOfRemainingGames--; // special case Sculley 2018 does not use first game
+	    }
+	    context.put("numOfRemainingGames", numOfRemainingGames);
 	    stack.push(context);
 	    return "success";
 	}
@@ -197,7 +202,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 		else if (userPicks2 == null) {
 			return userPicks1.size();
 		}
-		for (int i = numOfCompletedGames; i < numOfBowlGames; i++) {
+		for (int i = numOfCompletedGames; i < numOfBowlGames - 1; i++) {
 			Pick p1 = userPicks1.get(i);
 			Pick p2 = userPicks2.get(i);
 			if (p1.getFavorite() != p2.getFavorite()) {

@@ -4,7 +4,7 @@
 
 <html>
 <head>
-<title>Bowl Pool</title>
+	<title>Bowl Pool</title>
 </head>
 <body>
 	<h2>20${year} Standings</h2>
@@ -36,10 +36,17 @@
 	${numOfCompletedGames} completed games ${numOfRemainingGames} remaining
   	<br>
   	<br>
-  	<c:if test = "${makePicksLink}">
-  		<a href="/BowlPoolWeb/makePicks">Make Picks</a>
-  		<br><br>
-  	</c:if>
+  	<a href="/BowlPoolWeb/makePicks">
+  	<c:choose>
+  	<c:when test = "${!sessionScope.readOnly}">
+  		Make Picks
+  	</c:when>
+  	<c:otherwise>
+  		View Picks
+  	</c:otherwise>
+  	</c:choose>
+  	</a>
+  	<br><br>
   	<c:if test = "${allowAdmin}">
   		<a href="/BowlPoolWeb/manageBowlGames">Manage Bowl Games</a>
   		<br>

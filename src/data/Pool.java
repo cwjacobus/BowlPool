@@ -5,16 +5,16 @@ public class Pool {
 	private int poolId;
 	private String poolName;
 	private int year;
-	private boolean useSpreads;
+	private boolean usePointSpreads;
 	
 	public Pool () {
 	}
 	
-	public Pool (int poolId, String poolName, int year, boolean useSpreads) {
+	public Pool (int poolId, String poolName, int year, boolean usePointSpreads) {
 		this.poolId = poolId;
 		this.poolName = poolName;
 		this.year = year;
-		this.useSpreads = useSpreads;
+		this.usePointSpreads = usePointSpreads;
 	}
 
 	public int getPoolId() {
@@ -41,12 +41,12 @@ public class Pool {
 		this.year = year;
 	}
 
-	public boolean isUseSpreads() {
-		return useSpreads;
+	public boolean isUsePointSpreads() {
+		return usePointSpreads;
 	}
 
-	public void setUseSpreads(boolean useSpreads) {
-		this.useSpreads = useSpreads;
+	public void setUsePointSpreads(boolean usePointSpreads) {
+		this.usePointSpreads = usePointSpreads;
 	}
 	
 

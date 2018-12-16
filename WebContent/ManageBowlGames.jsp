@@ -7,7 +7,7 @@
 </head>
 <body>
 	Update Bowl Game Scores<br><br>
-	<s:iterator value="bowlGameList" var="bowlGame">
+	<s:iterator value="bowlGamesList" var="bowlGame">
   		<form action="updateScore">
   		<table><tr>
       		<td width=200 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>

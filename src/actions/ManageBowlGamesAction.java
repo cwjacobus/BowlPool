@@ -28,8 +28,9 @@ public class ManageBowlGamesAction extends ActionSupport implements SessionAware
 			return "error";
 		}
 		Integer year = (Integer) userSession.get("year");
-		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
-	    context.put("bowlGameList", bowlGameList);
+		// Want to get the games list each time after an update, dont use session
+		List<BowlGame> bowlGamesList = DAO.getBowlGamesList(year);
+	    context.put("bowlGamesList", bowlGamesList);
 	    stack.push(context);
 	    return "success";
 	}

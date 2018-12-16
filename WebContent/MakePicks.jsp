@@ -22,7 +22,7 @@
 	<table border=1 cellspacing=0 cellpadding=0>
 	<tr><th>Bowl</th><th>Time(EST)</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
 	<tr><td>
-	<s:iterator value="bowlGameList" var="bowlGame">
+	<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">
 		<c:set var="favChecked" value = ""/>
 		<c:set var="dogChecked" value = ""/>
 		<c:set var="winLoseClass" value=""/>
@@ -55,21 +55,21 @@
 			<c:set var="disabled" value="disabled" />
 		</c:if>
   		<tr ${winLoseClass}>
-      		<td width=200 style="color: white; background: #5D7B9D;"><s:property value="#bowlGame.bowlName"/></td>
+      		<td width=200 style="color: white; background: #5D7B9D;">${bowlGame.bowlName}</td>
       		<td width=130><fmt:formatDate type='both' dateStyle='short' timeStyle='short' value='${bowlGame.dateTime}'/></td>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=200><input type="checkbox" name="favorite" value="<s:property value="#bowlGame.gameId"/>" ${favChecked} ${disabled}><s:property value="#bowlGame.favorite"/></td>
+      			<td width=200><input type="checkbox" name="favorite" value="${bowlGame.gameId}" ${favChecked} ${disabled}>${bowlGame.favorite}</td>
       		</c:when>
       		<c:otherwise>
       			<td><input type="text" name="champGame" value="${champPick.winner}" size=24/></td>
       			<td><input type="number" name="champTotPts" value="${champPick.totalPoints}" min="0" max="175" size=2/></td>
-      			<input type="hidden" name="champGameId" value="<s:property value="#bowlGame.gameId"/>"/>
+      			<input type="hidden" name="champGameId" value="${bowlGame.gameId}"/>
       		</c:otherwise>
       		</c:choose>
       		<c:choose>
       		<c:when test="${bowlGame.bowlName != 'Championship'}">
-      			<td width=200><input type="checkbox" name="underdog" value="<s:property value="#bowlGame.gameId"/>"${dogChecked} ${disabled}><s:property value="#bowlGame.underdog"/></td>
+      			<td width=200><input type="checkbox" name="underdog" value="${bowlGame.gameId}"${dogChecked} ${disabled}>${bowlGame.underdog}</td>
       		</c:when>
       		<c:otherwise>
       			<td></td>
@@ -79,7 +79,7 @@
       			<td width=50 align=center>
       			<c:choose>
       				<c:when test="${bowlGame.spread != ''}">
-      					<s:property value='#bowlGame.Spread'/>
+      					${bowlGame.spread}
       				</c:when>
       				<c:otherwise>
       					N/L
@@ -88,10 +88,12 @@
       			</td>
       		</c:if>
       	</tr>
-  	</s:iterator>
+  	</c:forEach>
   	</td></tr></table>
   	<br>
-  	<input type="submit" value="Make Picks"/>
+  	<c:if test="${!sessionScope.readOnly}">
+  		<input type="submit" value="Make Picks"/>
+  	</c:if>
   	</form>
 	</body>
 </html>

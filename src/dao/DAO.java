@@ -218,6 +218,27 @@ public class DAO {
 		return bowlGameList;
 	}
 	
+	public static Map<Integer, BowlGame> getBowlGamesMap(Integer year) {
+		Map<Integer, BowlGame> bowlGamesMap = new HashMap<Integer, BowlGame>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame" + 
+					(useYearClause(year) ? " where " + getYearClause(year, null) + " order by DateTime": ""));
+			BowlGame bowlGame;
+			while (rs.next()) {
+				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
+						rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
+						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), (useYearClause(year) ? rs.getInt("Year") : 0),
+						(useYearClause(year) ? rs.getTimestamp("DateTime") : null));
+				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return bowlGamesMap;
+	}
+	
 	public static Map<Integer, List<Pick>> getPicksMap(Integer year, Integer poolId) {
 		Map<Integer, List<Pick>> picksMap = new HashMap<Integer, List<Pick>>();
 		ArrayList<Pick> picksList = new ArrayList<Pick>();

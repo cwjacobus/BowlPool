@@ -1,8 +1,11 @@
 package actions;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,13 +25,24 @@ import dao.DAO;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
+import data.BowlGame;
 import data.ChampPick;
 import data.Pick;
 import data.Pool;
 import data.Standings;
 import data.User;
 
-public class GetStandingsAction extends ActionSupport implements SessionAware {
+class SortbyDate implements Comparator<BowlGame> 
+{ 
+    // Used for sorting in ascending order of 
+    // roll number 
+    public int compare(BowlGame a, BowlGame b) 
+    { 
+        return a.getDateTime().before(b.getDateTime()) ? -1 : 1; 
+    } 
+}
+
+public class GetStandingsAction extends ActionSupport implements Serializable, SessionAware {
 	
 	private static final long serialVersionUID = 1L;
 	private String name;
@@ -38,6 +52,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	int numOfBowlGames = 1;
 	int lastGamePlayedIndex = 9;
 	Map<String, Object> userSession;
+	Map<Integer, BowlGame> bowlGamesMap;
 	
 	final static Logger logger = Logger.getLogger(GetStandingsAction.class);
 	
@@ -65,16 +80,24 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 			stack.push(context);
 			return "error";
 		}
-		
 		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(year, poolId);
+		userSession.put("picksMap", picksMap);
 		Map<Integer, ChampPick> champPicksMap = null;
 		if (DAO.useYearClause(year)) {
 			champPicksMap = DAO.getChampPicksMap(year, poolId);
+			userSession.put("champPicksMap", champPicksMap);
 		}
 		TreeMap<String, Integer> standings = DAO.getStandings(year, pool);
 		TreeMap<String, Standings> displayStandings = new TreeMap<String, Standings>(Collections.reverseOrder());
+		bowlGamesMap = DAO.getBowlGamesMap(year);
+		numOfBowlGames = bowlGamesMap.size();
+		List<BowlGame> bowlGamesList = new ArrayList<BowlGame>(bowlGamesMap.values());
+		Collections.sort(bowlGamesList, new SortbyDate()); 
+		userSession.put("bowlGamesList", bowlGamesList);
 		
-		numOfBowlGames = DAO.getBowlGamesList(year).size();
+		if (pool != null && pool.getPoolId() == 5) {
+			numOfBowlGames -= 1; // special case Sculley 2018 does not use first game
+	    }
 		int numOfCompletedGames = DAO.getNumberOfCompletedGames(year);
 		
 		//Iterate through standings to make formatted display string
@@ -83,6 +106,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
     	int prevWins= 0;
     	int place = 1;
     	int eliminatedByCount = 0;
+    	Map <String, Integer> eliminatedMap = new HashMap<String, Integer>();
 		while (it.hasNext()) {
 			Map.Entry<String, Integer> line = (Map.Entry<String, Integer>)it.next();
 			String[] lineKeyArray = line.getKey().split(":");
@@ -93,35 +117,34 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 				place = standingsIndex;
 			}
 			// Determine eliminated by count
-			if (!userName.equalsIgnoreCase("dummy")) { // ignore dummy user
-				eliminatedByCount = 0;
-				Iterator<Entry<String, Integer>> it2 = standings.entrySet().iterator();
-				while (it2.hasNext()) {
-					Map.Entry<String, Integer> line2 = (Map.Entry<String, Integer>)it2.next();
-					String[] lineKeyArray2 = line2.getKey().split(":");
-					int userId2 = line2.getValue();
-					int wins2 = Integer.parseInt(lineKeyArray2[0]);
-					if (wins == wins2) {
-						break;
-					}
-					List<Pick> userPicks1 = picksMap.get(userId);
-					List<Pick> userPicks2 = picksMap.get(userId2);
-					ChampPick userChampPick1 = null;
-					ChampPick userChampPick2 = null;
-					if (DAO.useYearClause(year)) {
-						userChampPick1 = champPicksMap.get(userId);
-						userChampPick2 = champPicksMap.get(userId2);
-					}
-					int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2, numOfCompletedGames);
-					if ((wins + diffPicks) < wins2) {
-						eliminatedByCount++;
-					}
+			eliminatedByCount = 0;
+			Iterator<Entry<String, Integer>> it2 = standings.entrySet().iterator();
+			while (it2.hasNext()) {
+				Map.Entry<String, Integer> line2 = (Map.Entry<String, Integer>)it2.next();
+				String[] lineKeyArray2 = line2.getKey().split(":");
+				int userId2 = line2.getValue();
+				int wins2 = Integer.parseInt(lineKeyArray2[0]);
+				if (wins == wins2) {
+					break;
+				}
+				List<Pick> userPicks1 = picksMap.get(userId);
+				List<Pick> userPicks2 = picksMap.get(userId2);
+				ChampPick userChampPick1 = null;
+				ChampPick userChampPick2 = null;
+				if (DAO.useYearClause(year)) {
+					userChampPick1 = champPicksMap.get(userId);
+					userChampPick2 = champPicksMap.get(userId2);
+				}
+				int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2, numOfCompletedGames);
+				if ((wins + diffPicks) < wins2) {
+					eliminatedByCount++;
 				}
 			}
 			Standings s = new Standings();
 			s.setUserName(userName);
 			s.setRank(place);
 			s.setCorrect(wins);
+			eliminatedMap.put(userName, eliminatedByCount);
 			s.setEliminatedBy(eliminatedByCount);
 			displayStandings.put(line.getKey(), s);
 			standingsIndex++;
@@ -130,12 +153,12 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 		
 		/*
 		// Print eliminated map
-		Iterator<Entry<Integer, Integer>> elimIt = eliminatedMap.entrySet().iterator();
+		Iterator<Entry<String, Integer>> elimIt = eliminatedMap.entrySet().iterator();
 		while (elimIt.hasNext()) {
-			Map.Entry<Integer, Integer> userPicks = (Map.Entry<Integer, Integer>)elimIt.next();
+			Map.Entry<String, Integer> userPicks = (Map.Entry<String, Integer>)elimIt.next();
 			System.out.println("User: " + userPicks.getKey() + " elimCount: " + userPicks.getValue());
 		}
-				
+		
 		// Print picks map
 		Iterator<Entry<Integer, List<Pick>>> it2 = picksMap.entrySet().iterator();
 		while (it2.hasNext()) {
@@ -150,7 +173,7 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	    }
 	    context.put("allowAdmin", allowAdmin);  
 	    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm");
-	    Date date1 = sdf.parse("12-15-20" + year + " 11:00");
+	    Date date1 = sdf.parse("12-15-20" + year + " 11:00"); // Time of first game in 2018
 	    Calendar cal = Calendar.getInstance();
 	   //TBD check times of games
 	    if (user.isAdmin() || (numOfBowlGames > 0 && date1.after(cal.getTime()))) {
@@ -161,9 +184,6 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 	    }
 	    context.put("numOfCompletedGames", numOfCompletedGames);
 	    int numOfRemainingGames = numOfBowlGames-numOfCompletedGames;
-	    if (pool != null && pool.getPoolId() == 5) {
-	    	numOfRemainingGames--; // special case Sculley 2018 does not use first game
-	    }
 	    context.put("numOfRemainingGames", numOfRemainingGames);
 	    stack.push(context);
 	    return "success";
@@ -202,13 +222,23 @@ public class GetStandingsAction extends ActionSupport implements SessionAware {
 		else if (userPicks2 == null) {
 			return userPicks1.size();
 		}
+		
+		for (Pick up1 : userPicks1) {
+			for (Pick up2 : userPicks2) {
+				if (up1.getFavorite() != up2.getFavorite() && !bowlGamesMap.get(up1.getGameId()).isCompleted()) {
+					diffPicks++;
+				}
+			}
+		}
+		/*
 		for (int i = numOfCompletedGames; i < numOfBowlGames - 1; i++) {
 			Pick p1 = userPicks1.get(i);
 			Pick p2 = userPicks2.get(i);
 			if (p1.getFavorite() != p2.getFavorite()) {
 				diffPicks++;
 			}
-		}
+		}*/
+		
 		if (userChampPick1 != null && userChampPick2 != null) {
 			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(year)) {
 				diffPicks++;

@@ -176,7 +176,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	    Date date1 = sdf.parse("12-15-20" + year + " 11:00"); // Time of first game in 2018
 	    Calendar cal = Calendar.getInstance();
 	   //TBD check times of games
-	    if (user.isAdmin() || (numOfBowlGames > 0 && date1.after(cal.getTime()))) {
+	    if ((user != null && user.isAdmin()) || (numOfBowlGames > 0 && date1.after(cal.getTime()))) {
 	    	userSession.put("readOnly", false);
 	    }
 	    else {

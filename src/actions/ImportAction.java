@@ -414,7 +414,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	}
 	
 	private String getStringFromCell(Row row, int index) {
-		String cellString;
+		String cellString = null;
 		   
 		if (row.getCell(index) == null || row.getCell(index).getCellType() == CellType.BLANK) {
 		      return null; 
@@ -423,7 +423,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		if (row.getCell(index).getCellType() == CellType.STRING) {
 		    cellString = row.getCell(index).getStringCellValue().trim(); 
 		}
-		else  {
+		else  if (row.getCell(index).getCellType() == CellType.NUMERIC) {
 			String dblValString = Double.toString(row.getCell(index).getNumericCellValue());
 		    if (dblValString.indexOf(".") != -1) {
 		    	cellString = Double.toString((double)row.getCell(index).getNumericCellValue()); 

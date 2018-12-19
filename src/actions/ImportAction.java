@@ -144,7 +144,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	}
 	
 	private void importUsersAndPicks(HSSFWorkbook hWorkbook) {
-		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
+		@SuppressWarnings("unchecked")
+		List<BowlGame> bowlGameList = (List<BowlGame>) userSession.get("bowlGamesList");
 		List<User> userList = DAO.getUsersList(year, pool.getPoolId());
 		List<Pick> picksList = new ArrayList<Pick>();
 		HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
@@ -271,7 +272,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		Iterator<Row> rowIterator = sheet.iterator();
 		boolean gamesFound = false;
 		String prevGame = null;
-		List<BowlGame> bowlGamesList = DAO.getBowlGamesList(year);
+		@SuppressWarnings("unchecked")
+		List<BowlGame> bowlGamesList = (List<BowlGame>) userSession.get("bowlGamesList");
 		boolean updateBowlGames = bowlGamesList.size() > 0;
 		while (rowIterator.hasNext()) {
 			Row row = rowIterator.next();

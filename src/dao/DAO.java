@@ -187,7 +187,7 @@ public class DAO {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		List<User> usersList = DAO.getUsersList(year, pool != null ? pool.getPoolId() : null);
+		List<User> usersList = getUsersList(year, pool != null ? pool.getPoolId() : null);
 		// Merge any users with 0 wins
 		for (User u : usersList) {
 			if (!standings.containsValue(u.getUserId())) {

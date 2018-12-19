@@ -95,11 +95,15 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		Collections.sort(bowlGamesList, new SortbyDate()); 
 		userSession.put("bowlGamesList", bowlGamesList);
 		
-		if (pool != null && pool.getPoolId() == 5) {
-			numOfBowlGames -= 1; // special case Sculley 2018 does not use first game
-	    }
 		int numOfCompletedGames = DAO.getNumberOfCompletedGames(year);
-		
+		if (pool != null && pool.getPoolId() == 5) {
+			// special case Sculley 2018 does not use first game
+			// TBD Create an OptOut table that allows a pool to skip a game gameId, poolId
+			numOfBowlGames -= 1; 
+			if (numOfCompletedGames > 0) {
+				numOfCompletedGames -= 1;
+			}
+	    }
 		//Iterate through standings to make formatted display string
 		Iterator<Entry<String, Integer>> it = standings.entrySet().iterator();
     	int standingsIndex = 1;

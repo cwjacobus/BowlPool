@@ -25,11 +25,11 @@ public class DAO {
 	
 	public static Connection conn; 
 	
-	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime) {
+	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, Integer dogScore, boolean completed) {
 		try {
 			Statement stmt = conn.createStatement();
 			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime) VALUES ('" + 
-				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", 0, 0, false, " + year + "," +
+				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", " + favScore + ", " +  dogScore + ", " + completed + ", " + year + "," +
 				(dateTime != null ? "'" + dateTime + "'" : null) + ");";
 			stmt.execute(insertSQL);
 		}
@@ -393,7 +393,7 @@ public class DAO {
 		int numberOfBowlGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame" + (useYearClause(year) ? " where " + getYearClause(year, null): ""));
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where year = " + year);
 			rs.next();
 			numberOfBowlGames = rs.getInt(1);
 		}
@@ -506,7 +506,7 @@ public class DAO {
         }
 		try {
 			String connString = "jdbc:mysql://localhost/bowlpool";
-			if (year.intValue() < 17) { // only append year before 2017
+			if (year != null && year.intValue() < 17) { // only append year before 2017
 			    connString += year;
 			}
 			connString += "?user=root&password=PASSWORD&useSSL=false";

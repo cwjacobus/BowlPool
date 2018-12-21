@@ -36,8 +36,8 @@ public class UpdateScoreAction extends ActionSupport implements SessionAware {
 		}
 		Integer year = (Integer) userSession.get("year");
 		DAO.updateBowlGameScore(favoriteScore, underDogScore, gameId, favorite, underdog);
-		List<BowlGame> bowlGameList = DAO.getBowlGamesList(year);
-	    context.put("bowlGameList", bowlGameList);
+		List<BowlGame> bowlGamesList = DAO.getBowlGamesList(year);
+	    context.put("bowlGamesList", bowlGamesList);
 	    stack.push(context);
 	    return "success";
 	}

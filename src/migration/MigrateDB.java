@@ -77,13 +77,18 @@ public class MigrateDB {
 				List<Pick> userPicks = fromPicksMap.get(userId);
 				for (Pick p : userPicks) {
 					Integer newGameId = getGameIdFromOldPick(fromBowlGameMap.get(p.getGameId()), toBowlGameMap);
-					System.out.println(newGameId + " from: " + p.getGameId() + " " + 
-						fromBowlGameMap.get(p.getGameId()).getFavorite() + " " + fromBowlGameMap.get(p.getGameId()).getUnderdog());
+					System.out.println(newGameId + " from: " + p.getGameId() + " " + fromBowlGameMap.get(p.getGameId()).getFavorite() + " " + fromBowlGameMap.get(p.getGameId()).getUnderdog());
+					Integer newUserId = getUserIdFromOldPick(fromUserMap.get(p.getUserId()), toUserMap);
+					System.out.println(newUserId + " from: " + p.getUserId() + " " + fromUserMap.get(p.getUserId()).getUserName());
 					Pick newPick = new Pick();
 					newPick.setGameId(newGameId);
-					migratedPicksList.add(new Pick());
+					newPick.setUserId(newUserId);
+					newPick.setPoolId(poolId);
+					newPick.setFavorite(p.getFavorite());
+					migratedPicksList.add(newPick);
 				}
 			}
+			createBatchPicks(migratedPicksList, poolId, toConn);
 			System.out.println(migratedPicksList.size() + " migratedPicks");
 		}
 		else {
@@ -92,7 +97,6 @@ public class MigrateDB {
 	}
 	
 	private static Integer getGameIdFromOldPick(BowlGame oldBowlGame, Map<Integer, BowlGame> toBowlGameMap) {
-		int x = 1;
 		for (Integer gameId : toBowlGameMap.keySet()) {
 			BowlGame bg = toBowlGameMap.get(gameId);
 			
@@ -100,7 +104,17 @@ public class MigrateDB {
 				return bg.getGameId();
 			}
 		}
-		
+		return null;
+	}
+	
+	private static Integer getUserIdFromOldPick(User oldUser, Map<Integer, User> toUserGameMap) {
+		for (Integer userId : toUserGameMap.keySet()) {
+			User u = toUserGameMap.get(userId);
+			
+			if (oldUser.getUserName().equals(u.getUserName())) {
+				return u.getUserId();
+			}
+		}
 		return null;
 	}
 	

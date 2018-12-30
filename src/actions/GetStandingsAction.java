@@ -38,7 +38,12 @@ class SortbyDate implements Comparator<BowlGame>
     // roll number 
     public int compare(BowlGame a, BowlGame b) 
     { 
-        return a.getDateTime().before(b.getDateTime()) ? -1 : 1; 
+    	if (a.getDateTime() == null || b.getDateTime() == null) {
+    		return a.getGameId() < b.getGameId() ? -1 : 1;
+    	}
+    	else {
+    		return a.getDateTime().before(b.getDateTime()) ? -1 : 1; 
+    	}
     } 
 }
 
@@ -59,15 +64,14 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
-	    
-		userSession.put("year", year);
-		DAO.setConnection(year);
 		
-		if (DAO.useYearClause(year)) {
+		//if (DAO.useYearClause(year)) {
 			System.out.println("PoolID: " + poolId);
+			DAO.setConnection();
 			pool = DAO.getPool(poolId);
 			userSession.put("pool", pool);
-		}
+			userSession.put("year", pool.getYear());
+		//}
 		
 		System.out.println("Login: " + name);
 		logger.info("Login: " + name + " year: " + year + " poolId: " + poolId);

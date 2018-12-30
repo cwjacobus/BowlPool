@@ -34,9 +34,11 @@ public class MakePicksAction extends ActionSupport implements SessionAware {
 	    List<Pick> userPicks = picksMap.get(user.getUserId());
 	    context.put("userPicks", userPicks);
 	    @SuppressWarnings("unchecked")
-		Map<Integer, ChampPick> champPicks =  (Map<Integer, ChampPick>) userSession.get("champPicksMap");
-	    ChampPick champPick = champPicks.get(user.getUserId());
-	    context.put("champPick", champPick);
+		Map<Integer, ChampPick> champPicks = (Map<Integer, ChampPick>) userSession.get("champPicksMap");
+	    if (champPicks != null) {
+	    	ChampPick champPick = champPicks.get(user.getUserId());
+	    	context.put("champPick", champPick);
+	    }
 	    stack.push(context);
 	    return "success";
 	}

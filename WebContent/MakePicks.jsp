@@ -28,7 +28,7 @@
 		<c:set var="winLoseClass" value=""/>
 		<c:set var="spread" value="0"/>
 		<c:if test="${sessionScope.pool.usePointSpreads}">
- 			<c:set var="spread" value="${bowlgame.spread}"/>
+ 			<c:set var="spread" value="${bowlGame.spread}"/>
  		</c:if>
 		<c:forEach var="pick" items="${userPicks}">
  			<c:if test="${pick.gameId == bowlGame.gameId && pick.favorite}">

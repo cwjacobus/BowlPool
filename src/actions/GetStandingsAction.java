@@ -1,6 +1,7 @@
 package actions;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,7 +52,6 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	
 	private static final long serialVersionUID = 1L;
 	private String name;
-	private Integer year = null;
 	private Integer poolId = null;
 	private Pool pool;
 	int numOfBowlGames = 1;
@@ -65,17 +65,14 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
 		
-		//if (DAO.useYearClause(year)) {
-			System.out.println("PoolID: " + poolId);
-			DAO.setConnection();
-			pool = DAO.getPool(poolId);
-			userSession.put("pool", pool);
-			userSession.put("year", pool.getYear());
-		//}
+		DAO.setConnection();
+		pool = DAO.getPool(poolId);
+		userSession.put("pool", pool);
+		userSession.put("year", pool.getYear());
 		
-		System.out.println("Login: " + name);
-		logger.info("Login: " + name + " year: " + year + " poolId: " + poolId);
-		User user  = DAO.getUser(name, year, poolId);
+		System.out.println("Login: " + name+ " year: " + pool.getYear() + " poolId: " + poolId + poolId + " " + new Timestamp(new Date().getTime()));
+		logger.info("Login: " + name + " year: " + pool.getYear() + " poolId: " + poolId);
+		User user  = DAO.getUser(name, pool.getYear(), poolId);
 		if (user != null || name.equalsIgnoreCase("admin")) { // Always allow admin to login to import users
 			userSession.put("user", user);
 		}
@@ -84,22 +81,22 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 			stack.push(context);
 			return "error";
 		}
-		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(year, poolId);
+		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(pool.getYear(), poolId);
 		userSession.put("picksMap", picksMap);
 		Map<Integer, ChampPick> champPicksMap = null;
-		if (DAO.useYearClause(year)) {
-			champPicksMap = DAO.getChampPicksMap(year, poolId);
+		if (DAO.useYearClause(pool.getYear())) {
+			champPicksMap = DAO.getChampPicksMap(pool.getYear(), poolId);
 			userSession.put("champPicksMap", champPicksMap);
 		}
-		TreeMap<String, Integer> standings = DAO.getStandings(year, pool);
+		TreeMap<String, Integer> standings = DAO.getStandings(pool.getYear(), pool);
 		TreeMap<String, Standings> displayStandings = new TreeMap<String, Standings>(Collections.reverseOrder());
-		bowlGamesMap = DAO.getBowlGamesMap(year);
+		bowlGamesMap = DAO.getBowlGamesMap(pool.getYear());
 		numOfBowlGames = bowlGamesMap.size();
 		List<BowlGame> bowlGamesList = new ArrayList<BowlGame>(bowlGamesMap.values());
 		Collections.sort(bowlGamesList, new SortbyDate()); 
 		userSession.put("bowlGamesList", bowlGamesList);
 		
-		int numOfCompletedGames = DAO.getNumberOfCompletedGames(year);
+		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool.getYear());
 		if (pool != null && pool.getPoolId() == 5) {
 			// special case Sculley 2018 does not use first game
 			// TBD Create an OptOut table that allows a pool to skip a game gameId, poolId
@@ -139,7 +136,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 				List<Pick> userPicks2 = picksMap.get(userId2);
 				ChampPick userChampPick1 = null;
 				ChampPick userChampPick2 = null;
-				if (DAO.useYearClause(year)) {
+				if (DAO.useYearClause(pool.getYear())) {
 					userChampPick1 = champPicksMap.get(userId);
 					userChampPick2 = champPicksMap.get(userId2);
 				}
@@ -181,7 +178,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	    }
 	    context.put("allowAdmin", allowAdmin);  
 	    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm");
-	    Date date1 = sdf.parse("12-15-20" + year + " 11:00"); // Time of first game in 2018
+	    Date date1 = sdf.parse("12-15-20" + pool.getYear() + " 11:00"); // Time of first game in 2018
 	    Calendar cal = Calendar.getInstance();
 	   //TBD check times of games
 	    if ((user != null && user.isAdmin()) || (numOfBowlGames > 0 && date1.after(cal.getTime()))) {
@@ -203,14 +200,6 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 
 	public void setName(String name) {
 	   this.name = name;
-	}
-	
-	public Integer getYear() {
-		return year;
-	}
-
-	public void setYear(Integer year) {
-	   this.year = year;
 	}
 	
 	public Integer getPoolId() {
@@ -248,7 +237,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		}*/
 		
 		if (userChampPick1 != null && userChampPick2 != null) {
-			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(year)) {
+			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(pool.getYear())) {
 				diffPicks++;
 			}
 		}

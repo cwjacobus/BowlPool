@@ -12,13 +12,6 @@
    	<form action="getStandings">
       	<table>
       	<tr><td>User</td><td><input type="text" name="name"/></td></tr>
-		<tr><td>Year</td><td><select name="year">
-             <option value="14">2014</option>
-             <option value="15">2015</option>
-             <option value="16">2016</option>
-             <option value="17">2017</option>
-             <option value="18">2018</option>
-		</select>
 		<tr><td>Pool</td>
       	<td><select name="poolId">
       	     <option value="0"></option>

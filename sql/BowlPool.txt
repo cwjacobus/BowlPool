@@ -30,7 +30,8 @@ PickId int(11) PRIMARY KEY AUTO_INCREMENT,
 UserId int(11),
 GameId int(11),
 Favorite boolean,
-PoolId int(5)
+PoolId int(5),
+CreatedTime timestamp
 );
 
 CREATE TABLE ChampPick

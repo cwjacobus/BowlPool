@@ -70,7 +70,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		userSession.put("pool", pool);
 		userSession.put("year", pool.getYear());
 		
-		System.out.println("Login: " + name+ " year: " + pool.getYear() + " poolId: " + poolId + poolId + " " + new Timestamp(new Date().getTime()));
+		System.out.println("Login: " + name+ " year: " + pool.getYear() + " poolId: " + poolId + " time: " + new Timestamp(new Date().getTime()));
 		logger.info("Login: " + name + " year: " + pool.getYear() + " poolId: " + poolId);
 		User user  = DAO.getUser(name, pool.getYear(), poolId);
 		if (user != null || name.equalsIgnoreCase("admin")) { // Always allow admin to login to import users

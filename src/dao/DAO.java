@@ -151,7 +151,6 @@ public class DAO {
 	public static TreeMap<String, Integer> getStandings(Integer year, Pool pool) {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
-		System.out.println("Year: " + year);
 		boolean useSpreads = pool != null ? pool.isUsePointSpreads() : true;
 		try { 
 			Statement stmt1 = conn.createStatement();

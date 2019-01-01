@@ -25,12 +25,13 @@ public class DAO {
 	
 	public static Connection conn; 
 	
-	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, Integer dogScore, boolean completed) {
+	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, 
+		Integer dogScore, boolean completed, boolean cancelled) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime) VALUES ('" + 
+			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime, Cancelled) VALUES ('" + 
 				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", " + favScore + ", " +  dogScore + ", " + completed + ", " + year + "," +
-				(dateTime != null ? "'" + dateTime + "'" : null) + ");";
+				(dateTime != null ? "'" + dateTime + "'" : null) + ", " + cancelled + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -204,8 +205,9 @@ public class DAO {
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
-						rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), rs.getTimestamp("DateTime"));
+					rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
+					rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
+					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"));
 				bowlGameList.add(bowlGame);
 			}
 		}
@@ -223,8 +225,8 @@ public class DAO {
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
-						rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), rs.getTimestamp("DateTime"));
+					rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), 
+					rs.getBoolean("Completed"), rs.getInt("Year"), rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"));
 				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
 			}
 		}
@@ -353,11 +355,11 @@ public class DAO {
 		return userList;
 	}
 	
-	public static int getNumberOfCompletedGames(Integer year) {
+	public static int getNumberOfCompletedOrCancelledGames(Integer year) {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and " + getYearClause(year, null));
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where (Completed = 1 or Cancelled = 1) and " + getYearClause(year, null));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}

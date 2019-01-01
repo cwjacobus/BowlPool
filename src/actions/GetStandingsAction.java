@@ -96,7 +96,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		Collections.sort(bowlGamesList, new SortbyDate()); 
 		userSession.put("bowlGamesList", bowlGamesList);
 		
-		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool.getYear());
+		int numOfCompletedGames = DAO.getNumberOfCompletedOrCancelledGames(pool.getYear());
 		if (pool != null && pool.getPoolId() == 5) {
 			// special case Sculley 2018 does not use first game
 			// TBD Create an OptOut table that allows a pool to skip a game gameId, poolId
@@ -222,7 +222,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		
 		for (Pick up1 : userPicks1) {
 			for (Pick up2 : userPicks2) {
-				if (up1.getFavorite() != up2.getFavorite() && !bowlGamesMap.get(up1.getGameId()).isCompleted()) {
+				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && !bowlGamesMap.get(up1.getGameId()).isCompleted()) {
 					diffPicks++;
 				}
 			}

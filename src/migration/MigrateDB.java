@@ -42,7 +42,7 @@ public class MigrateDB {
 			for (Integer k : fromBowlGameMap.keySet()) {
 				BowlGame bg = fromBowlGameMap.get(k); 
 				createBowlGame(bg.getBowlName(), bg.getFavorite(), bg.getUnderdog(), bg.getSpread(), fromYear, null, 
-						bg.getFavoriteScore(), bg.getUnderDogScore(), bg.isCompleted(), toConn);
+					bg.getFavoriteScore(), bg.getUnderDogScore(), bg.isCompleted(), bg.isCancelled(), toConn);
 			}
 			System.out.println("20" + fromYear + " " + fromBowlGameMap.size() + " Bowl Games migrated");	
 		}
@@ -173,12 +173,12 @@ public class MigrateDB {
 	}
 	
 	private static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, 
-		Integer dogScore, boolean completed, Connection conn) {
+		Integer dogScore, boolean completed, boolean cancelled, Connection conn) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime) VALUES ('" + 
+			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime, Cancelled) VALUES ('" + 
 				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", " + favScore + ", " +  dogScore + ", " + completed + ", " + year + "," +
-				(dateTime != null ? "'" + dateTime + "'" : null) + ");";
+				(dateTime != null ? "'" + dateTime + "'" : null) + ", " + cancelled + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -206,8 +206,8 @@ public class MigrateDB {
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
-						rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-						rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), year, null);
+					rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
+					rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), year, null, rs.getBoolean("Cancelled"));
 				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
 			}
 		}

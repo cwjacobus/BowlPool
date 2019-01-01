@@ -288,7 +288,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
 				// Create a blank Championship game place holder and break;
 				if (!updateBowlGames) {
-					DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false);
+					DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false, false);
 				}
 				break;
 			}
@@ -304,7 +304,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					String favorite = getStringFromCell(row, 3).trim();
 					
 					String underdog = getStringFromCell(row, 7).trim();
-					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false);
+					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false);
 				}
 				else {
 					BowlGame bg = getBowlGameFromShortName(bowlGamesList, gameName);
@@ -386,11 +386,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					underdog = game.getString("HomeTeamName");
 				}
 				Double pointSpread = avgHomeSpread != null ? Math.abs(roundToHalf(avgHomeSpread)) : null;
-				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false);
+				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false);
 			}
 			parsedDate = dateFormat.parse("2019-01-15 21:00:00");
 		    timestamp = new Timestamp(parsedDate.getTime());
-			DAO.createBowlGame("Championship", "", "", null, year, timestamp, 0, 0, false);
+			DAO.createBowlGame("Championship", "", "", null, year, timestamp, 0, 0, false, false);
 		 }
 		catch (Exception e) {
 			e.printStackTrace();

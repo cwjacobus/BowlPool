@@ -14,9 +14,10 @@ public class BowlGame {
 	private boolean completed;
 	private int year;
 	private Timestamp dateTime;
+	private boolean cancelled;
 	
-	public BowlGame (int gameId, String bowlName, String favorite, String underdog, 
-			double spread, int favoriteScore, int underDogScore, boolean completed, int year, Timestamp dateTime) {
+	public BowlGame (int gameId, String bowlName, String favorite, String underdog, double spread, int favoriteScore, 
+		int underDogScore, boolean completed, int year, Timestamp dateTime, boolean cancelled) {
 		this.gameId = gameId;
 		this.bowlName = bowlName;
 		this.favorite = favorite;
@@ -27,6 +28,7 @@ public class BowlGame {
 		this.completed = completed;
 		this.year = year;
 		this.dateTime = dateTime;
+		this.cancelled = cancelled;
 	}
 	
 	public int getGameId() {
@@ -92,6 +94,14 @@ public class BowlGame {
 
 	public void setDateTime(Timestamp dateTime) {
 		this.dateTime = dateTime;
+	}
+
+	public boolean isCancelled() {
+		return cancelled;
+	}
+
+	public void setCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
 	}
 
 }

@@ -109,6 +109,9 @@ group by User.UserName order by count(*) desc, User.UserName;
 select bg.bowlName, if(p.favorite, bg.favorite, bg.underdog), count(*) from Pick p, BowlGame bg where bg.gameId = p.gameId and p.poolid = 6 group by bg.bowlName, p.Favorite order by bg.dateTime, bg.gameid, p.Favorite desc;
 // Show a user's picks
 select bg.bowlname, if(p.favorite, upper(bg.favorite), bg.underdog), if(po.usepointspreads, bg.spread, "") from pick p, bowlgame bg, pool po where p.gameid = bg.gameid and p.poolid = po.poolid and p.userid = 439 order by bg.datetime, bg.gameid;
+// Get winners
+select bg.bowlName, if (bg.FavoriteScore - bg.Spread > bg.UnderdogScore, bg.favorite, bg.underdog) from BowlGame bg where year = 18 order by bg.dateTime, bg.gameid desc;
+
 
 // Get table counts for each table by year and pool
 select year, count(*) from bowlgame group by year;

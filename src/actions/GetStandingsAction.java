@@ -222,7 +222,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		
 		for (Pick up1 : userPicks1) {
 			for (Pick up2 : userPicks2) {
-				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && !bowlGamesMap.get(up1.getGameId()).isCompleted()) {
+				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && 
+						!bowlGamesMap.get(up1.getGameId()).isCompleted() && !bowlGamesMap.get(up1.getGameId()).isCancelled()) {
 					diffPicks++;
 				}
 			}

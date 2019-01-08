@@ -168,7 +168,7 @@ public class DAO {
 				String query2String = "SELECT u.UserId, count(*) from ChampPick p, User u, BowlGame bg where " + 
 					"p.userId = u.userId and bg.gameId = p.gameId and bg.completed = true and " + 
 					getYearClause("bg", year, "p", pool.getPoolId()) + 
-					" and (bg.Favorite = p.Winner and (bg.FavoriteScore > bg.UnderdogScore) or (bg.Underdog = p.Winner and (bg.UnderdogScore > bg.FavoriteScore))) " + 
+					" and (locate(p.winner, bg.Favorite) and (bg.FavoriteScore > bg.UnderdogScore) or (locate(p.winner, bg.Underdog) and (bg.UnderdogScore > bg.FavoriteScore))) " + 
 					"group by u.UserName";
 				ResultSet rs2 = stmt2.executeQuery(query2String);
 				while (rs2.next()) {

@@ -322,7 +322,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		try {
 			String uRL;
 			//uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
-			uRL = "https://api.fantasydata.net/v3/cfb/scores/json/GamesByWeek/2018POST/1?key=712e473edfa34aaf82cdf73469a772b7";
+			uRL = "https://api.fantasydata.net/v3/cfb/scores/json/GamesByWeek/20"+ year + "POST/1?key=712e473edfa34aaf82cdf73469a772b7";
 			URL obj = new URL(uRL);
 			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
 			//int responseCode = con.getResponseCode();
@@ -340,7 +340,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				String bowlGameTitle = "";
 				parsedDate = dateFormat.parse(game.getString("DateTime").replaceAll("T", " "));
 			    timestamp = new Timestamp(parsedDate.getTime());
-				System.out.print(game.getString("AwayTeamName") + " at " + parsedDate);
+				System.out.print(game.getString("AwayTeamName") + " at " + game.getString("HomeTeamName") + " " + parsedDate);
 				System.out.println(" (" + game.getString("DateTime") + ")");
 				
 			    

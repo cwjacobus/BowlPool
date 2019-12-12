@@ -503,7 +503,7 @@ public class DAO {
 			/*if (year != null && year.intValue() < 17) { // only append year before 2017
 			    connString += year;
 			}*/
-			connString += "?user=root&password=PASSWORD&useSSL=false";
+			connString += "?user=root&password=PASSWORD&useSSL=false&allowPublicKeyRetrieval=true";
 			conn = DriverManager.getConnection(connString);
 		}
 		catch (SQLException ex) {

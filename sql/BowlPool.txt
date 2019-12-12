@@ -95,8 +95,8 @@ select u.UserName, bg.BowlName from Pick p, User u, BowlGame bg where p.userId= 
 (p.Favorite = true and (bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) order by u.UserName;
 
 // Get standings
-select u.UserName, count(*) from Pick p, User u, BowlGame bg where p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and 
-(p.Favorite = true and (bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) 
+select u.UserName, count(*) from Pick p, User u, BowlGame bg, Pool pool where pool.poolId = u.poolId and p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and 
+pool.poolid = 8 and (p.Favorite = true and (bg.FavoriteScore - bg.Spread > bg.UnderdogScore) or (p.Favorite = false and (bg.UnderdogScore + bg.Spread > bg.FavoriteScore))) 
 group by u.UserName order by count(*) desc, u.UserName;
 
 // Trying to use outer join

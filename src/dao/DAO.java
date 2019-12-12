@@ -187,7 +187,7 @@ public class DAO {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		List<User> usersList = getUsersList(year, pool != null ? pool.getPoolId() : null);
+		List<User> usersList = getUsersWithPicksList(year, pool != null ? pool.getPoolId() : null);
 		// Merge any users with 0 wins
 		for (User u : usersList) {
 			if (!standings.containsValue(u.getUserId())) {
@@ -342,6 +342,25 @@ public class DAO {
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM User where " + getYearClause(year, poolId));
+			User user;
+			while (rs.next()) {
+				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"), rs.getString("FirstName"), 
+					rs.getString("Email"), rs.getInt("Year"), rs.getBoolean("admin"), rs.getInt("PoolId"));
+				userList.add(user);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return userList;
+	}
+	
+	public static List<User> getUsersWithPicksList(Integer year, Integer poolId) {
+		List<User>userList = new ArrayList<User>();
+		try {
+			// select distinct u.* from user u, pick p where u.userid = p.userid and u.poolid=8;
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT distinct u.* FROM User u, Pick p where u.userId = p.userId and p.poolID = " + poolId);
 			User user;
 			while (rs.next()) {
 				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"), rs.getString("FirstName"), 

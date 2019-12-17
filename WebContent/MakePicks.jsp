@@ -2,6 +2,7 @@
 <%@ taglib prefix="s" uri="/struts-tags" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <html>
 <head>
@@ -15,7 +16,43 @@
 		color: red;
 		font-weight: bold;
 	}
-</style>
+	</style>
+	<script type="text/javascript">
+		function confirmPicks(form) {
+			var champTeam = document.getElementById("champGame").value.trim();
+			var champTotPts = document.getElementById("champTotPts").value.trim();
+			var favorites = document.getElementsByName("favorite");
+			var underdogs = document.getElementsByName("underdog");
+			var favsChecked = 0;
+			var dogsChecked = 0;
+			for (var i = 0; i < favorites.length; i++) {
+				if (favorites[i].checked == true) {
+					favsChecked++;
+				}
+				if (underdogs[i].checked == true) {
+					dogsChecked++;
+				}	
+			}
+			//var numOfBowlGames = "${sessionScope.bowlGamesList}";
+			var errorMsg = "";
+			if (champTeam.length == 0) {
+				errorMsg += "No Championship Game Winner\n"
+			}
+			if (champTotPts.length == 0) {
+				errorMsg += "No Championship Game Total Points\n"
+			}
+			if ((favsChecked + dogsChecked) != favorites.length) {
+				errorMsg += "Not All Games Picked"
+			}
+			if (errorMsg.length > 0) {
+				errorMsg = "Are you sure you want to save your picks?  The following are missing: \n" + errorMsg;
+				return confirm(errorMsg);
+			}
+			else {
+				return true;
+			}
+		}
+	</script>
 </head>
 <body>
 	<form action="savePicks">
@@ -62,8 +99,8 @@
       			<td width=200><input type="checkbox" name="favorite" value="${bowlGame.gameId}" ${favChecked} ${disabled}>${bowlGame.favorite}</td>
       		</c:when>
       		<c:otherwise>
-      			<td><input type="text" name="champGame" value="${champPick.winner}" size=24/></td>
-      			<td><input type="number" name="champTotPts" value="${champPick.totalPoints}" min="0" max="175" size=2/></td>
+      			<td><input type="text" name="champGame" id="champGame" value="${champPick.winner}" size=24/></td>
+      			<td><input type="number" name="champTotPts" id="champTotPts" value="${champPick.totalPoints}" min="0" max="175" size=2/></td>
       			<input type="hidden" name="champGameId" value="${bowlGame.gameId}"/>
       		</c:otherwise>
       		</c:choose>
@@ -92,7 +129,7 @@
   	</td></tr></table>
   	<br>
   	<c:if test="${!sessionScope.readOnly}">
-  		<input type="submit" value="Make Picks"/>
+  		<input type="submit" value="Make Picks" onclick="return confirmPicks(this)"/>
   	</c:if>
   	</form>
 	</body>

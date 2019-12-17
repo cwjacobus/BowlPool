@@ -431,6 +431,20 @@ public class DAO {
 		return numberOfPicks;
 	}
 	
+	public static Timestamp getFirstGameDateTime(int year) {
+		Timestamp dt = null;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select min(dateTime) from BowlGame where year =" + year);
+			rs.next();
+			dt = rs.getTimestamp(1);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return dt;
+	}
+	
 	public static boolean isThereDataForAYear(int year) {
 		int totalDataCount = 0;
 		try {

@@ -2,7 +2,6 @@ package actions;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -177,8 +176,9 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	    	allowAdmin = true;
 	    }
 	    context.put("allowAdmin", allowAdmin);  
-	    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm");
-	    Date date1 = sdf.parse("12-15-20" + pool.getYear() + " 11:00"); // Time of first game in 2018
+	    // SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm");
+	    // Date date1 = sdf.parse("12-15-21" + pool.getYear() + " 11:00"); // Time of first game
+	    Date date1 = new Date(DAO.getFirstGameDateTime(pool.getYear()).getTime()); // Time of first game
 	    Calendar cal = Calendar.getInstance();
 	   //TBD check times of games
 	    if ((user != null && user.isAdmin()) || (numOfBowlGames > 0 && date1.after(cal.getTime()))) {

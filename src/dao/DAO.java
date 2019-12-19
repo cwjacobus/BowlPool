@@ -358,7 +358,6 @@ public class DAO {
 	public static List<User> getUsersWithPicksList(Integer year, Integer poolId) {
 		List<User>userList = new ArrayList<User>();
 		try {
-			// select distinct u.* from user u, pick p where u.userid = p.userid and u.poolid=8;
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT distinct u.* FROM User u, Pick p where u.userId = p.userId and p.poolID = " + poolId);
 			User user;
@@ -443,6 +442,23 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return dt;
+	}
+	
+	public static List<String> getPotentialChampionsList(int year) {
+		List<String>potentialChampionsList = new ArrayList<String>();
+		try {
+			// select favorite, underdog from bowlgame where year=19 and bowlname like '%CFP Semifinal%';
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT Favorite, Underdog FROM BowlGame where BowlName like '%CFP Semifinal%' and year = " + year);
+			while (rs.next()) {
+				potentialChampionsList.add(rs.getString(1)); // favorite
+				potentialChampionsList.add(rs.getString(2)); // underdog
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return potentialChampionsList;
 	}
 	
 	public static boolean isThereDataForAYear(int year) {

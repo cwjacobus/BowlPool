@@ -94,6 +94,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		List<BowlGame> bowlGamesList = new ArrayList<BowlGame>(bowlGamesMap.values());
 		Collections.sort(bowlGamesList, new SortbyDate()); 
 		userSession.put("bowlGamesList", bowlGamesList);
+		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
+		userSession.put("potentialChampionsList", potentialChampionsList);
 		
 		int numOfCompletedGames = DAO.getNumberOfCompletedOrCancelledGames(pool.getYear());
 		if (pool != null && pool.getPoolId() == 5) {

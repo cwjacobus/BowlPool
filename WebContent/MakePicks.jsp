@@ -99,7 +99,24 @@
       			<td width=200><input type="checkbox" name="favorite" value="${bowlGame.gameId}" ${favChecked} ${disabled}>${bowlGame.favorite}</td>
       		</c:when>
       		<c:otherwise>
-      			<td><input type="text" name="champGame" id="champGame" value="${champPick.winner}" size=24/></td>
+      			<c:choose>
+      			<c:when test = "${fn:length(sessionScope.potentialChampionsList) == 0}">
+      				<td><input type="text" name="champGame" id="champGame" value="${champPick.winner}" size=24/></td>
+      			</c:when>
+      			<c:otherwise>
+      				<td>
+      					<select name="champGame" id="champGame">	
+      						<c:forEach var="champTeam" items="${sessionScope.potentialChampionsList}">
+      							<c:set var="selected" value="" />
+      							<c:if test="${champTeam == champPick.winner}">
+      								<c:set var="selected" value="selected" />
+      							</c:if>
+      							<option value="${champTeam}"${selected}>${champTeam}</option>
+      						</c:forEach>
+      					</select>
+      				</td>
+      			</c:otherwise>
+      			</c:choose>
       			<td><input type="number" name="champTotPts" id="champTotPts" value="${champPick.totalPoints}" min="0" max="175" size=2/></td>
       			<input type="hidden" name="champGameId" value="${bowlGame.gameId}"/>
       		</c:otherwise>

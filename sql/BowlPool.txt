@@ -125,6 +125,8 @@ delete from pick where gameid in (select gameid from bowlgame where year = X);
 delete from bowlgame where year = X;
 delete from user where year = X;
 
+// Subtract an hour from game time for CT
+update bowlgame set datetime = addtime(datetime,"-1:00:00") where year=X;
 
 
 // My SQL commands

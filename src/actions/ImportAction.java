@@ -339,6 +339,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				JSONObject game = all.getJSONObject(i);
 				String bowlGameTitle = "";
 				parsedDate = dateFormat.parse(game.getString("DateTime").replaceAll("T", " "));
+				/* TBD Subtract an hour from parsedDate to convert from eastern to central
+				Calendar calendar = Calendar.getInstance();
+			    calendar.setTime(parsedDate);
+			    calendar.add(Calendar.HOUR_OF_DAY, -1);
+			    parsedDate = calendar.getTime();*/
 			    timestamp = new Timestamp(parsedDate.getTime());
 				System.out.print(game.getString("AwayTeamName") + " at " + game.getString("HomeTeamName") + " " + parsedDate);
 				System.out.println(" (" + game.getString("DateTime") + ")");

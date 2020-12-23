@@ -322,7 +322,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		try {
 			String uRL;
 			//uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
-			uRL = "https://api.fantasydata.net/v3/cfb/scores/json/GamesByWeek/20"+ year + "POST/1?key=712e473edfa34aaf82cdf73469a772b7";
+			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/GamesByWeek/20"+ year + "POST/1?key=712e473edfa34aaf82cdf73469a772b7";
 			URL obj = new URL(uRL);
 			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
 			//int responseCode = con.getResponseCode();
@@ -393,9 +393,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				Double pointSpread = avgHomeSpread != null ? Math.abs(roundToHalf(avgHomeSpread)) : null;
 				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false);
 			}
-			parsedDate = dateFormat.parse("2019-01-15 21:00:00");
-		    timestamp = new Timestamp(parsedDate.getTime());
-			DAO.createBowlGame("Championship", "", "", null, year, timestamp, 0, 0, false, false);
+			Date championshipDate = dateFormat.parse("2021-01-11 20:00:00");
+		    DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false);
 		 }
 		catch (Exception e) {
 			e.printStackTrace();

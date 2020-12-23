@@ -50,15 +50,16 @@ CREATE TABLE Pool
 PoolId int(5) PRIMARY KEY,
 PoolName varchar(255) NOT NULL,
 Year int(5) NOT NULL,
-UsePointSpreads boolean NOT NULL
+UsePointSpreads boolean NOT NULL,
+FirstGameDate timestamp
 );
 
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (1, 'Sculley 2014', 14, true);
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (2, 'Sculley 2015', 15, true);
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (3, 'Jacobus 2016', 16, false);
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (4, 'Sculley 2017', 17, true);
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (5, 'Sculley 2018', 18, true);
-insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (6, 'Jacobus 2018', 18, false);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (1, 'Sculley 2014', 14, true, NULL);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (2, 'Sculley 2015', 15, true, NULL);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (3, 'Jacobus 2016', 16, false, NULL);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (4, 'Sculley 2017', 17, true, NULL);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (5, 'Sculley 2018', 18, true, NULL);
+insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (6, 'Jacobus 2018', 18, false, NULL);
 
 
 

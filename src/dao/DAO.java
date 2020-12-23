@@ -217,11 +217,11 @@ public class DAO {
 		return bowlGameList;
 	}
 	
-	public static Map<Integer, BowlGame> getBowlGamesMap(Integer year) {
+	public static Map<Integer, BowlGame> getBowlGamesMap(Integer year, Timestamp firstGameStart) {
 		Map<Integer, BowlGame> bowlGamesMap = new HashMap<Integer, BowlGame>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where " + getYearClause(year, null) + " order by DateTime");
+			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where DateTime > '" + firstGameStart + "' and " + getYearClause(year, null) + " order by DateTime");
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
@@ -328,7 +328,7 @@ public class DAO {
 			String sql = "SELECT * FROM Pool where poolId = " + poolId;
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads"));
+				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads"), rs.getTimestamp("FirstGameDate"));
 			}
 		}
 		catch (SQLException e) {

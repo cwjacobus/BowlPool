@@ -1,20 +1,24 @@
 package data;
 
+import java.sql.Timestamp;
+
 public class Pool {
 	
 	private int poolId;
 	private String poolName;
 	private int year;
 	private boolean usePointSpreads;
+	private Timestamp firstGameDate;
 	
 	public Pool () {
 	}
 	
-	public Pool (int poolId, String poolName, int year, boolean usePointSpreads) {
+	public Pool (int poolId, String poolName, int year, boolean usePointSpreads, Timestamp firstGameDate) {
 		this.poolId = poolId;
 		this.poolName = poolName;
 		this.year = year;
 		this.usePointSpreads = usePointSpreads;
+		this.firstGameDate = firstGameDate;
 	}
 
 	public int getPoolId() {
@@ -47,6 +51,14 @@ public class Pool {
 
 	public void setUsePointSpreads(boolean usePointSpreads) {
 		this.usePointSpreads = usePointSpreads;
+	}
+
+	public Timestamp getFirstGameDate() {
+		return firstGameDate;
+	}
+
+	public void setFirstGameDate(Timestamp firstGameDate) {
+		this.firstGameDate = firstGameDate;
 	}
 	
 

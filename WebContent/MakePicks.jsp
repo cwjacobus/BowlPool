@@ -55,6 +55,10 @@
 	</script>
 </head>
 <body>
+	<!--<c:out value="User: ${sessionScope.user.userName} ${sessionScope.user.admin}"/>-->
+	<c:out value="First game: ${sessionScope.pool.firstGameDate}"/>
+	<jsp:useBean id="now" class="java.util.Date"/>
+	<c:set target='${now}' property='time' value='${now.time + 3600000}'/><!-- Add 1 hour for CT -> ET -->
 	<form action="savePicks">
 	<table border=1 cellspacing=0 cellpadding=0>
 	<tr><th>Bowl</th><th>Time(EST)</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
@@ -87,8 +91,12 @@
     			<c:set var="dogChecked" value="checked" />
   			</c:if>
 		</c:forEach>
+		<c:set var="gameStarted" value="false"/>
+		<c:if test="${bowlGame.dateTime < now}">
+			<c:set var="gameStarted" value="true" />
+		</c:if>
 		<c:set var="disabled" value="" />
-		<c:if test="${sessionScope.readOnly}">
+		<c:if test="${sessionScope.readOnly || gameStarted}">
 			<c:set var="disabled" value="disabled" />
 		</c:if>
   		<tr ${winLoseClass}>

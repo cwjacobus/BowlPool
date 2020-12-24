@@ -56,7 +56,6 @@
 </head>
 <body>
 	<!--<c:out value="User: ${sessionScope.user.userName} ${sessionScope.user.admin}"/>-->
-	<c:out value="First game: ${sessionScope.pool.firstGameDate}"/>
 	<jsp:useBean id="now" class="java.util.Date"/>
 	<c:set target='${now}' property='time' value='${now.time + 3600000}'/><!-- Add 1 hour for CT -> ET -->
 	<form action="savePicks">

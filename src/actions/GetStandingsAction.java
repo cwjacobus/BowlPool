@@ -102,7 +102,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
 		
-		int numOfCompletedGames = DAO.getNumberOfCompletedOrCancelledGames(pool.getYear());
+		int numOfCompletedGames = DAO.getNumberOfCompletedOrCancelledGames(pool.getYear(), pool.getFirstGameDate());
 		if (pool != null && pool.getPoolId() == 5) {
 			// special case Sculley 2018 does not use first game
 			// TBD Create an OptOut table that allows a pool to skip a game gameId, poolId
@@ -185,7 +185,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	    context.put("allowAdmin", allowAdmin);  
 	    // SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm");
 	    // Date date1 = sdf.parse("12-15-21" + pool.getYear() + " 11:00"); // Time of first game
-	    Timestamp ts = DAO.getFirstGameDateTime(pool.getYear());
+	    Timestamp ts = pool.getFirstGameDate() == null ? DAO.getFirstGameDateTime(pool.getYear()) : pool.getFirstGameDate();
 	    Date date1 = ts != null ? new Date(ts.getTime()) : null; // Time of first game
 	    Calendar cal = Calendar.getInstance();
 	   //TBD check times of games

@@ -23,9 +23,9 @@
   					<c:set var="color" value="#5D7B9D" />
   				</c:otherwise>
   			</c:choose>
-    		<tr style="color: white; background: ${color}; font-weight: bold;">
+  			<tr style="color: white; background: ${color}; font-weight: bold;">
     			<td width=25><s:property value="#standingsLine.value.rank"/>.</td>
-    			<td width=150><s:property value="#standingsLine.value.userName"/></td>
+    			<td width=150><s:property value='#standingsLine.value.userName'/></td>
     			<td width=35 align="center"><s:property value="#standingsLine.value.correct"/></td>
 	    		<td width=20 align="center">${standingsLine.value.eliminatedBy >= 5 ? 'X' : standingsLine.value.eliminatedBy}</td>
     		</tr>

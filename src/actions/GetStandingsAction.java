@@ -102,7 +102,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
 		
-		int numOfCompletedGames = DAO.getNumberOfCompletedOrCancelledGames(pool.getYear(), pool.getFirstGameDate());
+		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool.getYear(), pool.getFirstGameDate());
 		if (pool != null && pool.getPoolId() == 5) {
 			// special case Sculley 2018 does not use first game
 			// TBD Create an OptOut table that allows a pool to skip a game gameId, poolId
@@ -146,7 +146,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 					userChampPick1 = champPicksMap.get(userId);
 					userChampPick2 = champPicksMap.get(userId2);
 				}
-				int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2, numOfCompletedGames);
+				int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2);
 				if ((wins + diffPicks) < wins2) {
 					eliminatedByCount++;
 				}
@@ -219,7 +219,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	}
 		
 	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, 
-		ChampPick userChampPick1, ChampPick userChampPick2, int numOfCompletedGames) {
+		ChampPick userChampPick1, ChampPick userChampPick2) {
 		int diffPicks = 0;	
 		if (userPicks1 == null) {
 			return userPicks2.size();
@@ -230,20 +230,12 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		
 		for (Pick up1 : userPicks1) {
 			for (Pick up2 : userPicks2) {
-				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && 
+				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && bowlGamesMap.get(up1.getGameId()) != null &&
 						!bowlGamesMap.get(up1.getGameId()).isCompleted() && !bowlGamesMap.get(up1.getGameId()).isCancelled()) {
 					diffPicks++;
 				}
 			}
 		}
-		/*
-		for (int i = numOfCompletedGames; i < numOfBowlGames - 1; i++) {
-			Pick p1 = userPicks1.get(i);
-			Pick p2 = userPicks2.get(i);
-			if (p1.getFavorite() != p2.getFavorite()) {
-				diffPicks++;
-			}
-		}*/
 		
 		if (userChampPick1 != null && userChampPick2 != null) {
 			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(pool.getYear())) {

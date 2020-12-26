@@ -201,7 +201,8 @@ public class DAO {
 		List<BowlGame>bowlGameList = new ArrayList<BowlGame>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where " + getYearClause(year, null) + " order by DateTime");
+			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where " + getYearClause(year, null) + 
+				" and Cancelled = 0 order by DateTime");
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
@@ -223,7 +224,8 @@ public class DAO {
 			Statement stmt = conn.createStatement();
 			// Only get games after first game start date
 			String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
-			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where " + firstGameStartSQL + getYearClause(year, null) + " order by DateTime");
+			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where " + firstGameStartSQL + getYearClause(year, null) + 
+				" and Cancelled = 0 order by DateTime");
 			BowlGame bowlGame;
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
@@ -375,12 +377,12 @@ public class DAO {
 		return userList;
 	}
 	
-	public static int getNumberOfCompletedOrCancelledGames(Integer year, Timestamp firstGameStart) {
+	public static int getNumberOfCompletedGames(Integer year, Timestamp firstGameStart) {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
 			String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where (Completed = 1 or Cancelled = 1) and " + firstGameStartSQL + getYearClause(year, null));
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and " + firstGameStartSQL + getYearClause(year, null));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}
@@ -409,7 +411,7 @@ public class DAO {
 		try {
 			Statement stmt = conn.createStatement();
 			String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where " + firstGameStartSQL + getYearClause(year, null));
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where " + firstGameStartSQL + getYearClause(year, null) + " and Cancelled = 0");
 			rs.next();
 			numberOfBowlGames = rs.getInt(1);
 		}
@@ -438,7 +440,7 @@ public class DAO {
 		Timestamp dt = null;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select min(dateTime) from BowlGame where year =" + year);
+			ResultSet rs = stmt.executeQuery("select min(dateTime) from BowlGame where year = " + year + " and Cancelled = 0");
 			rs.next();
 			dt = rs.getTimestamp(1);
 		}

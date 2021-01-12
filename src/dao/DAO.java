@@ -178,7 +178,7 @@ public class DAO {
 			while (rs1.next()) {
 				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? 1 : 0; 
 				String wins = Integer.toString(rs1.getInt(3) + champWin); 
-				if (rs1.getInt(3) < 10) {
+				if ((rs1.getInt(3)  + champWin) < 10) {
 					wins = "0" + wins;
 				}
 				standings.put(wins + ":" + rs1.getString(1), rs1.getInt(2));

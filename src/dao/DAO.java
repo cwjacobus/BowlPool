@@ -16,6 +16,7 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import data.BowlGame;
+import data.CFTeam;
 import data.ChampPick;
 import data.Pick;
 import data.Pool;
@@ -60,6 +61,36 @@ public class DAO {
 			}
 			// Insert the remaining records
 			System.out.println("Insert remaining picks " + (picksCount - (picksCount % 250)) + " : " + picksCount);
+			stmt.executeBatch();
+			conn.commit();
+			conn.setAutoCommit(true); // set auto commit back to true for next inserts
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void createBatchCFTeams(List<CFTeam> cfTeamsList) {
+		try {
+			conn.setAutoCommit(false);
+			Statement stmt = conn.createStatement();
+			int cfTeamsCount = 0;
+			for (CFTeam t : cfTeamsList) {
+				String conference = t.getConference() != null ? "'" + t.getConference() + "'" : null;
+				String insertSQL = "INSERT INTO CFTeam VALUES (" + 
+					t.getCfTeamId() + ", '" + t.getSchool() + "', '" + t.getMascot() + "', " + conference + ", '" + t.getShortName() + "');";
+				stmt.addBatch(insertSQL);
+				cfTeamsCount++;
+				if (cfTeamsCount % 250 == 0) {
+					System.out.println("Insert cf teams " + (cfTeamsCount - 250) + " : " + cfTeamsCount);
+					stmt.executeBatch();
+					conn.commit();
+					stmt.close();
+					stmt = conn.createStatement();
+				}
+			}
+			// Insert the remaining records
+			System.out.println("Insert remaining cf teams " + (cfTeamsCount - (cfTeamsCount % 250)) + " : " + cfTeamsCount);
 			stmt.executeBatch();
 			conn.commit();
 			conn.setAutoCommit(true); // set auto commit back to true for next inserts

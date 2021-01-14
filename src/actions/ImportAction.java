@@ -33,6 +33,7 @@ import com.opensymphony.xwork2.util.ValueStack;
 
 import dao.DAO;
 import data.BowlGame;
+import data.CFTeam;
 import data.ChampPick;
 import data.Pick;
 import data.Pool;
@@ -44,17 +45,21 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	private String usersCB;
 	private String gamesCB;
 	private String picksCB;
+	private String cfTeamsCB;
 	private String inputFileName;
 	private String fromWS;
 	
 	boolean usersImport = false;
 	boolean picksImport = false;
 	boolean bowlGamesImport = false;
+	boolean cfTeamsImport = false;
 	
 	Map<String, Object> userSession;
 	
 	Integer year;
 	Pool pool;
+	
+	String key = "712e473edfa34aaf82cdf73469a772b7";
 
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
@@ -73,8 +78,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		prop.load(input);
 		System.out.println("Input file path: " + prop.getProperty("inputFilePath"));
 		
-		System.out.println("Import " + usersCB + " " + gamesCB + " " + picksCB + " " + fromWS + " " + inputFileName);
-	    if (usersCB == null && gamesCB == null && picksCB == null) {
+		System.out.println("Import " + cfTeamsCB + " " + usersCB + " " + gamesCB + " " + picksCB + " " + fromWS + " " + inputFileName);
+	    if (usersCB == null && gamesCB == null && picksCB == null && cfTeamsCB == null) {
 	    	context.put("errorMsg", "Nothing selected to import!");
 	    	stack.push(context);
 	    	return "error";
@@ -86,6 +91,15 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	return "error";
 	    }
 	    else {
+	    	if (cfTeamsCB != null) {
+	    		cfTeamsImport = true; 
+	    		// Check for users already imported
+	    		if (false /*DAO.getCFTeamsCount(year, pool.getPoolId()) > 0*/) {
+	    			context.put("errorMsg", "CF Teams already imported!  Delete and reimport.");
+	    			stack.push(context);
+	    			return "error";
+	    		}
+	    	}
 	    	if (usersCB != null) {
 	    		usersImport = true; 
 	    		// Check for users already imported
@@ -136,6 +150,9 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	}
 	    	else if (bowlGamesImport && fromWS != null) {
 	    		importBowlGamesFromWS();
+	    	}
+	    	else if (cfTeamsImport) {
+	    		importCFTeamsFromWS();
 	    	}
 	    }
 	    stack.push(context);
@@ -322,7 +339,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		try {
 			String uRL;
 			//uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
-			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/GamesByWeek/20"+ year + "POST/1?key=712e473edfa34aaf82cdf73469a772b7";
+			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/GamesByWeek/20"+ year + "POST/1?key=" + key;
 			URL obj = new URL(uRL);
 			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
 			//int responseCode = con.getResponseCode();
@@ -396,6 +413,37 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			Date championshipDate = dateFormat.parse("2021-01-11 20:00:00");
 		    DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false);
 		 }
+		catch (Exception e) {
+			e.printStackTrace();
+        }
+	}
+	
+	private void importCFTeamsFromWS () {
+		System.out.println("Import CF Teams From WS");
+		try {
+			String uRL;
+			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/Teams?key=" + key;
+			URL obj = new URL(uRL);
+			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream())); 
+			JSONArray all = new JSONArray(in.readLine());
+			in.close();
+			System.out.println(all.length() + " CF Teams to Import");
+			
+			List<CFTeam> cfTeamList = new ArrayList<CFTeam>();
+			CFTeam cfTeam = null;
+			String conference = null;
+			for (int i = 0; i < all.length(); i++) {
+				JSONObject cfTeamJson = all.getJSONObject(i);
+				conference = !cfTeamJson.getString("Conference").equalsIgnoreCase("null") ? cfTeamJson.getString("Conference") : null;
+				cfTeam = new CFTeam(Integer.parseInt(cfTeamJson.getString("TeamID")), cfTeamJson.getString("School"), cfTeamJson.getString("Name"), 
+					conference, cfTeamJson.getString("ShortDisplayName"));
+				cfTeamList.add(cfTeam);
+				System.out.println("Team: " + cfTeamJson.getString("TeamID") + " " + cfTeamJson.getString("School") + " " + cfTeamJson.getString("Name") + " " + 
+					conference + " " + cfTeamJson.getString("ShortDisplayName"));
+			}
+			DAO.createBatchCFTeams(cfTeamList);
+		}
 		catch (Exception e) {
 			e.printStackTrace();
         }
@@ -518,6 +566,14 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	
 	private double roundToHalf(double d) {
 	    return Math.round(d * 2) / 2.0;
+	}
+	
+	public String getCfTeamsCB() {
+		return cfTeamsCB;
+	}
+
+	public void setCfTeamsCB(String cfTeamsCB) {
+		this.cfTeamsCB = cfTeamsCB;
 	}
 
 	public String getUsersCB() {

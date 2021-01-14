@@ -53,6 +53,7 @@
   		<h3>Import Data</h3>
   		<form action="import">
   			<input type="file" name="inputFileName" accept=".xls" /><br>
+  			<input type="checkbox" name="cfTeamsCB" value="CFTeams"> CF Teams from WS<br>
   			<input type="checkbox" name="usersCB" value="Users"> Users<br>
 			<input type="checkbox" name="gamesCB" value="Games"> Games
 			(<input type="checkbox" name="fromWS" value="FromWS"> from WS)<br>

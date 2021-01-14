@@ -54,6 +54,23 @@ UsePointSpreads boolean NOT NULL,
 FirstGameDate timestamp
 );
 
+CREATE TABLE CFTeam
+(
+CFTeamId int(5) PRIMARY KEY,
+School varchar(100) NOT NULL,
+Mascot varchar(100) NOT NULL,
+Conference varchar(100),
+ShortName varchar(25)
+);
+
+CREATE TABLE CFPlayoffTeam
+(
+CFPlayoffTeamId int(11) PRIMARY KEY AUTO_INCREMENT,
+CFTeam varchar(150),
+CFTeamId int(5),
+Year int(5) NOT NULL
+);
+
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (1, 'Sculley 2014', 14, true, NULL);
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (2, 'Sculley 2015', 15, true, NULL);
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (3, 'Jacobus 2016', 16, false, NULL);

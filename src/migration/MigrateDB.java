@@ -207,7 +207,8 @@ public class MigrateDB {
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
 					rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-					rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), year, null, rs.getBoolean("Cancelled"));
+					rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), year, null, rs.getBoolean("Cancelled"),
+					rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"), rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"));
 				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
 			}
 		}

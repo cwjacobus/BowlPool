@@ -27,12 +27,16 @@ public class DAO {
 	public static Connection conn; 
 	
 	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, 
-		Integer dogScore, boolean completed, boolean cancelled) {
+		Integer dogScore, boolean completed, boolean cancelled, Integer favoriteTeamId, Integer underdogTeamId, boolean cfpSemiGame, boolean cfpChampGame) {
+		gameName = gameName.replaceAll("'", "");
+		favorite = favorite.replaceAll("'", "");
+		underdog = underdog.replaceAll("'", "");
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime, Cancelled) VALUES ('" + 
-				gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", " + favScore + ", " +  dogScore + ", " + completed + ", " + year + "," +
-				(dateTime != null ? "'" + dateTime + "'" : null) + ", " + cancelled + ");";
+			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime, Cancelled, " +
+				"FavoriteTeamId, UnderdogTeamId, CFPSemiGame, CFPChampGame) VALUES ('" + gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", " + 
+				favScore + ", " +  dogScore + ", " + completed + ", " + year + "," + (dateTime != null ? "'" + dateTime + "'" : null) + ", " + cancelled + 
+				", " + favoriteTeamId +  ", " + underdogTeamId +  ", " + cfpSemiGame +  ", " + cfpChampGame + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -236,10 +240,10 @@ public class DAO {
 				" and Cancelled = 0 order by DateTime");
 			BowlGame bowlGame;
 			while (rs.next()) {
-				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
-					rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
-					rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
-					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"));
+				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"), rs.getString("Underdog"), 
+					rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
+					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"), 
+					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"));
 				bowlGameList.add(bowlGame);
 			}
 		}
@@ -259,9 +263,10 @@ public class DAO {
 				" and Cancelled = 0 order by DateTime");
 			BowlGame bowlGame;
 			while (rs.next()) {
-				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
-					rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), 
-					rs.getBoolean("Completed"), rs.getInt("Year"), rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"));
+				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"), rs.getString("Underdog"), 
+					rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
+					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"),
+					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"));
 				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
 			}
 		}
@@ -467,6 +472,20 @@ public class DAO {
 		return numberOfPicks;
 	}
 	
+	public static int getCFTeamsCount() {
+		int numberOfCFTeams = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from CFTeam");
+			rs.next();
+			numberOfCFTeams = rs.getInt(1);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return numberOfCFTeams;
+	}
+	
 	public static Timestamp getFirstGameDateTime(int year) {
 		Timestamp dt = null;
 		try {
@@ -484,9 +503,10 @@ public class DAO {
 	public static List<String> getPotentialChampionsList(int year) {
 		List<String>potentialChampionsList = new ArrayList<String>();
 		try {
-			// select favorite, underdog from bowlgame where year=19 and bowlname like '%CFP Semifinal%';
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT Favorite, Underdog FROM BowlGame where BowlName like '%CFP Semifinal%' and year = " + year);
+			// TBD use BowlGame.CFPSemiGame column
+			ResultSet rs = stmt.executeQuery("SELECT Favorite, Underdog FROM BowlGame where CFPSemiGame=1 and year = " + year);
+			//ResultSet rs = stmt.executeQuery("SELECT Favorite, Underdog FROM BowlGame where BowlName like '%CFP Semifinal%' and year = " + year);
 			while (rs.next()) {
 				potentialChampionsList.add(rs.getString(1)); // favorite
 				potentialChampionsList.add(rs.getString(2)); // underdog
@@ -517,7 +537,9 @@ public class DAO {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and BowlName like '%Championship%' and " + getYearClause(year, null));
+			//TBD
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and CFPChampGame=1 and " + getYearClause(year, null));
+			//ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and BowlName like '%Championship%' and " + getYearClause(year, null));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}
@@ -525,6 +547,22 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return numberOfCompletedGames > 0;
+	}
+	
+	// Determine if champ pick lost in CFP Semi
+	public static boolean isChampPickEliminated(Integer year, String champPick) {
+		int numberOfCFPGamesLost = 0;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select * from BowlGame where CFPSemiGame=1 and " + getYearClause(year, null) + 
+				" and ((favorite = '" + champPick + "' and favoritescore <= underdogscore) or (underdog = '" + champPick + "' and underdogscore <= favoritescore));");
+			rs.next();
+			numberOfCFPGamesLost = rs.getInt(1);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return numberOfCFPGamesLost > 0;
 	}
 	
 	public static void updateBowlGameSpread(Integer gameId, Double spread) {

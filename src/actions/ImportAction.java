@@ -94,7 +94,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	if (cfTeamsCB != null) {
 	    		cfTeamsImport = true; 
 	    		// Check for users already imported
-	    		if (false /*DAO.getCFTeamsCount(year, pool.getPoolId()) > 0*/) {
+	    		if (DAO.getCFTeamsCount() > 0) {
 	    			context.put("errorMsg", "CF Teams already imported!  Delete and reimport.");
 	    			stack.push(context);
 	    			return "error";
@@ -305,7 +305,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
 				// Create a blank Championship game place holder and break;
 				if (!updateBowlGames) {
-					DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false, false);
+					DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false, false, null, null, false, true);
 				}
 				break;
 			}
@@ -321,7 +321,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					String favorite = getStringFromCell(row, 3).trim();
 					
 					String underdog = getStringFromCell(row, 7).trim();
-					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false);
+					// TBD get fav, dog ids and semi
+					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null, false, false);
 				}
 				else {
 					BowlGame bg = getBowlGameFromShortName(bowlGamesList, gameName);
@@ -338,8 +339,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		System.out.println("Import games from web service");
 		try {
 			String uRL;
-			//uRL = "https://api.fantasydata.net/v3/cfb/odds/json/GameOddsByWeek/2018/13?key=712e473edfa34aaf82cdf73469a772b7"; // 2017POST/1 
-			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/GamesByWeek/20"+ year + "POST/1?key=" + key;
+			// TBD Remove year adjust for 21
+			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/GamesByWeek/20"+ (year == 21 ? 20 : year) + "POST/1?key=" + key;
 			URL obj = new URL(uRL);
 			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
 			//int responseCode = con.getResponseCode();
@@ -351,6 +352,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date parsedDate;
 			Timestamp timestamp;
+			boolean champGameCreated = false;
 			
 			for (int i = 0; i < all.length(); i++) {
 				JSONObject game = all.getJSONObject(i);
@@ -365,7 +367,6 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				System.out.print(game.getString("AwayTeamName") + " at " + game.getString("HomeTeamName") + " " + parsedDate);
 				System.out.println(" (" + game.getString("DateTime") + ")");
 				
-			    
 				JSONArray preGameOddsArray = null;
 				try {
 					preGameOddsArray = game.getJSONArray("PregameOdds");
@@ -399,19 +400,33 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				
 				String favorite;
 				String underdog;
+				Integer favoriteTeamId;
+				Integer underdogTeamId;
 				if (avgHomeSpread == null || avgHomeSpread < 0.0) {
 					favorite = game.getString("HomeTeamName");
 					underdog = game.getString("AwayTeamName");
+					favoriteTeamId = Integer.parseInt(game.getString("HomeTeamID"));
+					underdogTeamId = Integer.parseInt(game.getString("AwayTeamID"));
 				}
 				else {
 					favorite = game.getString("AwayTeamName");
 					underdog = game.getString("HomeTeamName");
+					favoriteTeamId = Integer.parseInt(game.getString("AwayTeamID"));
+					underdogTeamId = Integer.parseInt(game.getString("HomeTeamID"));
+				}
+				boolean cfpSemiGame = (bowlGameTitle != null && bowlGameTitle.contains("CFP Semifinal")) ? true : false;
+				boolean cfpChampGame = false;
+				if (bowlGameTitle != null && bowlGameTitle.contains("Championship")) {
+					cfpChampGame = true;
+					champGameCreated = true;
 				}
 				Double pointSpread = avgHomeSpread != null ? Math.abs(roundToHalf(avgHomeSpread)) : null;
-				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false);
+				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false, favoriteTeamId, underdogTeamId, cfpSemiGame, cfpChampGame);
 			}
-			Date championshipDate = dateFormat.parse("2021-01-11 20:00:00");
-		    DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false);
+			if (!champGameCreated) {
+				Date championshipDate = dateFormat.parse("2021-01-11 20:00:00");
+				DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false, null, null, false, true);
+			}
 		 }
 		catch (Exception e) {
 			e.printStackTrace();

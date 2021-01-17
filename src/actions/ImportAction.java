@@ -58,9 +58,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	
 	Integer year;
 	Pool pool;
+	Map<String, CFTeam> cfTeamsMap;
 	
 	String key = "712e473edfa34aaf82cdf73469a772b7";
 
+	@SuppressWarnings("unchecked")
 	public String execute() throws Exception {
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
@@ -71,6 +73,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		}
 		pool = (Pool) userSession.get("pool");
 		year = (Integer) userSession.get("year");
+		cfTeamsMap = (Map<String, CFTeam>)userSession.get("cfTeamsMap");
 		System.out.println("Import: " + year + " " + pool.getPoolName());
 		
 		InputStream input = ServletActionContext.getServletContext().getResourceAsStream("/WEB-INF/BowlPool.properties");
@@ -225,8 +228,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		        				}
 	        					continue;
 	        				}
-	        				boolean champPick = bowlGame.getBowlName().equalsIgnoreCase("Championship");
-	        				if (!champPick) {
+	        				if (!bowlGame.isCfpChampGame()) {
 	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 == 0)) {
 	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create fav Pick
@@ -243,6 +245,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        				else {
 	        					if (cell.getColumnIndex() % 2 == 0) {
 	        						System.out.print("CHAMP WINNER-" + pick + " ");
+	        						// TBD TEST Translate pick to full team name (school + mascot) for ChampPick
+	        						CFTeam cfTeam = cfTeamsMap.get(pick.toUpperCase());
+	        						if (cfTeam != null) {
+	        							pick = cfTeam != null ? cfTeam.getSchool() + " " + cfTeam.getMascot() : pick;
+	        						}
 	        						// create Winner ChampPick
 	        						//DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
 	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0, pool.getPoolId(), null));
@@ -472,7 +479,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			Cell cell = (Cell)cellIter.next();
 			String bowlGameName = cell.getStringCellValue().trim();
 			if (bowlGameName != null && bowlGameName.length() > 0 && 
-				!bowlGameName.equalsIgnoreCase("Bowl") && !bowlGameName.equalsIgnoreCase("BCS Champ") && !bowlGameName.equalsIgnoreCase("Championship")) {
+				!bowlGameName.equalsIgnoreCase("Bowl") && !bowlGameName.equalsIgnoreCase("BCS Champ") && !bowlGameName.contains("Championship")) {
 					bowlGameNameMap.put(gameIndex, bowlGameName);
 				gameIndex++;
 			}
@@ -573,6 +580,15 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		}
 		else if (shortName.equalsIgnoreCase("Tax Slayer")) {
 			altShortName = "TaxSlayer";
+		}
+		else if (shortName.equalsIgnoreCase("First Respnder")) {
+			altShortName = "First Responder";
+		}
+		else if (shortName.equalsIgnoreCase("Lending Tree")) {
+			altShortName = "Lendingtree";
+		}
+		else if (shortName.equalsIgnoreCase("Duke's Mayo")) {
+			altShortName = "Dukes Mayo";
 		}
 		
 		return altShortName;

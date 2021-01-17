@@ -472,6 +472,34 @@ public class DAO {
 		return numberOfPicks;
 	}
 	
+	public static Map<String, CFTeam> getCFTeamsMap() {
+		Map<String, CFTeam> cfTeamsMap = new HashMap<>();
+		CFTeam cfTeam = new CFTeam();
+		Integer cfTeamId = null;
+		String school = null;
+		String mascot = null;
+		String conference = null;
+		String shortName = null;
+		try {
+			Statement stmt = conn.createStatement();
+			String queryString = "select * from CFTeam";
+			ResultSet rs = stmt.executeQuery(queryString);
+			while (rs.next()) {
+				cfTeamId = rs.getInt("CFTeamId");
+				school = rs.getString("School");
+				mascot = rs.getString("Mascot");
+				conference = rs.getString("Conference");
+				shortName = rs.getString("ShortName");
+				cfTeam = new CFTeam(cfTeamId, school, mascot, conference, shortName);
+				cfTeamsMap.put(school.toUpperCase(), cfTeam);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return cfTeamsMap;
+	}
+	
 	public static int getCFTeamsCount() {
 		int numberOfCFTeams = 0;
 		try {
@@ -504,9 +532,7 @@ public class DAO {
 		List<String>potentialChampionsList = new ArrayList<String>();
 		try {
 			Statement stmt = conn.createStatement();
-			// TBD use BowlGame.CFPSemiGame column
 			ResultSet rs = stmt.executeQuery("SELECT Favorite, Underdog FROM BowlGame where CFPSemiGame=1 and year = " + year);
-			//ResultSet rs = stmt.executeQuery("SELECT Favorite, Underdog FROM BowlGame where BowlName like '%CFP Semifinal%' and year = " + year);
 			while (rs.next()) {
 				potentialChampionsList.add(rs.getString(1)); // favorite
 				potentialChampionsList.add(rs.getString(2)); // underdog
@@ -537,9 +563,7 @@ public class DAO {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			//TBD
 			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and CFPChampGame=1 and " + getYearClause(year, null));
-			//ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and BowlName like '%Championship%' and " + getYearClause(year, null));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}
@@ -549,20 +573,23 @@ public class DAO {
 		return numberOfCompletedGames > 0;
 	}
 	
-	// Determine if champ pick lost in CFP Semi
-	public static boolean isChampPickEliminated(Integer year, String champPick) {
-		int numberOfCFPGamesLost = 0;
+	// Create List of userIds with eliminated champ picks (lost in CFP Semi) for a pool
+	public static List<Integer> getChampPickEliminatedList(Integer poolId) {
+		List<Integer> champPickEliminatedList = new ArrayList<>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select * from BowlGame where CFPSemiGame=1 and " + getYearClause(year, null) + 
-				" and ((favorite = '" + champPick + "' and favoritescore <= underdogscore) or (underdog = '" + champPick + "' and underdogscore <= favoritescore));");
-			rs.next();
-			numberOfCFPGamesLost = rs.getInt(1);
+			//select count(*) from BowlGame where CFPSemiGame = 1 and " + getYearClause(year, null) + 
+			// " and ((favorite = '" + champPick + "' and favoritescore <= underdogscore) or (underdog = '" + champPick + "' and underdogscore <= favoritescore));
+			ResultSet rs = stmt.executeQuery("select cp.userid from bowlgame bg, champpick cp where bg.cfpsemigame = 1 and cp.poolid = " + poolId + 
+				" and ((bg.favorite like concat('%', cp.winner, '%') and bg.favoritescore <= bg.underdogscore) or (bg.underdog like concat('%', cp.winner, '%') and bg.underdogscore <= bg.favoritescore));");
+			while (rs.next()) {
+				champPickEliminatedList.add(rs.getInt(1));
+			}
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return numberOfCFPGamesLost > 0;
+		return champPickEliminatedList;
 	}
 	
 	public static void updateBowlGameSpread(Integer gameId, Double spread) {
@@ -624,9 +651,6 @@ public class DAO {
         }
 		try {
 			String connString = "jdbc:mysql://localhost/bowlpool";
-			/*if (year != null && year.intValue() < 17) { // only append year before 2017
-			    connString += year;
-			}*/
 			connString += "?user=root&password=PASSWORD&useSSL=false&allowPublicKeyRetrieval=true";
 			conn = DriverManager.getConnection(connString);
 		}

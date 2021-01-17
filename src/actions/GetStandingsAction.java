@@ -26,6 +26,7 @@ import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
 import data.BowlGame;
+import data.CFTeam;
 import data.ChampPick;
 import data.Pick;
 import data.Pool;
@@ -57,6 +58,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	int lastGamePlayedIndex = 9;
 	Map<String, Object> userSession;
 	Map<Integer, BowlGame> bowlGamesMap;
+	List<Integer> champPickEliminatedList;
 	
 	final static Logger logger = Logger.getLogger(GetStandingsAction.class);
 	
@@ -87,6 +89,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		}
 		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(pool.getYear(), poolId);
 		userSession.put("picksMap", picksMap);
+		Map<String, CFTeam> cfTeamsMap = DAO.getCFTeamsMap();
+		userSession.put("cfTeamsMap", cfTeamsMap);
 		Map<Integer, ChampPick> champPicksMap = null;
 		if (DAO.useYearClause(pool.getYear())) {
 			champPicksMap = DAO.getChampPicksMap(pool.getYear(), poolId);
@@ -117,6 +121,9 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
     	int prevWins= 0;
     	int place = 1;
     	int eliminatedByCount = 0;
+    	boolean champGameCompleted = DAO.isChampGameCompleted(pool.getYear());
+    	champPickEliminatedList = DAO.getChampPickEliminatedList(poolId);
+    	System.out.println("Champ Game Completed: " + champGameCompleted);
     	Map <String, Integer> eliminatedMap = new HashMap<String, Integer>();
 		while (it.hasNext()) {
 			Map.Entry<String, Integer> line = (Map.Entry<String, Integer>)it.next();
@@ -146,7 +153,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 					userChampPick1 = champPicksMap.get(userId);
 					userChampPick2 = champPicksMap.get(userId2);
 				}
-				int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2);
+				int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2, champGameCompleted);
 				if ((wins + diffPicks) < wins2) {
 					eliminatedByCount++;
 				}
@@ -218,8 +225,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	   this.poolId = poolId;
 	}
 		
-	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, 
-		ChampPick userChampPick1, ChampPick userChampPick2) {
+	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2, 
+			boolean champGameCompleted /*, List<Integer> champPickEliminatedList*/) {
 		int diffPicks = 0;	
 		if (userPicks1 == null) {
 			return userPicks2.size();
@@ -238,7 +245,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		}
 		
 		if (userChampPick1 != null && userChampPick2 != null) {
-			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !DAO.isChampGameCompleted(pool.getYear())) {
+			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !champGameCompleted && champPickEliminatedList.get(userChampPick1.getUserId()) == null) {
 				diffPicks++;
 			}
 		}

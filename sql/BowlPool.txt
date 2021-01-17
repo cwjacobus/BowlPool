@@ -22,7 +22,11 @@ UnderDogScore int(11),
 Completed boolean,
 Year int(5),
 DateTime timestamp,
-Cancelled boolean
+Cancelled boolean,
+FavoriteTeamId int(5),
+UnderdogTeamId int(5),
+CFPSemiGame boolean,
+CFPChampGame boolean
 );
 
 CREATE TABLE Pick

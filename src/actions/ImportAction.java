@@ -346,8 +346,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		System.out.println("Import games from web service");
 		try {
 			String uRL;
-			// TBD Remove year adjust for 21
-			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/GamesByWeek/20"+ (year == 21 ? 20 : year) + "POST/1?key=" + key;
+			uRL = "https://api.sportsdata.io/v3/cfb/scores/json/GamesByWeek/20"+ year + "POST/1?key=" + key;
 			URL obj = new URL(uRL);
 			HttpURLConnection con = (HttpURLConnection)obj.openConnection();
 			//int responseCode = con.getResponseCode();

@@ -82,6 +82,11 @@ insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (4, 'Sculley 2
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (5, 'Sculley 2018', 18, true, NULL);
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (6, 'Jacobus 2018', 18, false, NULL);
 
+// Copy users from another pool
+INSERT INTO User (UserName, LastName, FirstName, year, admin, PoolId)
+SELECT  User.UserName, User.LastName, User.FirstName, 21, false, 11
+FROM User
+WHERE User.poolId = 9;
 
 
 INSERT INTO User (UserName, LastName, FirstName, Email, year, admin, PoolId) VALUES ('Jacobus', 'Jacobus', 'Chris', 'cjacobus65@gmail.com', 18, 1, 5);

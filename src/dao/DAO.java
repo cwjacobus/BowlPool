@@ -580,7 +580,7 @@ public class DAO {
 			Statement stmt = conn.createStatement();
 			//select count(*) from BowlGame where CFPSemiGame = 1 and " + getYearClause(year, null) + 
 			// " and ((favorite = '" + champPick + "' and favoritescore <= underdogscore) or (underdog = '" + champPick + "' and underdogscore <= favoritescore));
-			ResultSet rs = stmt.executeQuery("select cp.userid from bowlgame bg, champpick cp where bg.cfpsemigame = 1 and cp.poolid = " + poolId + 
+			ResultSet rs = stmt.executeQuery("select cp.userid from bowlgame bg, champpick cp where bg.cfpsemigame = 1 and bg.completed = true and cp.poolid = " + poolId + 
 				" and ((bg.favorite like concat('%', cp.winner, '%') and bg.favoritescore <= bg.underdogscore) or (bg.underdog like concat('%', cp.winner, '%') and bg.underdogscore <= bg.favoritescore));");
 			while (rs.next()) {
 				champPickEliminatedList.add(rs.getInt(1));

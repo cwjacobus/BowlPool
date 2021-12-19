@@ -16,9 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+// Note .xls files are HSSF and .xlsx files are XSSF
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -143,7 +143,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    		FileInputStream spreadSheetFile = new FileInputStream(inputFile);
 	     
 	    		//Create Workbook instance holding reference to .xls file
-	    		HSSFWorkbook hWorkbook = new HSSFWorkbook(spreadSheetFile);
+	    		XSSFWorkbook hWorkbook = new XSSFWorkbook(spreadSheetFile);
 	    		if (usersImport || picksImport) {
 	    			importUsersAndPicks(hWorkbook);
 	    		}
@@ -163,7 +163,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    return "success";
 	}
 	
-	private void importUsersAndPicks(HSSFWorkbook hWorkbook) {
+	private void importUsersAndPicks(XSSFWorkbook hWorkbook) {
 		@SuppressWarnings("unchecked")
 		List<BowlGame> bowlGameList = (List<BowlGame>) userSession.get("bowlGamesList");
 		List<User> userList = DAO.getUsersList(year, pool.getPoolId());
@@ -171,7 +171,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
 		try {  
 			HashMap<Integer, String> bowlGameNameMap = null;
-			HSSFSheet sheet = hWorkbook.getSheetAt(0);
+			XSSFSheet sheet = hWorkbook.getSheetAt(0);
 	        System.out.println(sheet.getSheetName());
 	        Iterator<Row> rowIterator = sheet.iterator();
 	        boolean usersFound = false;
@@ -290,8 +290,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    }
 	}
 	
-	private void importBowlGamesFromFile(HSSFWorkbook hWorkbook) {	
-		HSSFSheet sheet = hWorkbook.getSheetAt(1);
+	private void importBowlGamesFromFile(XSSFWorkbook hWorkbook) {	
+		XSSFSheet sheet = hWorkbook.getSheetAt(1);
 		System.out.println(sheet.getSheetName());
 		Iterator<Row> rowIterator = sheet.iterator();
 		boolean gamesFound = false;
@@ -586,8 +586,20 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		else if (shortName.equalsIgnoreCase("Lending Tree")) {
 			altShortName = "Lendingtree";
 		}
-		else if (shortName.equalsIgnoreCase("Duke's Mayo")) {
+		else if (shortName.equalsIgnoreCase("Duke Mayo")) {
 			altShortName = "Dukes Mayo";
+		}
+		else if (shortName.equals("FRISCO")) {
+			altShortName = "Frisco Bowl";
+		}
+		else if (shortName.equalsIgnoreCase("Frisco Classic")) {
+			altShortName = "Frisco Football Classic";
+		}
+		else if (shortName.equalsIgnoreCase("Gaspirilla")) {
+			altShortName = "Gasparilla";
+		}
+		else if (shortName.equalsIgnoreCase("LA Bowl")) {
+			altShortName = "La Bowl";
 		}
 		
 		return altShortName;

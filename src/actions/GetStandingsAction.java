@@ -245,7 +245,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		}
 		
 		if (userChampPick1 != null && userChampPick2 != null) {
-			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !champGameCompleted && champPickEliminatedList.get(userChampPick1.getUserId()) == null) {
+			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !champGameCompleted && !champPickEliminatedList.contains(userChampPick1.getUserId())) {
 				diffPicks++;
 			}
 		}

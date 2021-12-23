@@ -75,6 +75,13 @@ CFTeamId int(5),
 Year int(5) NOT NULL
 );
 
+CREATE TABLE ExcludedGame
+(
+ExcludedGameId int(11) PRIMARY KEY AUTO_INCREMENT,
+GameId int(11) NOT NULL,
+PoolId int(5) NOT NULL
+);
+
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (1, 'Sculley 2014', 14, true, NULL);
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (2, 'Sculley 2015', 15, true, NULL);
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (3, 'Jacobus 2016', 16, false, NULL);

@@ -344,6 +344,21 @@ public class DAO {
 		return picksMap;
 	}
 	
+	public static List<Integer> getExcludedGamesList(Integer poolId) {
+		List<Integer> excludedGameList = new ArrayList<Integer>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM ExcludedGame where poolId = " + poolId);
+			while (rs.next()) {
+				excludedGameList.add(new Integer(rs.getInt("GameId")));
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return excludedGameList;
+	}
+	
 	public static User getUser(String name, Integer year, Integer poolId) {
 		User user = null;
 		try {
@@ -413,12 +428,13 @@ public class DAO {
 		return userList;
 	}
 	
-	public static int getNumberOfCompletedGames(Integer year, Timestamp firstGameStart) {
+	public static int getNumberOfCompletedGames(Pool pool) {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and " + firstGameStartSQL + getYearClause(year, null));
+			String firstGameStartSQL = pool.getFirstGameDate() != null ? "DateTime > '" + pool.getFirstGameDate() + "' and " : "";
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and GameId not in (select GameId from ExcludedGame where poolId = " + 
+				pool.getPoolId() + ") and " + firstGameStartSQL + getYearClause(pool.getYear(), null));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}

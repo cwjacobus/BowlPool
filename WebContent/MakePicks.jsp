@@ -95,7 +95,7 @@
 			<c:set var="gameStarted" value="true" />
 		</c:if>
 		<c:set var="disabled" value="" />
-		<c:if test="${sessionScope.readOnly || gameStarted}">
+		<c:if test="${gameStarted}"> 
 			<c:set var="disabled" value="disabled" />
 		</c:if>
   		<tr ${winLoseClass}>
@@ -139,7 +139,7 @@
       		<c:if test="${bowlGame.bowlName != 'Championship'}">
       			<td width=50 align=center>
       			<c:choose>
-      				<c:when test="${bowlGame.spread != ''}">
+      				<c:when test="${bowlGame.spread != null}">
       					${bowlGame.spread}
       				</c:when>
       				<c:otherwise>
@@ -152,7 +152,7 @@
   	</c:forEach>
   	</td></tr></table>
   	<br>
-  	<c:if test="${!sessionScope.readOnly}">
+  	<c:if test="${!sessionScope.readOnly || true}">
   		<input type="submit" value="Make Picks" onclick="return confirmPicks(this)"/>
   	</c:if>
   	</form>

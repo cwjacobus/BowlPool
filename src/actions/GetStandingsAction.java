@@ -105,16 +105,12 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		userSession.put("bowlGamesList", bowlGamesList);
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
+		List<Integer> excludedGameList = DAO.getExcludedGamesList(poolId);
+		userSession.put("excludedGameList", excludedGameList);
 		
-		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool.getYear(), pool.getFirstGameDate());
-		if (pool != null && pool.getPoolId() == 5) {
-			// special case Sculley 2018 does not use first game
-			// TBD Create an OptOut table that allows a pool to skip a game gameId, poolId
-			numOfBowlGames -= 1; 
-			if (numOfCompletedGames > 0) {
-				numOfCompletedGames -= 1;
-			}
-	    }
+		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool);
+		int numberOfExcludedGames = (excludedGameList != null ? excludedGameList.size() : 0);
+		numOfBowlGames -= numberOfExcludedGames; 
 		//Iterate through standings to make formatted display string
 		Iterator<Entry<String, Integer>> it = standings.entrySet().iterator();
     	int standingsIndex = 1;

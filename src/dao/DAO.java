@@ -191,7 +191,8 @@ public class DAO {
 		try { 
 			Statement stmt1 = conn.createStatement();
 			String query1String = "SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
-				"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and " + 
+				"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and bg.cancelled = false and " + 
+				"bg.gameId not in (select gameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
 				getYearClause("bg", year, "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
 				"(bg.FavoriteScore - " + (useSpreads ? "bg.Spread" : "0") + " > bg.UnderdogScore) or " +
 				"(p.Favorite = false and (bg.UnderdogScore + " + (useSpreads ? "bg.Spread" : "0") + " > bg.FavoriteScore))) " + 
@@ -253,13 +254,13 @@ public class DAO {
 		return bowlGameList;
 	}
 	
-	public static Map<Integer, BowlGame> getBowlGamesMap(Integer year, Timestamp firstGameStart) {
+	public static Map<Integer, BowlGame> getBowlGamesMap(Integer year) {
 		Map<Integer, BowlGame> bowlGamesMap = new HashMap<Integer, BowlGame>();
 		try {
 			Statement stmt = conn.createStatement();
 			// Only get games after first game start date
-			String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
-			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where " + firstGameStartSQL + getYearClause(year, null) + 
+			//String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
+			ResultSet rs = stmt.executeQuery("SELECT * FROM BowlGame where " + /*firstGameStartSQL +*/ getYearClause(year, null) + 
 				" and Cancelled = 0 order by DateTime");
 			BowlGame bowlGame;
 			while (rs.next()) {
@@ -383,7 +384,7 @@ public class DAO {
 			String sql = "SELECT * FROM Pool where poolId = " + poolId;
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads"), rs.getTimestamp("FirstGameDate"));
+				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads")/*, rs.getTimestamp("FirstGameDate")*/);
 			}
 		}
 		catch (SQLException e) {
@@ -432,9 +433,9 @@ public class DAO {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			String firstGameStartSQL = pool.getFirstGameDate() != null ? "DateTime > '" + pool.getFirstGameDate() + "' and " : "";
+			//String firstGameStartSQL = pool.getFirstGameDate() != null ? "DateTime > '" + pool.getFirstGameDate() + "' and " : "";
 			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and GameId not in (select GameId from ExcludedGame where poolId = " + 
-				pool.getPoolId() + ") and " + firstGameStartSQL + getYearClause(pool.getYear(), null));
+				pool.getPoolId() + ") and " + getYearClause(pool.getYear(), null)); // and " + firstGameStartSQL + getYearClause(pool.getYear(), null));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}
@@ -458,12 +459,12 @@ public class DAO {
 		return numberOfUsers;
 	}
 	
-	public static int getBowlGamesCount(Integer year, Timestamp firstGameStart) {
+	public static int getBowlGamesCount(Integer year) {
 		int numberOfBowlGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where " + firstGameStartSQL + getYearClause(year, null) + " and Cancelled = 0");
+			//String firstGameStartSQL = firstGameStart != null ? "DateTime > '" + firstGameStart + "' and " : "";
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where " + /*firstGameStartSQL +*/ getYearClause(year, null) + " and Cancelled = 0");
 			rs.next();
 			numberOfBowlGames = rs.getInt(1);
 		}

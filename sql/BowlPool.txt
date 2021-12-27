@@ -54,8 +54,7 @@ CREATE TABLE Pool
 PoolId int(5) PRIMARY KEY,
 PoolName varchar(255) NOT NULL,
 Year int(5) NOT NULL,
-UsePointSpreads boolean NOT NULL,
-FirstGameDate timestamp
+UsePointSpreads boolean NOT NULL
 );
 
 CREATE TABLE CFTeam

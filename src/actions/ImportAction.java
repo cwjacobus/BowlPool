@@ -115,7 +115,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	if (picksCB != null) {
 	    		picksImport = true;
 	    		// Check for games imported
-	    		if (DAO.getBowlGamesCount(year, pool.getFirstGameDate()) == 0) {
+	    		if (DAO.getBowlGamesCount(year) == 0) {
 	    			context.put("errorMsg", "Bowl Games not imported for 20" + year + "!  Import Bowl Games.");
 	    			stack.push(context);
 	    			return "error";
@@ -129,7 +129,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	}
 	    	if (gamesCB != null) { // Import bowl games
 	    		bowlGamesImport = true; 
-	    		int bowlGamesCount = DAO.getBowlGamesCount(year, pool.getFirstGameDate());
+	    		int bowlGamesCount = DAO.getBowlGamesCount(year);
 	    		if (fromWS != null) {  // from WS
 	    			if (bowlGamesCount > 0) {
 	    				context.put("errorMsg", "Bowl Games already imported for 20" + year + "!  Delete and reimport.");

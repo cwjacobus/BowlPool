@@ -59,6 +59,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	Map<String, Object> userSession;
 	Map<Integer, BowlGame> bowlGamesMap;
 	List<Integer> champPickEliminatedList;
+	List<Integer> excludedGameList;
 	
 	final static Logger logger = Logger.getLogger(GetStandingsAction.class);
 	
@@ -105,7 +106,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		userSession.put("bowlGamesList", bowlGamesList);
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
-		List<Integer> excludedGameList = DAO.getExcludedGamesList(poolId);
+		excludedGameList = DAO.getExcludedGamesList(poolId);
 		userSession.put("excludedGameList", excludedGameList);
 		
 		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool);
@@ -235,7 +236,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		for (Pick up1 : userPicks1) {
 			for (Pick up2 : userPicks2) {
 				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && bowlGamesMap.get(up1.getGameId()) != null &&
-						!bowlGamesMap.get(up1.getGameId()).isCompleted() && !bowlGamesMap.get(up1.getGameId()).isCancelled()) {
+						!bowlGamesMap.get(up1.getGameId()).isCompleted() && !bowlGamesMap.get(up1.getGameId()).isCancelled() && !excludedGameList.contains(up1.getGameId())) {
 					diffPicks++;
 				}
 			}

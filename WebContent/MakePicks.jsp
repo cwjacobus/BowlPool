@@ -3,7 +3,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib uri="/WEB-INF/custom-functions.tld" prefix="custfn" %>
 
 <html>
 <head>
@@ -64,7 +63,7 @@
 	<tr><th>Bowl</th><th>Time(EST)</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
 	<tr><td>
 	<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">
-		<c:if test="${custfn:notIn(sessionScope.excludedGameList, bowlGame.gameId)}">
+		<c:if test="${!fn:contains(sessionScope.excludedGameList, bowlGame.gameId)}">
 		<c:set var="favChecked" value = ""/>
 		<c:set var="dogChecked" value = ""/>
 		<c:set var="winLoseClass" value=""/>

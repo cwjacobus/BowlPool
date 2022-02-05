@@ -1,7 +1,6 @@
 package dao;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -682,22 +681,8 @@ public class DAO {
 		return yearClause;
 	}
 	
-	public static void setConnection() {
-		try {
-            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-        } 
-		catch (Exception ex) {
-        }
-		try {
-			String connString = "jdbc:mysql://localhost/bowlpool";
-			connString += "?user=root&password=PASSWORD&useSSL=false&allowPublicKeyRetrieval=true";
-			conn = DriverManager.getConnection(connString);
-		}
-		catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		}
+	public static void setConnection(Connection connection) {
+		conn = connection;
 	}
 	
 	/*

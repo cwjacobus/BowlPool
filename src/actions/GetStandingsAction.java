@@ -1,6 +1,7 @@
 package actions;
 
 import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.util.Map.Entry;
@@ -32,6 +34,7 @@ import data.Pick;
 import data.Pool;
 import data.Standings;
 import data.User;
+import init.BowlPoolDatabase;
 
 class SortbyDate implements Comparator<BowlGame> 
 { 
@@ -67,7 +70,9 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		ValueStack stack = ActionContext.getContext().getValueStack();
 	    Map<String, Object> context = new HashMap<String, Object>();
 		
-		DAO.setConnection();
+	    BowlPoolDatabase bowlPoolDB = (BowlPoolDatabase)ServletActionContext.getServletContext().getAttribute("Database");  
+        Connection con = bowlPoolDB.getCon();
+		DAO.setConnection(con);
 		pool = DAO.getPool(poolId);
 		if (pool == null) {
 			context.put("errorMsg", "Pool does not exist!");

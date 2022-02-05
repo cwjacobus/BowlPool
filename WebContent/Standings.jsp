@@ -60,6 +60,24 @@
 			<input type="checkbox" name="picksCB" value="Picks"> Picks<br>
 			<input type="submit" value="Import">
   		</form>
+  		<h3>Cancel Game</h3>
+  		<form action="cancelGame">
+  			<select name="bowlGame">	
+      			<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">
+      				<option value="${bowlGame.gameId}">${bowlGame.bowlName}</option>
+      			</c:forEach>
+      		</select><br>
+  			<input type="submit" value="Cancel Game">
+  		</form>
+  		<h3>Exclude Game</h3>
+  		<form action="excludeGame">
+  			<select name="bowlGame">	
+      			<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">
+      				<option value="${bowlGame.gameId}">${bowlGame.bowlName}</option>
+      			</c:forEach>
+      		</select><br>
+  			<input type="submit" value="Exclude Game">
+  		</form>
   		<br>
   	</c:if>
   	<!--<s:form action="import" method="post" enctype="multipart/form-data" >

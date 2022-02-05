@@ -41,5 +41,17 @@
             <result name="success">/ImportResults.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
       </action>
+      <action name="cancelGame" 
+            class="actions.CancelGameAction" 
+            method="execute">
+            <result name="success">/SuccessPage.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
+      <action name="excludeGame" 
+            class="actions.ExcludeGameAction" 
+            method="execute">
+            <result name="success">/SuccessPage.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
    </package>
 </struts>

@@ -59,7 +59,7 @@
 	<jsp:useBean id="now" class="java.util.Date"/>
 	<c:set target='${now}' property='time' value='${now.time + 3600000}'/><!-- Add 1 hour for CT -> ET -->
 	<form action="savePicks">
-	<table border=1 cellspacing=0 cellpadding=0>
+	<table border=1 style="border-collapse: collapse; border-spacing: 0px;">
 	<tr><th>Bowl</th><th>Time(EST)</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
 	<tr><td>
 	<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">

@@ -635,6 +635,28 @@ public class DAO {
 		return;
 	}
 	
+	public static void cancelBowlGame(Integer gameId) {
+		try {
+			Statement stmt = conn.createStatement();
+			String updateSQL = "UPDATE BowlGame SET Cancelled = 1 WHERE GameId = " + gameId;
+			stmt.execute(updateSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void excludeBowlGame(Integer gameId, Integer poolId) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "INSERT INTO ExcludedGame (GameId, PoolId) VALUES (" + gameId + ", " + poolId + ");";
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static boolean useYearClause(Integer year) {
 		boolean yearClause = false;
 		

@@ -24,6 +24,7 @@ import com.opensymphony.xwork2.util.ValueStack;
 
 import dao.DAO;
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -72,7 +73,15 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		
 	    BowlPoolDatabase bowlPoolDB = (BowlPoolDatabase)ServletActionContext.getServletContext().getAttribute("Database");  
         Connection con = bowlPoolDB.getCon();
-		DAO.setConnection(con);
+        DAO.setConnection(con);
+        try {
+        	DAO.pingDatabase();
+        }
+        catch (CommunicationsException ce) {
+        	logger.info("DB Connection timed out - Reconnect");
+        	con = bowlPoolDB.reconnectAfterTimeout();
+        	DAO.setConnection(con);
+        }
 		pool = DAO.getPool(poolId);
 		if (pool == null) {
 			context.put("errorMsg", "Pool does not exist!");

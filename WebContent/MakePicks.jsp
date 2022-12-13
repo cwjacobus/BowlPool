@@ -58,7 +58,7 @@
 	<!--<c:out value="User: ${sessionScope.user.userName} ${sessionScope.user.admin}"/>-->
 	<jsp:useBean id="now" class="java.util.Date"/>
 	<c:set target='${now}' property='time' value='${now.time + 3600000}'/><!-- Add 1 hour for CT -> ET -->
-	<form action="savePicks">
+	<form action="savePicks" onsubmit="makePicksButton.disabled = true; return true;">
 	<table border=1 style="border-collapse: collapse; border-spacing: 0px;">
 	<tr><th>Bowl</th><th>Time(EST)</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
 	<tr><td>
@@ -155,7 +155,7 @@
   	</td></tr></table>
   	<br>
   	<c:if test="${!sessionScope.readOnly}">
-  		<input type="submit" value="Make Picks" onclick="return confirmPicks(this)"/>
+  		<input type="submit" name="makePicksButton" value="Make Picks" onclick="return confirmPicks(this)"/>
   	</c:if>
   	</form>
 	</body>

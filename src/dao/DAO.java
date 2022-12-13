@@ -392,6 +392,12 @@ public class DAO {
 		return pool;
 	}
 	
+	public static void pingDatabase() throws SQLException {
+		Statement stmt = conn.createStatement();
+		String sql = "SELECT * FROM Pool";
+		stmt.executeQuery(sql);
+	}
+	
 	public static List<User> getUsersList(Integer year, Integer poolId) {
 		List<User>userList = new ArrayList<User>();
 		try {

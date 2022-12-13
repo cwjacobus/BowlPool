@@ -162,7 +162,7 @@ delete from user where year = X;
 update bowlgame set datetime = addtime(datetime,"-1:00:00") where year=X;
 
 // Compare 2 users picks for differences
-select g.bowlname, IF(p1.favorite=1, g.favorite, g.underdog), IF(p2.favorite=1, g.favorite, g.underdog) from pick p1, pick p2, bowlgame g where p1.gameid = g.gameid and p1.gameid=p2.gameid and 
+select g.datetime, g.bowlname, IF(p1.favorite=1, g.favorite, g.underdog), IF(p2.favorite=1, g.favorite, g.underdog) from pick p1, pick p2, bowlgame g where p1.gameid = g.gameid and p1.gameid=p2.gameid and 
 p1.favorite!=p2.favorite and p1.userid=808 and p2.userid=837 order by g.datetime;
 
 
@@ -174,3 +174,6 @@ mysqladmin -u root -pPASSWORD create db2
 mysql -u root -pPASSWORD db2 < dump.sql
 // Change password
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('PASSWORD')
+
+show variables like "%timeout%";
+SET GLOBAL interactive_timeout=604800;

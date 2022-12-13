@@ -27,6 +27,7 @@
 			 <option value="9">Jacobus 2020</option>
 			 <option value="12">Sculley 2021</option>
 			 <option value="11">Jacobus 2021</option>
+			 <option value="13">Jacobus 2022</option>
 		</select></td></tr>
       	<tr><td><input type="submit" value="Login"/></td></tr>
 		</table>

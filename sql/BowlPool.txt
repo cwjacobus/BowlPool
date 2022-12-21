@@ -165,6 +165,12 @@ update bowlgame set datetime = addtime(datetime,"-1:00:00") where year=X;
 select g.datetime, g.bowlname, IF(p1.favorite=1, g.favorite, g.underdog), IF(p2.favorite=1, g.favorite, g.underdog) from pick p1, pick p2, bowlgame g where p1.gameid = g.gameid and p1.gameid=p2.gameid and 
 p1.favorite!=p2.favorite and p1.userid=808 and p2.userid=837 order by g.datetime;
 
+// Swap favorite/ underdog
+UPDATE bowlgame SET favorite=(@temp:=favorite), favorite = underdog, underdog = @temp where GameId = 1684 or GameId = 1688;
+UPDATE bowlgame SET favoriteteamid=(@temp:=favoriteteamid), favoriteteamid = underdogteamid, underdogteamid = @temp where GameId = 1684 or GameId = 1688;
+// Flip picks
+UPDATE pick set favorite = not favorite where GameId = 1684 or GameId = 1688;
+
 
 // My SQL commands
 C:\Program Files\MySQL\MySQL Server 5.7\bin>mysql -u root -pPASSWORD

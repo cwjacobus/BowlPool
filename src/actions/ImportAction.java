@@ -19,6 +19,8 @@ import java.util.Properties;
 // Note .xls files are HSSF and .xlsx files are XSSF
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -141,14 +143,19 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    	if (usersImport || picksImport || (bowlGamesImport && fromWS == null)) {
 	    		File inputFile = new File(prop.getProperty("inputFilePath") + inputFileName);
 	    		FileInputStream spreadSheetFile = new FileInputStream(inputFile);
-	     
-	    		//Create Workbook instance holding reference to .xls file
-	    		XSSFWorkbook hWorkbook = new XSSFWorkbook(spreadSheetFile);
+	    		XSSFWorkbook xWorkbook = null;
+	    		HSSFWorkbook hWorkbook = null;
+	    		if (inputFileName.contains(".xlsx")) {
+	    			xWorkbook = new XSSFWorkbook(spreadSheetFile);
+	    		}
+	    		else {
+	    			hWorkbook = new HSSFWorkbook(spreadSheetFile);
+	    		}
 	    		if (usersImport || picksImport) {
-	    			importUsersAndPicks(hWorkbook);
+	    			importUsersAndPicks(xWorkbook, hWorkbook);
 	    		}
 	    		if (bowlGamesImport) {
-	    			importBowlGamesFromFile(hWorkbook);
+	    			importBowlGamesFromFile(xWorkbook, hWorkbook);
 	    		} 
 	    	}
 	    	else if (bowlGamesImport && fromWS != null) {
@@ -163,17 +170,25 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    return "success";
 	}
 	
-	private void importUsersAndPicks(XSSFWorkbook hWorkbook) {
+	private void importUsersAndPicks(XSSFWorkbook xWorkbook, HSSFWorkbook hWorkbook) {
 		@SuppressWarnings("unchecked")
 		List<BowlGame> bowlGameList = (List<BowlGame>) userSession.get("bowlGamesList");
 		List<User> userList = DAO.getUsersList(year, pool.getPoolId());
 		List<Pick> picksList = new ArrayList<Pick>();
 		HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
 		try {  
+			Iterator<Row> rowIterator = null;
+			if (xWorkbook != null) {
+				XSSFSheet xSheet = xWorkbook.getSheetAt(0);
+				System.out.println(xSheet.getSheetName());
+				rowIterator = xSheet.iterator();
+			}
+			else {
+				HSSFSheet hSheet = hWorkbook.getSheetAt(0);
+				System.out.println(hSheet.getSheetName());
+				rowIterator = hSheet.iterator();
+			}
 			HashMap<Integer, String> bowlGameNameMap = null;
-			XSSFSheet sheet = hWorkbook.getSheetAt(0);
-	        System.out.println(sheet.getSheetName());
-	        Iterator<Row> rowIterator = sheet.iterator();
 	        boolean usersFound = false;
 	        boolean userCreationStarted = false;
 	        String prevUser = null;
@@ -217,25 +232,26 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        			int gameIndex = 0;
 	        			while (cellIter.hasNext()){
 	        				Cell cell = (Cell)cellIter.next();
-	        				if (cell.getColumnIndex() == 0 || cell.getColumnIndex() == 1) {
+	        				int cellColumnIndex = cell.getColumnIndex();
+	        				if (cellColumnIndex == 0 || cellColumnIndex == 1) {
 	        					continue;
 	        				}
-	        				String pick = getStringFromCell(row, cell.getColumnIndex());
+	        				String pick = getStringFromCell(row, cellColumnIndex);
 	        				BowlGame bowlGame = getBowlGameFromShortName(bowlGameList, bowlGameNameMap.get(gameIndex));
 	        				if (bowlGame == null) {
-	        					if (cell.getColumnIndex() % 2 != 0) {
+	        					if (cellColumnIndex % 2 != 0) {
 		        					gameIndex++;
 		        				}
 	        					continue;
 	        				}
 	        				if (!bowlGame.isCfpChampGame()) {
-	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 == 0)) {
+	        					if ((pick != null && pick.length() > 0) && (cellColumnIndex % 2 == 0)) {
 	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create fav Pick
 	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), true);
 	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), true, pool.getPoolId(), null));
 	        					}
-	        					if ((pick != null && pick.length() > 0) && (cell.getColumnIndex() % 2 != 0)) {
+	        					if ((pick != null && pick.length() > 0) && (cellColumnIndex % 2 != 0)) {
 	        						System.out.print("DOG-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create dog Pick
 	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
@@ -243,7 +259,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        					}
 	        				}
 	        				else {
-	        					if (cell.getColumnIndex() % 2 == 0) {
+	        					if (cellColumnIndex % 2 == 0) {
 	        						System.out.print("CHAMP WINNER-" + pick + " ");
 	        						// TBD TEST Translate pick to full team name (school + mascot) for ChampPick
 	        						CFTeam cfTeam = cfTeamsMap.get(pick.toUpperCase());
@@ -254,7 +270,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						//DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
 	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0, pool.getPoolId(), null));
 	        					}
-	        					else if (cell.getColumnIndex() % 2 != 0) { // Assumes ChampPick record has been created previously to update
+	        					else if (cellColumnIndex % 2 != 0) { // Assumes ChampPick record has been created previously to update
 	        						System.out.print("CHAMP TOTAL POINTS-" + pick + " ");
 	        						// create Winner ChampPick
 	        						//DAO.updateChampPickTotPts(user.getUserId(), pick);
@@ -266,7 +282,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						}
 	        					}
 	        				}
-	        				if (cell.getColumnIndex() % 2 != 0) {
+	        				if (cellColumnIndex % 2 != 0) {
 	        					gameIndex++;
 	        				}
 	        				if (gameIndex == bowlGameNameMap.size()) {
@@ -290,10 +306,18 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    }
 	}
 	
-	private void importBowlGamesFromFile(XSSFWorkbook hWorkbook) {	
-		XSSFSheet sheet = hWorkbook.getSheetAt(1);
-		System.out.println(sheet.getSheetName());
-		Iterator<Row> rowIterator = sheet.iterator();
+	private void importBowlGamesFromFile(XSSFWorkbook xWorkbook, HSSFWorkbook hWorkbook) {	
+		Iterator<Row> rowIterator = null;
+		if (xWorkbook != null) {
+			XSSFSheet xSheet = xWorkbook.getSheetAt(1);
+			System.out.println(xSheet.getSheetName());
+			rowIterator = xSheet.iterator();
+		}
+		else {
+			HSSFSheet hSheet = hWorkbook.getSheetAt(1);
+			System.out.println(hSheet.getSheetName());
+			rowIterator = hSheet.iterator();
+		}
 		boolean gamesFound = false;
 		String prevGame = null;
 		@SuppressWarnings("unchecked")

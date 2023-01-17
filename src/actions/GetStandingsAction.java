@@ -78,7 +78,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
         	DAO.pingDatabase();
         }
         catch (CommunicationsException ce) {
-        	logger.info("DB Connection timed out - Reconnect");
+        	System.out.println("DB Connection timed out - Reconnect");
         	con = bowlPoolDB.reconnectAfterTimeout();
         	DAO.setConnection(con);
         }

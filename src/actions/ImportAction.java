@@ -604,7 +604,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		else if (shortName.equalsIgnoreCase("Tax Slayer")) {
 			altShortName = "TaxSlayer";
 		}
-		else if (shortName.equalsIgnoreCase("First Respnder")) {
+		else if (shortName.equalsIgnoreCase("First Respnder")  || shortName.equalsIgnoreCase("1st Responder")) {
 			altShortName = "First Responder";
 		}
 		else if (shortName.equalsIgnoreCase("Lending Tree")) {
@@ -624,6 +624,15 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		}
 		else if (shortName.equalsIgnoreCase("LA Bowl")) {
 			altShortName = "La Bowl";
+		}
+		else if (shortName.equalsIgnoreCase("Roof Claim")) {
+			altShortName = "Roofclaim";
+		}
+		else if (shortName.equalsIgnoreCase("ReliaQuest")) {
+			altShortName = "Reliaquest";
+		}
+		else if (shortName.equalsIgnoreCase("Pop-Tarts")) {
+			altShortName = "Pop-tarts";
 		}
 		
 		return altShortName;

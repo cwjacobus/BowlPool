@@ -171,6 +171,10 @@ UPDATE bowlgame SET favoriteteamid=(@temp:=favoriteteamid), favoriteteamid = und
 // Flip picks
 UPDATE pick set favorite = not favorite where GameId = 1684 or GameId = 1688;
 
+// Insert favorite picks
+insert into pick (userid, gameid, favorite, poolid, createdtime)
+SELECT  <Favorites userId>, gameid, 1, <poolId>, now() FROM bowlgame WHERE year = <year>;
+
 
 // My SQL commands
 C:\Program Files\MySQL\MySQL Server 5.7\bin>mysql -u root -pPASSWORD

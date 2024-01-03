@@ -134,7 +134,6 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
     	int eliminatedByCount = 0;
     	boolean champGameCompleted = DAO.isChampGameCompleted(pool.getYear());
     	champPickEliminatedList = DAO.getChampPickEliminatedList(poolId);
-    	System.out.println("Champ Game Completed: " + champGameCompleted);
     	Map <String, Integer> eliminatedMap = new HashMap<String, Integer>();
 		while (it.hasNext()) {
 			Map.Entry<String, Integer> line = (Map.Entry<String, Integer>)it.next();

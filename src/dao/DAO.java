@@ -26,16 +26,18 @@ public class DAO {
 	public static Connection conn; 
 	
 	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, 
-		Integer dogScore, boolean completed, boolean cancelled, Integer favoriteTeamId, Integer underdogTeamId, boolean cfpSemiGame, boolean cfpChampGame) {
+		Integer dogScore, boolean completed, boolean cancelled, Integer favoriteTeamId, Integer underdogTeamId, boolean cfpSemiGame, boolean cfpChampGame,
+		boolean cfpRound1Game, boolean cfpQuarterGame) {
 		gameName = gameName.replaceAll("'", "");
 		favorite = favorite.replaceAll("'", "");
 		underdog = underdog.replaceAll("'", "");
 		try {
 			Statement stmt = conn.createStatement();
 			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime, Cancelled, " +
-				"FavoriteTeamId, UnderdogTeamId, CFPSemiGame, CFPChampGame) VALUES ('" + gameName + "', '" + favorite + "', '" + underdog + "' , " + line + ", " + 
-				favScore + ", " +  dogScore + ", " + completed + ", " + year + "," + (dateTime != null ? "'" + dateTime + "'" : null) + ", " + cancelled + 
-				", " + favoriteTeamId +  ", " + underdogTeamId +  ", " + cfpSemiGame +  ", " + cfpChampGame + ");";
+				"FavoriteTeamId, UnderdogTeamId, CFPSemiGame, CFPChampGame, CFPRound1Game, CFPQuarterGame) VALUES ('" + gameName + "', '" + favorite + "', '" + 
+				underdog + "' , " + line + ", " + favScore + ", " +  dogScore + ", " + completed + ", " + year + "," + (dateTime != null ? "'" + 
+				dateTime + "'" : null) + ", " + cancelled + ", " + favoriteTeamId +  ", " + underdogTeamId +  ", " + cfpSemiGame +  ", " + 
+				cfpChampGame + ", " + cfpRound1Game +  ", " + cfpQuarterGame + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -186,7 +188,10 @@ public class DAO {
 	public static TreeMap<String, Integer> getStandings(Integer year, Pool pool) {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> cfpRound1Winners = new HashMap<Integer, Integer>();
 		boolean useSpreads = pool != null ? pool.isUsePointSpreads() : true;
+		int cfpRound1Pts = 2;
+		
 		try { 
 			Statement stmt1 = conn.createStatement();
 			String query1String = "SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
@@ -210,10 +215,27 @@ public class DAO {
 					champGameWinners.put(rs2.getInt(1), rs2.getInt(2));
 				}
 			}
+			// 2024 Only - get CFP Round 1 winners for additional points
+			if (year == 24) {
+				Statement stmt3 = conn.createStatement();
+				String query3String = "SELECT u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
+						"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and bg.cancelled = false and " + 
+						"bg.gameId not in (select gameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
+						"bg.bowlName like '%Playoff%' and " + 
+						getYearClause("bg", year, "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
+						"(bg.FavoriteScore - " + (useSpreads ? "bg.Spread" : "0") + " > bg.UnderdogScore) or " +
+						"(p.Favorite = false and (bg.UnderdogScore + " + (useSpreads ? "bg.Spread" : "0") + " > bg.FavoriteScore))) " + 
+						"group by u.UserName";
+				ResultSet rs3 = stmt3.executeQuery(query3String);
+				while (rs3.next()) {
+					cfpRound1Winners.put(rs3.getInt(1), rs3.getInt(2));
+				}
+			}
 			while (rs1.next()) {
 				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? 1 : 0; 
-				String wins = Integer.toString(rs1.getInt(3) + champWin); 
-				if ((rs1.getInt(3)  + champWin) < 10) {
+				int r1Win = cfpRound1Winners.get(rs1.getInt(2)) != null ? (cfpRound1Pts - 1) : 0;
+				String wins = Integer.toString(rs1.getInt(3) + champWin + r1Win); 
+				if ((rs1.getInt(3)  + champWin + r1Win) < 10) {
 					wins = "0" + wins;
 				}
 				standings.put(wins + ":" + rs1.getString(1), rs1.getInt(2));
@@ -243,7 +265,7 @@ public class DAO {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"), rs.getString("Underdog"), 
 					rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
 					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"), 
-					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"));
+					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"),rs.getBoolean("CFPRound1Game"), rs.getBoolean("CFPQuarterGame"));
 				bowlGameList.add(bowlGame);
 			}
 		}
@@ -266,7 +288,7 @@ public class DAO {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"), rs.getString("Underdog"), 
 					rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
 					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"),
-					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"));
+					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"),rs.getBoolean("CFPRound1Game"), rs.getBoolean("CFPQuarterGame"));
 				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
 			}
 		}
@@ -554,16 +576,46 @@ public class DAO {
 		List<String>potentialChampionsList = new ArrayList<String>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT Favorite, Underdog FROM BowlGame where CFPSemiGame=1 and year = " + year);
+			ResultSet rs = stmt.executeQuery("SELECT distinct Favorite, Underdog FROM BowlGame where (CFPRound1Game=1 or CFPQuarterGame=1) and year = " + year);
 			while (rs.next()) {
-				potentialChampionsList.add(rs.getString(1)); // favorite
-				potentialChampionsList.add(rs.getString(2)); // underdog
+				String favorite = rs.getString(1);
+				String underdog = rs.getString(2);
+				if (favorite != null && favorite.length() > 0) {
+					potentialChampionsList.add(favorite);
+				}
+				if (underdog != null && underdog.length() > 0) {
+					potentialChampionsList.add(underdog);
+				}
 			}
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return potentialChampionsList;
+	}
+	
+	public static HashMap<Integer, String> getCFPTeamsMap(int year) {
+		HashMap<Integer, String> cfpTeamsMap = new HashMap<>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT distinct Home, HomeSeed, Visitor, VisSeed from CFPGame where year=" + year);
+			while (rs.next()) {
+				String home = rs.getString(1);
+				Integer homeSeed = rs.getInt(2);
+				String visitor = rs.getString(3);
+				Integer visSeed = rs.getInt(4);
+				if (home != null && home.length() > 0) {
+					cfpTeamsMap.put(homeSeed, home);
+				}
+				if (visitor != null && visitor.length() > 0) {
+					cfpTeamsMap.put(visSeed, visitor);
+				}
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return cfpTeamsMap;
 	}
 	
 	public static boolean isThereDataForAYear(int year) {

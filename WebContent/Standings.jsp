@@ -12,7 +12,7 @@
 	<table style="padding: 0; border-spacing: 0;">
 	<c:set var="color" value="white" />
 	<c:set var="index" value="0" />
-	<tr style="color: white; background: black; font-weight: bold;"><th></th><th align="left">Name</th><th align="left">Win</th><th align="left">Elim</th></tr>
+	<tr style="color: white; background: black; font-weight: bold;"><th></th><th align="left">Name</th><th align="left">Pts</th><th align="left">Elim</th></tr>
   	<s:iterator value="standings" var="standingsLine">
   		<c:if test ="${standingsLine.value.userName != 'dummy'}">
   			<c:choose>

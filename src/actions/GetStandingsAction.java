@@ -17,6 +17,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
+import org.json.JSONObject;
 
 import java.util.Map.Entry;
 
@@ -122,6 +123,9 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		userSession.put("potentialChampionsList", potentialChampionsList);
 		excludedGameList = DAO.getExcludedGamesList(poolId);
 		userSession.put("excludedGameList", excludedGameList);
+		Map<Integer, String> cFPTeamMap = DAO.getCFPTeamsMap(pool.getYear());
+		JSONObject cFPTeamsJSON = new JSONObject(cFPTeamMap);
+	    userSession.put("cFPTeamsJSON", cFPTeamsJSON.toString());
 		
 		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool);
 		int numberOfExcludedGames = (excludedGameList != null ? excludedGameList.size() : 0);

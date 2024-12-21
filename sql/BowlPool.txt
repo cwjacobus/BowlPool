@@ -66,20 +66,42 @@ Conference varchar(100),
 ShortName varchar(25)
 );
 
-CREATE TABLE CFPlayoffTeam
-(
-CFPlayoffTeamId int(11) PRIMARY KEY AUTO_INCREMENT,
-CFTeam varchar(150),
-CFTeamId int(5),
-Year int(5) NOT NULL
-);
-
 CREATE TABLE ExcludedGame
 (
 ExcludedGameId int(11) PRIMARY KEY AUTO_INCREMENT,
 GameId int(11) NOT NULL,
 PoolId int(5) NOT NULL
 );
+
+CREATE TABLE CFPGame
+(
+CFPGameId int(11) PRIMARY KEY AUTO_INCREMENT,
+Description varchar(50),
+Winner varchar(25),
+Loser varchar(25),
+PointsValue int,
+Completed boolean,
+Home varchar(25),
+Visitor varchar(25),
+HomeScore int(3),
+VisScore int(3),
+HomeSeed int(3),
+VisSeed int(3),
+DateTime timestamp,
+Year int(5) NOT NULL
+);
+
+CREATE TABLE CFPPick
+(
+CFPPickId int(11) PRIMARY KEY AUTO_INCREMENT,
+UserId int(11),
+CFPGameId int(11),
+Winner varchar(255),
+TotalPoints int(11),
+PoolId int(5),
+CreatedTime timestamp
+);
+
 
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (1, 'Sculley 2014', 14, true, NULL);
 insert into pool (PoolId, PoolName, Year, UsePointSpreads) values (2, 'Sculley 2015', 15, true, NULL);
@@ -187,3 +209,42 @@ SET PASSWORD FOR 'root'@'localhost' = PASSWORD('PASSWORD')
 
 show variables like "%timeout%";
 SET GLOBAL interactive_timeout=604800;
+
+// 2024/25 12 team playoff
+ALTER TABLE bowlgame ADD COLUMN CFPRound1Game boolean default false; ALTER TABLE bowlgame ADD COLUMN CFPQuarterGame boolean default false;
+update bowlgame set CFPRound1Game = true where bowlname = 'College Football Playoff First Round Game' and year=24;
+update bowlgame set bowlname='Hawaii Bowl' where gameid=1742;
+
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Peach Bowl','Arizona State Sun Devils',null,null,0,0,false,24,'2025-01-01 13:00:00',false,255,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Rose Bowl','Oregon Ducks',null,null,0,0,false,24,'2025-01-01 17:00:00',false,245,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Fiesta Bowl','Boise State Broncos',null,null,0,0,false,24,'2024-12-31 19:30:00',false,215,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Sugar Bowl','Georgia Bulldogs',null,null,0,0,false,24,'2025-01-01 20:45:00',false,272,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Orange Bowl',null,null,null,0,0,false,24,'2025-01-09 19:30:00',false,null,null,false,false,true,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Cotton Bowl',null,null,null,0,0,false,24,'2025-01-10 19:30:00',false,null,null,false,false,true,false);
+
+// Exclude new quarters and semis
+insert into excludedgame (gameid, poolid) values (1790, 17);
+insert into excludedgame (gameid, poolid) values (1783, 17);
+insert into excludedgame (gameid, poolid) values (1789, 17);
+insert into excludedgame (gameid, poolid) values (1791, 17);
+insert into excludedgame (gameid, poolid) values (1787, 17);
+insert into excludedgame (gameid, poolid) values (1788, 17);
+
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 1',2,false,'UT','CLEM',5,12,'2025-01-21 16:00:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 2',2,false,'PSU','SMU',6,11,'2025-01-21 12:00:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 3',2,false,'ND','IU',7,10,'2025-01-20 20:00:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 4',2,false,'OSU','TENN',8,9,'2025-01-21 20:00:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 4 Peach Bowl',2,false,'ASU',null,4,null,'2026-01-01 13:00:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 1 Rose Bowl',2,false,'OREGON',null,1,null,'2026-01-01 17:00:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 3 Fiesta Bowl',2,false,'BOISE',null,3,null,'2025-12-31 19:30:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 2 Sugar Bowl',2,false,'UGA',null,2,null,'2026-01-01 20:45:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Semis Game 1 Orange Bowl',2,false,null,null,null,null,'2026-01-09 19:30:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Semis Game 2 Cotton Bowl',2,false,null,null,null,null,'2026-01-10 19:30:00',25);
+insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Championship',2,false,null,null,null,null,'2026-01-20 19:30:00',25);
+

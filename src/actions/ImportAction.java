@@ -336,7 +336,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
 				// Create a blank Championship game place holder and break;
 				if (!updateBowlGames) {
-					DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false, false, null, null, false, true);
+					DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false, false, null, null, false, true, false, false);
 				}
 				break;
 			}
@@ -353,7 +353,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					
 					String underdog = getStringFromCell(row, 7).trim();
 					// TBD get fav, dog ids and semi
-					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null, false, false);
+					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null, false, false, false, false); //TBD)
 				}
 				else {
 					BowlGame bg = getBowlGameFromShortName(bowlGamesList, gameName);
@@ -451,11 +451,13 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					champGameCreated = true;
 				}
 				Double pointSpread = avgHomeSpread != null ? Math.abs(roundToHalf(avgHomeSpread)) : null;
-				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false, favoriteTeamId, underdogTeamId, cfpSemiGame, cfpChampGame);
+				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false, favoriteTeamId, 
+					underdogTeamId, cfpSemiGame, cfpChampGame, false, false); //TBD
 			}
 			if (!champGameCreated) {
 				Date championshipDate = dateFormat.parse("2021-01-11 20:00:00");
-				DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false, null, null, false, true);
+				DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false, null, 
+					null, false, true, false, false);
 			}
 		 }
 		catch (Exception e) {

@@ -75,6 +75,41 @@ public class DAO {
 		}
 	}
 	
+	public static void createBatchCfpPicks(List<String> cfpPicksList, Pool pool, Integer userId) {
+		try {
+			conn.setAutoCommit(false);
+			Statement stmt = conn.createStatement();
+			int picksCount = 0;
+			for (String p : cfpPicksList) {
+				String[] cfpPicksArray = p.split(":");
+				String team = cfpPicksArray[0];
+				String round = cfpPicksArray[1];
+				String gameIndex = cfpPicksArray[2];
+				String insertSQL = "INSERT INTO CFPPick (UserId, CFPGameId, Winner, TotalPoints, PoolId, CreatedTime) VALUES (" + 
+					userId + ", (SELECT CFPGameId from CFPGame where round =" + round + " and gameIndex =" + gameIndex + " and year =" + pool.getYear() +
+					"), '" + team + "', 0, " + pool.getPoolId() + ", NOW());";
+				stmt.addBatch(insertSQL);
+				picksCount++;
+				// Every 500 lines, insert the records
+				if (picksCount % 250 == 0) {
+					System.out.println("Insert picks " + (picksCount - 250) + " : " + picksCount);
+					stmt.executeBatch();
+					conn.commit();
+					stmt.close();
+					stmt = conn.createStatement();
+				}
+			}
+			// Insert the remaining records
+			System.out.println("Insert remaining picks " + (picksCount - (picksCount % 250)) + " : " + picksCount);
+			stmt.executeBatch();
+			conn.commit();
+			conn.setAutoCommit(true); // set auto commit back to true for next inserts
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void createBatchCFTeams(List<CFTeam> cfTeamsList) {
 		try {
 			conn.setAutoCommit(false);
@@ -174,6 +209,17 @@ public class DAO {
 		}
 	}
 	
+	public static void deleteCfpPickByUserIdAndPoolId(Integer userId, Integer poolId) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "DELETE from CFPPick WHERE userId = " + userId + " and poolId = " + poolId;
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void deletePicksByUserIdAndPoolId(Integer userId, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
@@ -233,7 +279,7 @@ public class DAO {
 			}
 			while (rs1.next()) {
 				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? 1 : 0; 
-				int r1Win = cfpRound1Winners.get(rs1.getInt(2)) != null ? (cfpRound1Pts - 1) : 0;
+				int r1Win = (cfpRound1Winners.get(rs1.getInt(2)) != null) ? (cfpRound1Pts - 1)*cfpRound1Winners.get(rs1.getInt(2)) : 0;
 				String wins = Integer.toString(rs1.getInt(3) + champWin + r1Win); 
 				if ((rs1.getInt(3)  + champWin + r1Win) < 10) {
 					wins = "0" + wins;

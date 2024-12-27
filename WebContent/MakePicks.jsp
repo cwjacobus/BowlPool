@@ -58,166 +58,132 @@
 		}
 	}
 	
-	function addDropDown(team, seed, gameCode, ddElement) {
+	function addDropDown(team, round, gameIndex, ddElement) {
 		var option = document.createElement('option');
 		option.text = team;
-		option.value = seed + ':' + team + ':' + gameCode;
+		option.value = team + ':' + round + ':' + gameIndex;
 		ddElement.add(option);
 	}
 
     function initializeCFPTeams() {	
+    	var round = 1;
     	if (!(year > 24)) {
     		return;
     	}
 		addDropDown('', 0, '', cfp1);
-		addDropDown(cfpTeams[5], 5, 'cfp1', cfp1);
-		addDropDown(cfpTeams[12], 12, 'cfp1', cfp1);
+		addDropDown(cfpTeams[5], round, 1, cfp1);
+		addDropDown(cfpTeams[12], round, 1, cfp1);
 		
 		addDropDown('', 0, '', cfp2);
-		addDropDown(cfpTeams[8], 8, 'cfp2', cfp2);
-		addDropDown(cfpTeams[9], 9, 'cfp2', cfp2);
+		addDropDown(cfpTeams[8], round, 2, cfp2);
+		addDropDown(cfpTeams[9], round, 2, cfp2);
 		
 		addDropDown('', 0, '', cfp3);
-		addDropDown(cfpTeams[6], 6, 'cfp3', cfp3);
-		addDropDown(cfpTeams[11], 11, 'cfp3', cfp3);
+		addDropDown(cfpTeams[6], round, 3, cfp3);
+		addDropDown(cfpTeams[11], round, 3, cfp3);
 
 		addDropDown('', 0, '', cfp4);
-		addDropDown(cfpTeams[7], 7, 'cfp4', cfp4);
-		addDropDown(cfpTeams[10], 10, 'cfp4', cfp4);
+		addDropDown(cfpTeams[7], round, 4, cfp4);
+		addDropDown(cfpTeams[10], round, 4, cfp4);
 
 		addDropDown('', 0, '', cfp5);
-		addDropDown(cfpTeams[4], 4, 'cfp5', cfp5);
+		addDropDown(cfpTeams[4], round, 4, cfp5);
 		
 		addDropDown('', 0, '', cfp6);
-		addDropDown(cfpTeams[1], 1, 'cfp6', cfp6);
+		addDropDown(cfpTeams[1], round, 1, cfp6);
 		
 		addDropDown('', 0, '', cfp7);
-		addDropDown(cfpTeams[3], 3, 'cfp7', cfp7);
+		addDropDown(cfpTeams[3], round, 3, cfp7);
 		
 		addDropDown('', 0, '', cfp8);
-		addDropDown(cfpTeams[2], 2, 'cfp8', cfp8);
+		addDropDown(cfpTeams[2], round, 2, cfp8);
     }
     
     function getQtrValues(qtrGameIndex) {
-    	topSeedOption = document.createElement('option');
-    	newOption = document.createElement('option');
-    	cfpChamp = document.getElementById("cfpChamp");
-    	cfpSemi1 = document.getElementById("cfpSemi1");
-		cfpSemi2 = document.getElementById("cfpSemi2");
+    	var round = 2;
+    	var topSeedOption = document.createElement('option');
+    	var cfpChamp = document.getElementById("cfpChamp");
+    	var cfpSemi1 = document.getElementById("cfpSemi1");
+    	var cfpSemi2 = document.getElementById("cfpSemi2");
 		topSeedOption.text = cfpTeams[qtrGameIndex];
+		topSeedOption.value = cfpTeams[qtrGameIndex] + ':' + round + ':' + qtrGameIndex;
 		removeAllFromDropDown(cfpSemi1);
 		removeAllFromDropDown(cfpSemi2);
 		removeAllFromDropDown(cfpChamp);
-		emptyOption = document.createElement('option');
+		var emptyOption = document.createElement('option');
 		emptyOption.text = "";
 		emptyOption.value = 0;
 		if (qtrGameIndex == 4) {
 			cfp5 = document.getElementById("cfp5");
 			cfp1 = document.getElementById("cfp1");
 			removeAllFromDropDown(cfp5);
-			topSeedOption.value = qtrGameIndex + ':' + cfpTeams[qtrGameIndex] + ':cfp5';
 			cfp5.add(emptyOption);
 			cfp5.add(topSeedOption);
-			seeding = cfp1.options[cfp1.selectedIndex].value.split(":")[0];
-			newOption.text = cfp1.options[cfp1.selectedIndex].text;
-			newOption.value = seeding + ":" + newOption.text + ":" + 'cfp5';
-			cfp5.add(newOption);
+			addDropDown(cfp1.options[cfp1.selectedIndex].text, round, qtrGameIndex, cfp5);
 		}
 		else if (qtrGameIndex == 1) {
 			cfp6 = document.getElementById("cfp6");
 			removeAllFromDropDown(cfp6);
-			topSeedOption.value = qtrGameIndex + ':' + cfpTeams[qtrGameIndex] + ':cfp6';
 			cfp6.add(emptyOption);
 			cfp6.add(topSeedOption);
-			seeding = cfp2.options[cfp2.selectedIndex].value.split(":")[0];
-			newOption.text = cfp2.options[cfp2.selectedIndex].text;
-			newOption.value = seeding + ":" + newOption.text + ":" + 'cfp6';
-			cfp6.add(newOption);
+			addDropDown(cfp2.options[cfp2.selectedIndex].text, round, qtrGameIndex, cfp6);
 		}
 		else if (qtrGameIndex == 3) {
 			cfp7 = document.getElementById("cfp7");
 			removeAllFromDropDown(cfp7);
-			topSeedOption.value = qtrGameIndex + ':' + cfpTeams[qtrGameIndex] + ':cfp7';
 			cfp7.add(emptyOption);
 			cfp7.add(topSeedOption);
-			seeding = cfp3.options[cfp3.selectedIndex].value.split(":")[0];
-			newOption.text = cfp3.options[cfp3.selectedIndex].text;
-			newOption.value = seeding + ":" + newOption.text + ":" + 'cfp7';
-			cfp7.add(newOption);
+			addDropDown(cfp3.options[cfp3.selectedIndex].text, round, qtrGameIndex, cfp7);
 		}
 		else {
 			cfp8 = document.getElementById("cfp8");
 			removeAllFromDropDown(cfp8);
-			topSeedOption.value = qtrGameIndex + ':' + cfpTeams[qtrGameIndex] + ':cfp8';
 			cfp8.add(emptyOption);
 			cfp8.add(topSeedOption);
-			seeding = cfp4.options[cfp4.selectedIndex].value.split(":")[0];
-			newOption.text = cfp4.options[cfp4.selectedIndex].text;
-			newOption.value = seeding + ":" + newOption.text + ":" + 'cfp8';
-			cfp8.add(newOption);
+			addDropDown(cfp4.options[cfp4.selectedIndex].text, round, qtrGameIndex, cfp8);
 		}	
     }
     
     function getSemiValues(semiGameIndex) {
-    	newOption1 = document.createElement('option');
-    	newOption2 = document.createElement('option');
-    	cfpChamp = document.getElementById("cfpChamp");
+    	var round = 3;
+    	var cfpChamp = document.getElementById("cfpChamp");
     	removeAllFromDropDown(cfpChamp);
-    	emptyOption = document.createElement('option');
+    	var emptyOption = document.createElement('option');
 		emptyOption.text = "";
 		emptyOption.value = 0;
-		cfp5 = document.getElementById("cfp5");
-		cfp6 = document.getElementById("cfp6");
-		cfp7 = document.getElementById("cfp7");
-		cfp8 = document.getElementById("cfp8");
+		var cfp5 = document.getElementById("cfp5");
+		var cfp6 = document.getElementById("cfp6");
+		var cfp7 = document.getElementById("cfp7");
+		var cfp8 = document.getElementById("cfp8");
 		if (semiGameIndex == 1 && cfp5.selectedIndex != 0 && cfp6.selectedIndex != 0) {
 			cfpSemi1 = document.getElementById("cfpSemi1");
 			removeAllFromDropDown(cfpSemi1);
 			cfpSemi1.add(emptyOption);
-			seeding1 = cfp5.options[cfp5.selectedIndex].value.split(":")[0];
-			newOption1.text = cfp5.options[cfp5.selectedIndex].text;
-			newOption1.value = seeding1 + ":" + newOption1.text + ":" + 'cfpSemi1';
-			cfpSemi1.add(newOption1);
-			seeding2 = cfp6.options[cfp6.selectedIndex].value.split(":")[0];
-			newOption2.text = cfp6.options[cfp6.selectedIndex].text;
-			newOption2.value = seeding2 + ":" + newOption2.text + ":" + 'cfpSemi1';
-			cfpSemi1.add(newOption2);
+			addDropDown(cfp5.options[cfp5.selectedIndex].text, round, semiGameIndex, cfpSemi1);
+			addDropDown(cfp6.options[cfp6.selectedIndex].text, round, semiGameIndex, cfpSemi1);
 		}
 		else if (semiGameIndex == 2 && cfp7.selectedIndex != 0 && cfp8.selectedIndex != 0) {
 			cfpSemi2 = document.getElementById("cfpSemi2");
 			removeAllFromDropDown(cfpSemi2);
 			cfpSemi2.add(emptyOption);
-			seeding1 = cfp7.options[cfp7.selectedIndex].value.split(":")[0];
-			newOption1.text = cfp7.options[cfp7.selectedIndex].text;
-			newOption1.value = seeding1 + ":" + newOption1.text + ":" + 'cfpSemi2';
-			cfpSemi2.add(newOption1);
-			seeding2 = cfp8.options[cfp8.selectedIndex].value.split(":")[0];
-			newOption2.text = cfp8.options[cfp8.selectedIndex].text;
-			newOption2.value = seeding2 + ":" + newOption2.text + ":" + 'cfpSemi2';
-			cfpSemi2.add(newOption2);
+			addDropDown(cfp7.options[cfp7.selectedIndex].text, round, semiGameIndex, cfpSemi2);
+			addDropDown(cfp8.options[cfp8.selectedIndex].text, round, semiGameIndex, cfpSemi2);
 		}
     }
     
     function getChampValues() {
-    	newOption1 = document.createElement('option');
-    	newOption2 = document.createElement('option');
-    	cfpChamp = document.getElementById("cfpChamp");
+    	var round = 4;
+    	var cfpChamp = document.getElementById("cfpChamp");
     	emptyOption = document.createElement('option');
 		emptyOption.text = "";
 		emptyOption.value = 0;
-		cfpSemi1 = document.getElementById("cfpSemi1");
-		cfpSemi2 = document.getElementById("cfpSemi2");
+		var cfpSemi1 = document.getElementById("cfpSemi1");
+		var cfpSemi2 = document.getElementById("cfpSemi2");
 		if (cfpSemi1.selectedIndex != 0 && cfpSemi2.selectedIndex != 0) {
 			removeAllFromDropDown(cfpChamp);
 			cfpChamp.add(emptyOption);
-			seeding1 = cfpSemi1.options[cfpSemi1.selectedIndex].value.split(":")[0];
-			newOption1.text = cfpSemi1.options[cfpSemi1.selectedIndex].text;
-			newOption1.value = seeding1 + ":" + newOption1.text + ":" + 'cfpChamp';
-			cfpChamp.add(newOption1);
-			seeding2 = cfpSemi2.options[cfpSemi2.selectedIndex].value.split(":")[0];
-			newOption2.text = cfpSemi2.options[cfpSemi2.selectedIndex].text;
-			newOption2.value = seeding2 + ":" + newOption2.text + ":" + 'cfpChamp';
-			cfpChamp.add(newOption2);
+			addDropDown(cfpSemi1.options[cfpSemi1.selectedIndex].text, round, 1, cfpChamp);
+			addDropDown(cfpSemi2.options[cfpSemi2.selectedIndex].text, round, 1, cfpChamp);
 		}
     }
     

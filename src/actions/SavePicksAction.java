@@ -1,6 +1,7 @@
 package actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +80,14 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 		}
 		Thread.sleep(1000);
 		DAO.createBatchPicks(picksList, pool.getPoolId());
+		if (year > 24) {
+			List<String> cfpPicksList = Arrays.asList(cfp1, cfp2, cfp3, cfp4, cfp5, cfp6, cfp7, cfp8, cfpSemi1, cfpSemi2, cfpChamp);
+			DAO.deleteCfpPickByUserIdAndPoolId(user.getUserId(), pool.getPoolId());
+			Thread.sleep(1000);
+			DAO.createBatchCfpPicks(cfpPicksList, pool, user.getUserId());
+		}
+		
+		
 		/*
 		if (champGame != null && champGame.trim().length() > 0) {
 			System.out.println(champGame + " " + champGameId + " " + champTotPts + " " + user.getUserId() + " " + pool.getPoolId() + " " + year);

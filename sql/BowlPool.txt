@@ -77,6 +77,8 @@ CREATE TABLE CFPGame
 (
 CFPGameId int(11) PRIMARY KEY AUTO_INCREMENT,
 Description varchar(50),
+Round int,
+GameIndex int,
 Winner varchar(25),
 Loser varchar(25),
 PointsValue int,
@@ -236,15 +238,15 @@ insert into excludedgame (gameid, poolid) values (1791, 17);
 insert into excludedgame (gameid, poolid) values (1787, 17);
 insert into excludedgame (gameid, poolid) values (1788, 17);
 
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 1',2,false,'UT','CLEM',5,12,'2025-01-21 16:00:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 2',2,false,'PSU','SMU',6,11,'2025-01-21 12:00:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 3',2,false,'ND','IU',7,10,'2025-01-20 20:00:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 4',2,false,'OSU','TENN',8,9,'2025-01-21 20:00:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 4 Peach Bowl',2,false,'ASU',null,4,null,'2026-01-01 13:00:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 1 Rose Bowl',2,false,'OREGON',null,1,null,'2026-01-01 17:00:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 3 Fiesta Bowl',2,false,'BOISE',null,3,null,'2025-12-31 19:30:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 2 Sugar Bowl',2,false,'UGA',null,2,null,'2026-01-01 20:45:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Semis Game 1 Orange Bowl',2,false,null,null,null,null,'2026-01-09 19:30:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Semis Game 2 Cotton Bowl',2,false,null,null,null,null,'2026-01-10 19:30:00',25);
-insert into cfpgame (Description,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Championship',2,false,null,null,null,null,'2026-01-20 19:30:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 1',1,1,2,false,'UT','CLEM',5,12,'2025-01-21 16:00:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 2',1,2,2,false,'PSU','SMU',6,11,'2025-01-21 12:00:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 3',1,3,2,false,'ND','IU',7,10,'2025-01-20 20:00:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Round 1 Game 4',1,4,2,false,'OSU','TENN',8,9,'2025-01-21 20:00:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 4 Peach Bowl',2,4,2,false,'ASU','UT',4,5,'2026-01-01 13:00:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 1 Rose Bowl',2,1,2,false,'OREGON','OSU',1,8,'2026-01-01 17:00:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 3 Fiesta Bowl',2,3,2,false,'BOISE','PSU',3,6,'2025-12-31 19:30:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Quarters Game 2 Sugar Bowl',2,2,2,false,'UGA','ND',2,7,'2026-01-01 20:45:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Semis Game 1 Orange Bowl',3,1,2,false,null,null,null,null,'2026-01-09 19:30:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Semis Game 2 Cotton Bowl',3,2,2,false,null,null,null,null,'2026-01-10 19:30:00',25);
+insert into cfpgame (Description,Round,GameIndex,PointsValue,Completed,Home,Visitor,HomeSeed,VisSeed,DateTime,year) values ('CFP Championship',4,1,2,false,null,null,null,null,'2026-01-20 19:30:00',25);
 

@@ -7,11 +7,16 @@ import java.util.Map;
 import org.apache.struts2.interceptor.SessionAware;
 
 import com.opensymphony.xwork2.util.ValueStack;
+
+import dao.DAO;
+
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
+import data.CFPPick;
 import data.ChampPick;
 import data.Pick;
+import data.Pool;
 import data.User;
 
 public class MakePicksAction extends ActionSupport implements SessionAware {
@@ -29,6 +34,7 @@ public class MakePicksAction extends ActionSupport implements SessionAware {
 			return "error";
 		}
 		User user = (User) userSession.get("user");
+		Pool pool = (Pool) userSession.get("pool");
 	    @SuppressWarnings("unchecked")
 		Map<Integer, List<Pick>> picksMap = (Map<Integer, List<Pick>>) userSession.get("picksMap");
 	    List<Pick> userPicks = picksMap.get(user.getUserId());
@@ -39,7 +45,13 @@ public class MakePicksAction extends ActionSupport implements SessionAware {
 	    	ChampPick champPick = champPicks.get(user.getUserId());
 	    	context.put("champPick", champPick);
 	    }
+	    Map<Integer, List<CFPPick>> cfpPicksMap = DAO.getCfpPicksMap(pool.getPoolId());
+	    context.put("cfpPicksMap", cfpPicksMap);
+	    HashMap<Integer, User> usersMap = DAO.getUsersMap(pool.getPoolId());
+	    context.put("usersMap", usersMap);
 	    stack.push(context);
+	    
+	    
 	    return "success";
 	}
 	

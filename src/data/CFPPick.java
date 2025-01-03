@@ -4,9 +4,9 @@ import java.sql.Timestamp;
 
 public class CFPPick {
 	
-	private int cFPPickId;
+	private int cfpPickId;
 	private int userId;
-	private int cFPGameId;
+	private int cfpGameId;
 	private String winner;
 	private int totalPoints;
 	private int poolId;
@@ -15,22 +15,22 @@ public class CFPPick {
 	public CFPPick () {
 	}
 	
-	public CFPPick (int cFPPickId, int userId, int cFPGameId, String winner, int totalPoints, int poolId, Timestamp createdTime) {
-		this.cFPGameId = cFPGameId;
+	public CFPPick (int cfpPickId, int userId, int cfpGameId, String winner, int totalPoints, int poolId, Timestamp createdTime) {
+		this.cfpGameId = cfpGameId;
 		this.userId = userId;
-		this.cFPPickId = cFPPickId;
+		this.cfpPickId = cfpPickId;
 		this.winner = winner;
 		this.totalPoints = totalPoints;
 		this.poolId = poolId;
 		this.createdTime = createdTime;
 	}
 
-	public int getcFPPickId() {
-		return cFPPickId;
+	public int getCfpPickId() {
+		return cfpPickId;
 	}
 
-	public void setcFPPickId(int cFPPickId) {
-		this.cFPPickId = cFPPickId;
+	public void setCfpPickId(int cfpPickId) {
+		this.cfpPickId = cfpPickId;
 	}
 
 	public int getUserId() {
@@ -41,12 +41,12 @@ public class CFPPick {
 		this.userId = userId;
 	}
 
-	public int getcFPGameId() {
-		return cFPGameId;
+	public int getCfpGameId() {
+		return cfpGameId;
 	}
 
-	public void setcFPGameId(int cFPGameId) {
-		this.cFPGameId = cFPGameId;
+	public void setCfpGameId(int cfpGameId) {
+		this.cfpGameId = cfpGameId;
 	}
 
 	public String getWinner() {

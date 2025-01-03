@@ -15,6 +15,8 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import data.BowlGame;
+import data.CFPGame;
+import data.CFPPick;
 import data.CFTeam;
 import data.ChampPick;
 import data.Pick;
@@ -231,29 +233,32 @@ public class DAO {
 		}
 	}
 	
-	public static TreeMap<String, Integer> getStandings(Integer year, Pool pool) {
+	public static TreeMap<String, Integer> getStandings(Pool pool) {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> cfpRound1Winners = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> cfpWinners = new HashMap<Integer, Integer>();
 		boolean useSpreads = pool != null ? pool.isUsePointSpreads() : true;
 		int cfpRound1Pts = 2;
+		int cfpChampPts = 5;
+		int[] pointsPerRound = {2, 3, 5, 10};
 		
 		try { 
 			Statement stmt1 = conn.createStatement();
 			String query1String = "SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
 				"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and bg.cancelled = false and " + 
 				"bg.gameId not in (select gameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
-				getYearClause("bg", year, "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
+				getYearClause("bg", pool.getYear(), "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
 				"(bg.FavoriteScore - " + (useSpreads ? "bg.Spread" : "0") + " > bg.UnderdogScore) or " +
 				"(p.Favorite = false and (bg.UnderdogScore + " + (useSpreads ? "bg.Spread" : "0") + " > bg.FavoriteScore))) " + 
 				"group by u.UserName";
 			ResultSet rs1 = stmt1.executeQuery(query1String);
 			// Get who picked champ game correct
-			if (useYearClause(year)) { // ChampPick did not exist until 2017
+			if (useYearClause(pool.getYear()) && !(pool.getYear() > 24)) { // ChampPick did not exist until 2017
 				Statement stmt2 = conn.createStatement();
 				String query2String = "SELECT u.UserId, count(*) from ChampPick p, User u, BowlGame bg where " + 
 					"p.userId = u.userId and bg.gameId = p.gameId and bg.completed = true and " + 
-					getYearClause("bg", year, "p", pool.getPoolId()) + 
+					getYearClause("bg", pool.getYear(), "p", pool.getPoolId()) + 
 					" and (locate(p.winner, bg.Favorite) and (bg.FavoriteScore > bg.UnderdogScore) or (locate(p.winner, bg.Underdog) and (bg.UnderdogScore > bg.FavoriteScore))) " + 
 					"group by u.UserName";
 				ResultSet rs2 = stmt2.executeQuery(query2String);
@@ -262,26 +267,57 @@ public class DAO {
 				}
 			}
 			// 2024 Only - get CFP Round 1 winners for additional points
-			if (year == 24) {
+			if (pool.getYear() == 24) {
 				Statement stmt3 = conn.createStatement();
 				String query3String = "SELECT u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
-						"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and bg.cancelled = false and " + 
-						"bg.gameId not in (select gameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
-						"bg.bowlName like '%Playoff%' and " + 
-						getYearClause("bg", year, "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
-						"(bg.FavoriteScore - " + (useSpreads ? "bg.Spread" : "0") + " > bg.UnderdogScore) or " +
-						"(p.Favorite = false and (bg.UnderdogScore + " + (useSpreads ? "bg.Spread" : "0") + " > bg.FavoriteScore))) " + 
-						"group by u.UserName";
+					"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and bg.cancelled = false and " + 
+					"bg.gameId not in (select gameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
+					"bg.bowlName like '%Playoff%' and " + 
+					getYearClause("bg", pool.getYear(), "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
+					"(bg.FavoriteScore - " + (useSpreads ? "bg.Spread" : "0") + " > bg.UnderdogScore) or " +
+					"(p.Favorite = false and (bg.UnderdogScore + " + (useSpreads ? "bg.Spread" : "0") + " > bg.FavoriteScore))) " + 
+					"group by u.UserName";
 				ResultSet rs3 = stmt3.executeQuery(query3String);
 				while (rs3.next()) {
 					cfpRound1Winners.put(rs3.getInt(1), rs3.getInt(2));
 				}
 			}
+			// CFPGames
+			else if (pool.getYear() > 24) {
+				//SELECT u.UserId, round, count(*) from CFPPick p, User u, CFPGame pg where  p.userId= u.userId and pg.cfpgameId = p.cfpgameId and pg.completed = true and pg.year = 25 and p.PoolId = 19 and 
+				//		(p.winner = home and (pg.homeScore - 0 > pg.VisScore) or (p.winner = visitor and (pg.VisScore + 0 > pg.homeScore))) group by u.UserName, round
+				Statement stmt4 = conn.createStatement();
+				String query4String = "SELECT u.UserId, round, count(*) from CFPPick p, User u, CFPGame pg where  " +
+					"p.userId = u.userId and pg.cfpgameId = p.cfpgameId and pg.completed = true and pg.year = " + pool.getYear() + 
+					" and p.poolId = " + pool.getPoolId() + " and (p.winner = home and " +
+					"(pg.HomeScore - " + (useSpreads ? "pg.Spread" : "0") + " > pg.VisScore) or " + 
+					"(p.winner = visitor and (pg.VisScore + " + (useSpreads ? "pg.Spread" : "0") + " > pg.HomeScore))) " + 
+					"GROUP BY u.UserName, round ORDER BY u.UserName, round";
+				ResultSet rs4 = stmt4.executeQuery(query4String);
+				Integer prevUserId = 0;
+				Integer userPoints = 0;
+				Integer userId = 0;
+				while (rs4.next()) {
+					userId = rs4.getInt(1);
+					if (userId.intValue() != prevUserId.intValue()) {
+						if (prevUserId.intValue() != 0) {
+							cfpWinners.put(prevUserId, userPoints);
+							userPoints = 0;
+						}
+						prevUserId = userId;
+					}
+					Integer round = rs4.getInt(2);
+					Integer winsPerRound = rs4.getInt(3);
+					userPoints += winsPerRound * pointsPerRound[round - 1];
+				}
+				cfpWinners.put(userId, userPoints);
+			}
 			while (rs1.next()) {
-				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? 1 : 0; 
-				int r1Win = (cfpRound1Winners.get(rs1.getInt(2)) != null) ? (cfpRound1Pts - 1)*cfpRound1Winners.get(rs1.getInt(2)) : 0;
-				String wins = Integer.toString(rs1.getInt(3) + champWin + r1Win); 
-				if ((rs1.getInt(3)  + champWin + r1Win) < 10) {
+				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? (pool.getYear() != 24 ? 1 : (cfpChampPts - 1)) : 0; 
+				int r1Win = (cfpRound1Winners.get(rs1.getInt(2)) != null) ? (cfpRound1Pts - 1) * cfpRound1Winners.get(rs1.getInt(2)) : 0;
+				int cfpWin = (cfpWinners.get(rs1.getInt(2)) != null) ? cfpWinners.get(rs1.getInt(2)) : 0;
+				String wins = Integer.toString(rs1.getInt(3) + champWin + r1Win + cfpWin); 
+				if ((rs1.getInt(3)  + champWin + r1Win + cfpWin) < 10) {
 					wins = "0" + wins;
 				}
 				standings.put(wins + ":" + rs1.getString(1), rs1.getInt(2));
@@ -290,7 +326,7 @@ public class DAO {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		List<User> usersList = getUsersWithPicksList(year, pool != null ? pool.getPoolId() : null);
+		List<User> usersList = getUsersWithPicksList(pool.getYear(), pool != null ? pool.getPoolId() : null);
 		// Merge any users with 0 wins
 		for (User u : usersList) {
 			if (!standings.containsValue(u.getUserId())) {
@@ -298,6 +334,26 @@ public class DAO {
 			}
 		}
 		return standings;
+	}
+	
+	public static List<CFPGame> getCfpGamesList(Integer year) {
+		List<CFPGame>cfpGameList = new ArrayList<>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM CFPGame where year=" + year + " order by DateTime");
+			CFPGame cfpGame;
+			while (rs.next()) {
+				cfpGame = new CFPGame(rs.getInt("CFPGameId"), rs.getString("Description"), rs.getInt("Round"), rs.getInt("GameIndex"), 
+					rs.getString("Winner"), rs.getString("Loser"), rs.getInt("PointsValue"), rs.getBoolean("Completed"), rs.getString("Home"), 
+					rs.getString("Visitor"), rs.getInt("HomeScore"), rs.getInt("VisScore"), rs.getInt("HomeSeed"), rs.getInt("VisSeed"),
+					rs.getTimestamp("DateTime"), rs.getInt("Year"));
+				cfpGameList.add(cfpGame);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return cfpGameList;
 	}
 	
 	public static List<BowlGame> getBowlGamesList(Integer year) {
@@ -342,6 +398,41 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return bowlGamesMap;
+	}
+	
+	public static Map<Integer, List<CFPPick>> getCfpPicksMap(Integer poolId) {
+		Map<Integer, List<CFPPick>> cfpPicksMap = new HashMap<>();
+		ArrayList<CFPPick> cfpPicksList = new ArrayList<>();
+		Integer prevUserId = null; 
+		Integer userId = null;
+		Integer cfpGameId = null;
+		Integer cfpPickId = null;
+		String winner = null;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select p.* from CFPPick p where p.poolId =  " + poolId + " order by p.UserId, p.CFPGameId");
+			while (rs.next()) {
+				userId = rs.getInt("UserId");
+				cfpGameId = rs.getInt("CFPGameId");
+				cfpPickId = rs.getInt("CFPPickId");
+				winner = rs.getString("Winner");
+				if (prevUserId != null && userId.intValue()!= prevUserId.intValue()) {
+					cfpPicksMap.put(prevUserId, cfpPicksList);
+					cfpPicksList = new ArrayList<>();
+				}
+				CFPPick p = new CFPPick(cfpPickId, userId, cfpGameId, winner, 0, poolId, null);
+				cfpPicksList.add(p);
+				prevUserId = userId;
+			}
+			// add last one
+			if (userId != null && cfpGameId != null && cfpPickId != null && winner != null) {
+				cfpPicksMap.put(userId, cfpPicksList);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return cfpPicksMap;
 	}
 	
 	public static Map<Integer, List<Pick>> getPicksMap(Integer year, Integer poolId) {
@@ -482,6 +573,24 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return userList;
+	}
+	
+	public static HashMap<Integer, User> getUsersMap(Integer poolId) {
+		 HashMap<Integer, User> userMap = new HashMap<Integer, User>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM User where poolId = " + poolId);
+			User user;
+			while (rs.next()) {
+				user = new User(rs.getInt("UserId"), rs.getString("UserName"), rs.getString("LastName"), rs.getString("FirstName"), 
+					rs.getString("Email"), rs.getInt("Year"), rs.getBoolean("admin"), rs.getInt("PoolId"));
+				userMap.put(user.getUserId(), user);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return userMap;
 	}
 	
 	public static List<User> getUsersWithPicksList(Integer year, Integer poolId) {
@@ -716,6 +825,21 @@ public class DAO {
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute("UPDATE BowlGame SET Spread = " + spread + " WHERE GameId = " + gameId);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return;
+	}
+	
+	public static void updateCFPGameScore(Integer homeScore, Integer visScore, Integer cfpGameId, String home, String visitor) {
+		String champUpdate = "";
+		if (home != null && home.length() > 0 && visitor != null && visitor.length() > 0) {
+			champUpdate += ", Home = '" + home + "', Visitor = '" + visitor + "'";
+		}
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.execute("UPDATE CFPGame SET HomeScore = " + homeScore + ", VisScore = " +  visScore + ", Completed = true" + champUpdate + " WHERE CFPGameId = " + cfpGameId);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();

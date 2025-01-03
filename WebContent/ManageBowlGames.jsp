@@ -38,5 +38,33 @@
       	<input type="hidden" name="champGame" value="${bowlGame.bowlName == 'Championship'}"/>
   		</form>
   	</s:iterator>
+  	<s:iterator value="cfpGamesList" var="cfpGame">
+  		<form action="updateCfpScore">
+  		<table><tr>
+      		<td width=200 style="color: white; background: #5D7B9D;"><s:property value="#cfpGame.description"/></td>
+      		<c:choose>
+      		<c:when test="${cfpGame.round == 1}">
+      			<td width=200><s:property value="#cfpGame.visitor"/><input type="hidden" name="visitor" value=""/></td>
+      		</c:when>
+      		<c:otherwise>
+      			<td><input type="text" name="visitor" value="<s:property value='#cfpGame.visitor'/>" size=10/></td>
+      		</c:otherwise>
+      		</c:choose>
+      		<td><input type="text" name="visScore" value="<s:property value="#cfpGame.visScore"/>" size=2/></td>
+      		<c:choose>
+      		<c:when test="${cfpGame.round == 1}">
+      			<td width=200><s:property value="#cfpGame.home"/><input type="hidden" name="home" value=""/></td>
+      		</c:when>
+      		<c:otherwise>
+      			<td><input type="text" name="home" value="<s:property value='#cfpGame.home'/>" size=10/></td>
+      		</c:otherwise>
+      		</c:choose>
+      		<td><input type="text" name="homeScore" value="<s:property value="#cfpGame.homeScore"/>" size=2/></td>
+      		<td><input type="submit" value="Set Score"/></td>
+      	</tr></table>
+      	<input type="hidden" name="cfpGameId" value="<s:property value="#cfpGame.cfpGameId"/>"/>
+      	<input type="hidden" name="year" value="${year}"/>
+  		</form>
+  	</s:iterator>
 	</body>
 </html>

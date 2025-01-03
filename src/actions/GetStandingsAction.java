@@ -105,6 +105,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		}
 		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(pool.getYear(), poolId);
 		userSession.put("picksMap", picksMap);
+		//Map<Integer, List<Pick>> cfPpicksMap = DAO.getCFPPicksMap(pool.getYear(), poolId);
+		//userSession.put("cfPpicksMap", cfPpicksMap);
 		Map<String, CFTeam> cfTeamsMap = DAO.getCFTeamsMap();
 		userSession.put("cfTeamsMap", cfTeamsMap);
 		Map<Integer, ChampPick> champPicksMap = null;
@@ -112,20 +114,22 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 			champPicksMap = DAO.getChampPicksMap(pool.getYear(), poolId);
 			userSession.put("champPicksMap", champPicksMap);
 		}
-		TreeMap<String, Integer> standings = DAO.getStandings(pool.getYear(), pool);
+		TreeMap<String, Integer> standings = DAO.getStandings(pool);
 		TreeMap<String, Standings> displayStandings = new TreeMap<String, Standings>(Collections.reverseOrder());
 		bowlGamesMap = DAO.getBowlGamesMap(pool.getYear());
 		numOfBowlGames = bowlGamesMap.size();
 		List<BowlGame> bowlGamesList = new ArrayList<BowlGame>(bowlGamesMap.values());
 		Collections.sort(bowlGamesList, new SortbyDate()); 
 		userSession.put("bowlGamesList", bowlGamesList);
+		//List<CFPGame> cfpGamesList = DAO.getCfpGamesList(pool.getYear());
+		//userSession.put("cfpGamesList", cfpGamesList);
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
 		excludedGameList = DAO.getExcludedGamesList(poolId);
 		userSession.put("excludedGameList", excludedGameList);
-		Map<Integer, String> cFPTeamMap = DAO.getCFPTeamsMap(pool.getYear());
-		JSONObject cFPTeamsJSON = new JSONObject(cFPTeamMap);
-	    userSession.put("cFPTeamsJSON", cFPTeamsJSON.toString());
+		Map<Integer, String> cfpTeamMap = DAO.getCFPTeamsMap(pool.getYear());
+		JSONObject cfpTeamsJSON = new JSONObject(cfpTeamMap);
+	    userSession.put("cfpTeamsJSON", cfpTeamsJSON.toString());
 		
 		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool);
 		int numberOfExcludedGames = (excludedGameList != null ? excludedGameList.size() : 0);

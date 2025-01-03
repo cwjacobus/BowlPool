@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 public class CFPGame {
 	
-	private int cFPGameId;
+	private int cfpGameId;
 	private String description;
 	private int round;
 	private int gameIndex;
@@ -21,9 +21,9 @@ public class CFPGame {
 	private Timestamp dateTime;
 	private int year;
 	
-	public CFPGame (int cFPGameId, String description, int round, int gameIndex, String winner, String loser, int pointsValue, boolean completed, String home, String visitor, int homeScore, int visScore, 
+	public CFPGame (int cfpGameId, String description, int round, int gameIndex, String winner, String loser, int pointsValue, boolean completed, String home, String visitor, int homeScore, int visScore, 
 			int homeSeed, int visSeed, Timestamp dateTime, int year) {
-		this.cFPGameId = cFPGameId;
+		this.cfpGameId = cfpGameId;
 		this.description = description;
 		this.round = round;
 		this.gameIndex = gameIndex;
@@ -41,12 +41,12 @@ public class CFPGame {
 		this.visSeed = visSeed;
 	}
 
-	public int getcFPGameId() {
-		return cFPGameId;
+	public int getCfpGameId() {
+		return cfpGameId;
 	}
 
-	public void setcFPGameId(int cFPGameId) {
-		this.cFPGameId = cFPGameId;
+	public void setCfpGameId(int cfpGameId) {
+		this.cfpGameId = cfpGameId;
 	}
 
 	public String getDescription() {
@@ -167,6 +167,10 @@ public class CFPGame {
 
 	public void setYear(int year) {
 		this.year = year;
+	}
+	
+	public String toString() {
+		return visitor + "(" + visSeed + ")" + " v " + home + "(" + homeSeed + ")";
 	}
 
 }

@@ -237,6 +237,10 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        					continue;
 	        				}
 	        				String pick = getStringFromCell(row, cellColumnIndex);
+	        				if (bowlGameNameMap.get(gameIndex).equals("SemiFinal") && year == 24) {
+	        					gameIndex++;
+	        					continue;
+	        				}
 	        				BowlGame bowlGame = getBowlGameFromShortName(bowlGameList, bowlGameNameMap.get(gameIndex));
 	        				if (bowlGame == null) {
 	        					if (cellColumnIndex % 2 != 0) {
@@ -342,10 +346,10 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			}
 			if (gameName != null) {
 				System.out.println(gameName);
-				String lineString = getStringFromCell(row, 5).trim();
+				String lineString = getStringFromCell(row, 5);
 				double line = 0;
-				if (!lineString.equalsIgnoreCase("pick") && !lineString.equalsIgnoreCase("p")) {
-					lineString = lineString.replace("-", "");
+				if (lineString != null && !lineString.equalsIgnoreCase("pick") && !lineString.equalsIgnoreCase("p") && !lineString.equalsIgnoreCase("No spread")) {
+					lineString = lineString.trim().replace("-", "");
 					line = Double.parseDouble(lineString);
 				}
 				if (!updateBowlGames) {
@@ -630,13 +634,12 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		else if (shortName.equalsIgnoreCase("Roof Claim")) {
 			altShortName = "Roofclaim";
 		}
-		else if (shortName.equalsIgnoreCase("ReliaQuest")) {
-			altShortName = "Reliaquest";
+		else if (shortName.equalsIgnoreCase("Pop Tarts")) {
+			altShortName = "Pop-Tarts";
 		}
-		else if (shortName.equalsIgnoreCase("Pop-Tarts")) {
-			altShortName = "Pop-tarts";
+		else if (shortName.equalsIgnoreCase("Auto Zone")) {
+			altShortName = "AutoZone";
 		}
-		
 		return altShortName;
 		
 	}

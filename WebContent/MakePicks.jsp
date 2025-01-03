@@ -20,7 +20,7 @@
 	<script type="text/javascript">
 	//var cfpTeams = {1: "OREGON", 2: "UGA", 3: "BOISE", 4: "ASU", 5: "UT", 6: "PSU", 7: "ND", 8: "OSU", 9: "TENN", 10: "IU", 11: "SMU", 12: "CLEM"};
 	var year = "${sessionScope.year}"; // No need if before 2025
-	var cfpTeams = ${sessionScope.cFPTeamsJSON};
+	var cfpTeams = ${sessionScope.cfpTeamsJSON};
 	
 	function confirmPicks(form) {
 		var favorites = document.getElementsByName("favorite");
@@ -341,5 +341,41 @@
   		<input type="submit" name="makePicksButton" value="Make Picks" onclick="return confirmPicks(this)"/>
   	</c:if>
   	</form>
+  	
+  	<br><br>
+  	<c:choose>
+  	<c:when test="${fn:length(cfpPicksMap[sessionScope.user.userId]) > 0}">
+  		My CFP Bracket Picks:<br>
+  		<c:set var="winLoseClass" value=""/>
+  		<table border=1>
+  			<tr><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th></tr>
+  			<tr>
+  			<c:forEach var="cfpPick" items="${cfpPicksMap[sessionScope.user.userId]}">
+  				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
+  			</c:forEach>
+  			</tr>
+  		</table>
+  	</c:when>
+  	<c:otherwise>
+  		No picks made
+  	</c:otherwise>
+  	</c:choose>
+  	
+  	<br><br>
+  	<c:if test="${sessionScope.readOnly || sessionScope.user.admin}">
+  		All CFP Bracket Picks<br>
+  		<table border=1>
+  		<tr><th>User</th><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th></tr>
+  		<c:forEach var="cfpPicks" items="${cfpPicksMap}">
+  			<tr>
+  			<td>${usersMap[cfpPicks.key].userName}</td>
+  			<c:forEach var="cfpPick" items="${cfpPicks.value}">
+  				<c:set var="winLoseClass" value=""/>
+  				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
+  			</c:forEach>
+  			</tr>
+  		</c:forEach>
+  		</table>
+  	</c:if>
 	</body>
 </html>

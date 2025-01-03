@@ -12,6 +12,7 @@ import com.opensymphony.xwork2.ActionSupport;
 
 import dao.DAO;
 import data.BowlGame;
+import data.CFPGame;
 
 public class ManageBowlGamesAction extends ActionSupport implements SessionAware {
 	
@@ -31,6 +32,8 @@ public class ManageBowlGamesAction extends ActionSupport implements SessionAware
 		// Want to get the games list each time after an update, dont use session
 		List<BowlGame> bowlGamesList = DAO.getBowlGamesList(year);
 	    context.put("bowlGamesList", bowlGamesList);
+	    List<CFPGame> cfpGamesList = DAO.getCfpGamesList(year);
+	    context.put("cfpGamesList", cfpGamesList);
 	    stack.push(context);
 	    return "success";
 	}

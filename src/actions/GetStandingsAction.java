@@ -130,6 +130,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		Map<Integer, String> cfpTeamMap = DAO.getCFPTeamsMap(pool.getYear());
 		JSONObject cfpTeamsJSON = new JSONObject(cfpTeamMap);
 	    userSession.put("cfpTeamsJSON", cfpTeamsJSON.toString());
+	    userSession.put("cfpTeamsList", new ArrayList<String>(cfpTeamMap.values()));
 		
 		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool);
 		int numberOfExcludedGames = (excludedGameList != null ? excludedGameList.size() : 0);

@@ -731,7 +731,9 @@ public class DAO {
 		List<String>potentialChampionsList = new ArrayList<String>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT distinct Favorite, Underdog FROM BowlGame where (CFPRound1Game=1 or CFPQuarterGame=1) and year = " + year);
+			String queryString = year <= 24 ? "SELECT distinct Favorite, Underdog FROM BowlGame where (CFPRound1Game=1 or CFPQuarterGame=1) and year = " + year : 
+				"SELECT distinct Home, Visitor FROM CFPGame where (round=1 or round=2) and year=" + year;
+			ResultSet rs = stmt.executeQuery(queryString);
 			while (rs.next()) {
 				String favorite = rs.getString(1);
 				String underdog = rs.getString(2);

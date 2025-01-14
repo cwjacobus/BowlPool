@@ -30,6 +30,7 @@ import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
 import data.BowlGame;
+import data.CFPGame;
 import data.CFTeam;
 import data.ChampPick;
 import data.Pick;
@@ -121,8 +122,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		List<BowlGame> bowlGamesList = new ArrayList<BowlGame>(bowlGamesMap.values());
 		Collections.sort(bowlGamesList, new SortbyDate()); 
 		userSession.put("bowlGamesList", bowlGamesList);
-		//List<CFPGame> cfpGamesList = DAO.getCfpGamesList(pool.getYear());
-		//userSession.put("cfpGamesList", cfpGamesList);
+		Map<Integer, CFPGame> cfpGamesMap = DAO.getCfpGamesMap(pool.getYear());
+		userSession.put("cfpGamesMap", cfpGamesMap);
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
 		excludedGameList = DAO.getExcludedGamesList(poolId);

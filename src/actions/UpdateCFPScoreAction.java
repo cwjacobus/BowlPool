@@ -1,5 +1,7 @@
 package actions;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,10 @@ public class UpdateCFPScoreAction extends ActionSupport implements SessionAware 
 		}
 		Integer year = (Integer) userSession.get("year");
 		DAO.updateCFPGameScore(homeScore, visScore, cfpGameId, home, visitor);
-		List<CFPGame> cfpGamesList = DAO.getCfpGamesList(year);
+		Map<Integer, CFPGame> cfpGamesMap = DAO.getCfpGamesMap(year);
+	    List<CFPGame> cfpGamesList = new ArrayList<CFPGame>(cfpGamesMap.values());
+	    Comparator<CFPGame> comparator = Comparator.comparing(CFPGame::getRound).thenComparing(CFPGame::getGameIndex);
+	    cfpGamesList.sort(comparator);
 	    context.put("cfpGamesList", cfpGamesList);
 	    List<BowlGame> bowlGamesList = DAO.getBowlGamesList(year);
 	    context.put("bowlGamesList", bowlGamesList);

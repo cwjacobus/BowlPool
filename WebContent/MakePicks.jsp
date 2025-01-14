@@ -87,16 +87,16 @@
 		addDropDown(cfpTeams[10], round, 4, cfp4);
 
 		addDropDown('', 0, '', cfp5);
-		addDropDown(cfpTeams[4], round, 4, cfp5);
+		addDropDown(cfpTeams[4], round, 1, cfp5);
 		
 		addDropDown('', 0, '', cfp6);
-		addDropDown(cfpTeams[1], round, 1, cfp6);
+		addDropDown(cfpTeams[1], round, 2, cfp6);
 		
 		addDropDown('', 0, '', cfp7);
 		addDropDown(cfpTeams[3], round, 3, cfp7);
 		
 		addDropDown('', 0, '', cfp8);
-		addDropDown(cfpTeams[2], round, 2, cfp8);
+		addDropDown(cfpTeams[2], round, 4, cfp8);
     }
     
     function getQtrValues(qtrGameIndex) {
@@ -105,25 +105,27 @@
     	var cfpChamp = document.getElementById("cfpChamp");
     	var cfpSemi1 = document.getElementById("cfpSemi1");
     	var cfpSemi2 = document.getElementById("cfpSemi2");
-		topSeedOption.text = cfpTeams[qtrGameIndex];
-		topSeedOption.value = cfpTeams[qtrGameIndex] + ':' + round + ':' + qtrGameIndex;
 		removeAllFromDropDown(cfpSemi1);
 		removeAllFromDropDown(cfpSemi2);
 		removeAllFromDropDown(cfpChamp);
 		var emptyOption = document.createElement('option');
 		emptyOption.text = "";
 		emptyOption.value = 0;
-		if (qtrGameIndex == 4) {
+		if (qtrGameIndex == 1) {
 			cfp5 = document.getElementById("cfp5");
 			cfp1 = document.getElementById("cfp1");
 			removeAllFromDropDown(cfp5);
+			topSeedOption.text = cfpTeams[4];
+			topSeedOption.value = cfpTeams[4] + ':' + round + ':' + qtrGameIndex;
 			cfp5.add(emptyOption);
 			cfp5.add(topSeedOption);
 			addDropDown(cfp1.options[cfp1.selectedIndex].text, round, qtrGameIndex, cfp5);
 		}
-		else if (qtrGameIndex == 1) {
+		else if (qtrGameIndex == 2) {
 			cfp6 = document.getElementById("cfp6");
 			removeAllFromDropDown(cfp6);
+			topSeedOption.text = cfpTeams[1];
+			topSeedOption.value = cfpTeams[1] + ':' + round + ':' + qtrGameIndex;
 			cfp6.add(emptyOption);
 			cfp6.add(topSeedOption);
 			addDropDown(cfp2.options[cfp2.selectedIndex].text, round, qtrGameIndex, cfp6);
@@ -131,6 +133,8 @@
 		else if (qtrGameIndex == 3) {
 			cfp7 = document.getElementById("cfp7");
 			removeAllFromDropDown(cfp7);
+			topSeedOption.text = cfpTeams[3];
+			topSeedOption.value = cfpTeams[3] + ':' + round + ':' + qtrGameIndex;
 			cfp7.add(emptyOption);
 			cfp7.add(topSeedOption);
 			addDropDown(cfp3.options[cfp3.selectedIndex].text, round, qtrGameIndex, cfp7);
@@ -138,6 +142,8 @@
 		else {
 			cfp8 = document.getElementById("cfp8");
 			removeAllFromDropDown(cfp8);
+			topSeedOption.text = cfpTeams[2];
+			topSeedOption.value = cfpTeams[2] + ':' + round + ':' + qtrGameIndex;
 			cfp8.add(emptyOption);
 			cfp8.add(topSeedOption);
 			addDropDown(cfp4.options[cfp4.selectedIndex].text, round, qtrGameIndex, cfp8);
@@ -300,7 +306,7 @@
   	<table cellspacing=10 cellpadding=10>
 		<tr><th>Round 1</th><th>Quarters</th><th>Semis</th><th>Championship</th></tr>
 		<tr>
-		<td width=75> <select name="cfp1" id="cfp1" onchange="getQtrValues(4)" style="width: 75px;">
+		<td width=75> <select name="cfp1" id="cfp1" onchange="getQtrValues(1)" style="width: 75px;">
 		</select></td>
       	<td width=75><select name="cfp5" id="cfp5" onchange="getSemiValues(1)" style="width: 75px;">
 		</select></td>
@@ -308,7 +314,7 @@
       	<td></td>
 		</tr>
 		<tr>
-		<td width=75> <select name="cfp2" id="cfp2" onchange="getQtrValues(1)" style="width: 75px;">
+		<td width=75> <select name="cfp2" id="cfp2" onchange="getQtrValues(2)" style="width: 75px;">
 		</select></td>
 		<td width=75><select name="cfp6" id="cfp6" onchange="getSemiValues(1)" style="width: 75px;">
 		</select></td>
@@ -327,7 +333,7 @@
 		</select></td>
 		</tr>
 		<tr>
-		<td width=75> <select name="cfp4" id="cfp4" onchange="getQtrValues(2)" style="width: 75px;">
+		<td width=75> <select name="cfp4" id="cfp4" onchange="getQtrValues(4)" style="width: 75px;">
 		</select></td>
       	<td width=75><select name="cfp8" id="cfp8" onchange="getSemiValues(2)" style="width: 75px;">
 		</select></td>
@@ -346,11 +352,19 @@
   	<c:choose>
   	<c:when test="${fn:length(cfpPicksMap[sessionScope.user.userId]) > 0}">
   		My CFP Bracket Picks:<br>
-  		<c:set var="winLoseClass" value=""/>
   		<table border=1>
   			<tr><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th></tr>
   			<tr>
   			<c:forEach var="cfpPick" items="${cfpPicksMap[sessionScope.user.userId]}">
+  				<c:set var="winLoseClass" value="class='win'"/>
+  				<c:if test="${!cfpGamesMap[cfpPick.cfpGameId].completed}">
+  					<c:set var="winLoseClass" value=""/>
+  				</c:if>
+  				<c:if test="${cfpGamesMap[cfpPick.cfpGameId].completed && 
+  						((cfpGamesMap[cfpPick.cfpGameId].home == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].homeScore < cfpGamesMap[cfpPick.cfpGameId].visScore) ||
+  						 (cfpGamesMap[cfpPick.cfpGameId].visitor == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visScore < cfpGamesMap[cfpPick.cfpGameId].homeScore))}">
+  					<c:set var="winLoseClass" value="class='lose'"/>
+  				</c:if>
   				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
   			</c:forEach>
   			</tr>
@@ -370,7 +384,15 @@
   			<tr>
   			<td>${usersMap[cfpPicks.key].userName}</td>
   			<c:forEach var="cfpPick" items="${cfpPicks.value}">
-  				<c:set var="winLoseClass" value=""/>
+  				<c:set var="winLoseClass" value="class='lose'"/>
+  				<c:if test="${!cfpGamesMap[cfpPick.cfpGameId].completed}">
+  					<c:set var="winLoseClass" value=""/>
+  				</c:if>
+  				<c:if test="${cfpGamesMap[cfpPick.cfpGameId].completed && 
+  						((cfpGamesMap[cfpPick.cfpGameId].home == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].homeScore > cfpGamesMap[cfpPick.cfpGameId].visScore) ||
+  						 (cfpGamesMap[cfpPick.cfpGameId].visitor == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visScore > cfpGamesMap[cfpPick.cfpGameId].homeScore))}">
+  					<c:set var="winLoseClass" value="class='win'"/>
+  				</c:if>
   				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
   			</c:forEach>
   			</tr>

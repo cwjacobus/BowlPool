@@ -336,24 +336,24 @@ public class DAO {
 		return standings;
 	}
 	
-	public static List<CFPGame> getCfpGamesList(Integer year) {
-		List<CFPGame>cfpGameList = new ArrayList<>();
+	public static Map<Integer, CFPGame> getCfpGamesMap(Integer year) {
+		Map<Integer, CFPGame> cfpGamesMap = new HashMap<>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM CFPGame where year=" + year + " order by DateTime");
+			ResultSet rs = stmt.executeQuery("SELECT * FROM CFPGame where year=" + year + " order by Round, GameIndex");
 			CFPGame cfpGame;
 			while (rs.next()) {
 				cfpGame = new CFPGame(rs.getInt("CFPGameId"), rs.getString("Description"), rs.getInt("Round"), rs.getInt("GameIndex"), 
 					rs.getString("Winner"), rs.getString("Loser"), rs.getInt("PointsValue"), rs.getBoolean("Completed"), rs.getString("Home"), 
 					rs.getString("Visitor"), rs.getInt("HomeScore"), rs.getInt("VisScore"), rs.getInt("HomeSeed"), rs.getInt("VisSeed"),
 					rs.getTimestamp("DateTime"), rs.getInt("Year"));
-				cfpGameList.add(cfpGame);
+				cfpGamesMap.put(cfpGame.getCfpGameId(), cfpGame);
 			}
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return cfpGameList;
+		return cfpGamesMap;
 	}
 	
 	public static List<BowlGame> getBowlGamesList(Integer year) {
@@ -410,7 +410,8 @@ public class DAO {
 		String winner = null;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select p.* from CFPPick p where p.poolId =  " + poolId + " order by p.UserId, p.CFPGameId");
+			ResultSet rs = stmt.executeQuery("select p.* from CFPPick p, CFPGame g where p.cfpGameId = g.cfpGameId and p.poolId =  " + 
+				poolId + " order by p.UserId, g.round, g.gameIndex");
 			while (rs.next()) {
 				userId = rs.getInt("UserId");
 				cfpGameId = rs.getInt("CFPGameId");
@@ -835,13 +836,13 @@ public class DAO {
 	}
 	
 	public static void updateCFPGameScore(Integer homeScore, Integer visScore, Integer cfpGameId, String home, String visitor) {
-		String champUpdate = "";
+		String champOrSemiUpdate = "";
 		if (home != null && home.length() > 0 && visitor != null && visitor.length() > 0) {
-			champUpdate += ", Home = '" + home + "', Visitor = '" + visitor + "'";
+			champOrSemiUpdate += ", Home = '" + home + "', Visitor = '" + visitor + "'";
 		}
 		try {
 			Statement stmt = conn.createStatement();
-			stmt.execute("UPDATE CFPGame SET HomeScore = " + homeScore + ", VisScore = " +  visScore + ", Completed = true" + champUpdate + " WHERE CFPGameId = " + cfpGameId);
+			stmt.execute("UPDATE CFPGame SET HomeScore = " + homeScore + ", VisScore = " +  visScore + ", Completed = true" + champOrSemiUpdate + " WHERE CFPGameId = " + cfpGameId);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();

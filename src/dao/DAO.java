@@ -77,19 +77,21 @@ public class DAO {
 		}
 	}
 	
-	public static void createBatchCfpPicks(List<String> cfpPicksList, Pool pool, Integer userId) {
+	public static void createBatchCfpPicks(List<String> cfpPicksList, Integer cfpChampTotPts, Pool pool, Integer userId) {
 		try {
 			conn.setAutoCommit(false);
 			Statement stmt = conn.createStatement();
 			int picksCount = 0;
+			int totPts = 0;
 			for (String p : cfpPicksList) {
 				String[] cfpPicksArray = p.split(":");
 				String team = cfpPicksArray[0];
 				String round = cfpPicksArray[1];
 				String gameIndex = cfpPicksArray[2];
+				totPts = Integer.parseInt(round) == 4 ? cfpChampTotPts : 0;
 				String insertSQL = "INSERT INTO CFPPick (UserId, CFPGameId, Winner, TotalPoints, PoolId, CreatedTime) VALUES (" + 
 					userId + ", (SELECT CFPGameId from CFPGame where round =" + round + " and gameIndex =" + gameIndex + " and year =" + pool.getYear() +
-					"), '" + team + "', 0, " + pool.getPoolId() + ", NOW());";
+					"), '" + team + "'," + totPts + "," + pool.getPoolId() + ", NOW());";
 				stmt.addBatch(insertSQL);
 				picksCount++;
 				// Every 500 lines, insert the records
@@ -344,7 +346,7 @@ public class DAO {
 			CFPGame cfpGame;
 			while (rs.next()) {
 				cfpGame = new CFPGame(rs.getInt("CFPGameId"), rs.getString("Description"), rs.getInt("Round"), rs.getInt("GameIndex"), 
-					rs.getString("Winner"), rs.getString("Loser"), rs.getInt("PointsValue"), rs.getBoolean("Completed"), rs.getString("Home"), 
+					rs.getInt("PointsValue"), rs.getBoolean("Completed"), rs.getString("Home"), 
 					rs.getString("Visitor"), rs.getInt("HomeScore"), rs.getInt("VisScore"), rs.getInt("HomeSeed"), rs.getInt("VisSeed"),
 					rs.getTimestamp("DateTime"), rs.getInt("Year"));
 				cfpGamesMap.put(cfpGame.getCfpGameId(), cfpGame);
@@ -408,6 +410,7 @@ public class DAO {
 		Integer cfpGameId = null;
 		Integer cfpPickId = null;
 		String winner = null;
+		Integer totPts = null;
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select p.* from CFPPick p, CFPGame g where p.cfpGameId = g.cfpGameId and p.poolId =  " + 
@@ -417,11 +420,12 @@ public class DAO {
 				cfpGameId = rs.getInt("CFPGameId");
 				cfpPickId = rs.getInt("CFPPickId");
 				winner = rs.getString("Winner");
+				totPts = rs.getInt("TotalPoints");
 				if (prevUserId != null && userId.intValue()!= prevUserId.intValue()) {
 					cfpPicksMap.put(prevUserId, cfpPicksList);
 					cfpPicksList = new ArrayList<>();
 				}
-				CFPPick p = new CFPPick(cfpPickId, userId, cfpGameId, winner, 0, poolId, null);
+				CFPPick p = new CFPPick(cfpPickId, userId, cfpGameId, winner, totPts, poolId, null);
 				cfpPicksList.add(p);
 				prevUserId = userId;
 			}

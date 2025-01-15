@@ -34,6 +34,7 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 	private String cfpSemi1;
 	private String cfpSemi2;
 	private String cfpChamp;
+	private Integer cfpChampTotPts;
 	//private String champGame;
 	//private Integer champTotPts;
 	//private Integer champGameId;
@@ -84,7 +85,7 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 			List<String> cfpPicksList = Arrays.asList(cfp1, cfp2, cfp3, cfp4, cfp5, cfp6, cfp7, cfp8, cfpSemi1, cfpSemi2, cfpChamp);
 			DAO.deleteCfpPickByUserIdAndPoolId(user.getUserId(), pool.getPoolId());
 			Thread.sleep(1000);
-			DAO.createBatchCfpPicks(cfpPicksList, pool, user.getUserId());
+			DAO.createBatchCfpPicks(cfpPicksList, cfpChampTotPts, pool, user.getUserId());
 		}
 		
 		
@@ -226,6 +227,14 @@ public class SavePicksAction extends ActionSupport implements SessionAware {
 
 	public void setCfpChamp(String cfpChamp) {
 		this.cfpChamp = cfpChamp;
+	}
+
+	public Integer getCfpChampTotPts() {
+		return cfpChampTotPts;
+	}
+
+	public void setCfpChampTotPts(Integer cfpChampTotPts) {
+		this.cfpChampTotPts = cfpChampTotPts;
 	}
 
 	@Override

@@ -303,43 +303,35 @@
   	<br>
   	<c:if test="${sessionScope.year > 24}">
   	CF Playoff Bracket
-  	<table cellspacing=10 cellpadding=10>
-		<tr><th>Round 1</th><th>Quarters</th><th>Semis</th><th>Championship</th></tr>
+  	<table cellspacing=5 cellpadding=5>
+		<tr><th>Round 1</th><th>Quarters</th><th>Semis</th><th>Championship</th><th>Champ Pts</th></tr>
 		<tr>
-		<td width=75> <select name="cfp1" id="cfp1" onchange="getQtrValues(1)" style="width: 75px;">
-		</select></td>
-      	<td width=75><select name="cfp5" id="cfp5" onchange="getSemiValues(1)" style="width: 75px;">
-		</select></td>
-		<td></td>
-      	<td></td>
+			<td width=75> <select name="cfp1" id="cfp1" onchange="getQtrValues(1)" style="width: 75px;"></select></td>
+      		<td width=75><select name="cfp5" id="cfp5" onchange="getSemiValues(1)" style="width: 75px;"></select></td>
+			<td></td>
+      		<td></td>
+      		<td></td>
 		</tr>
 		<tr>
-		<td width=75> <select name="cfp2" id="cfp2" onchange="getQtrValues(2)" style="width: 75px;">
-		</select></td>
-		<td width=75><select name="cfp6" id="cfp6" onchange="getSemiValues(1)" style="width: 75px;">
-		</select></td>
-		<td width=75><select name="cfpSemi1" id="cfpSemi1" onchange="getChampValues()" style="width: 75px;">
-		</select></td>
-		<td></td>
+			<td width=75> <select name="cfp2" id="cfp2" onchange="getQtrValues(2)" style="width: 75px;"></select></td>
+			<td width=75><select name="cfp6" id="cfp6" onchange="getSemiValues(1)" style="width: 75px;"></select></td>
+			<td width=75><select name="cfpSemi1" id="cfpSemi1" onchange="getChampValues()" style="width: 75px;"></select></td>
+			<td></td>
+			<td></td>
 		</tr>
 		<tr>
-		<td width=75> <select name="cfp3" id="cfp3" onchange="getQtrValues(3)" style="width: 75px;">
-		</select></td>
-      	<td width=75><select name="cfp7" id="cfp7" onchange="getSemiValues(2)" style="width: 75px;">
-		</select></td>
-      	<td width=75><select name="cfpSemi2" id="cfpSemi2" onchange="getChampValues()" style="width: 75px;">
-		</select></td>
-      	<td width=75><select name="cfpChamp" id="cfpChamp" style="width: 75px;">
-		</select></td>
+			<td width=75> <select name="cfp3" id="cfp3" onchange="getQtrValues(3)" style="width: 75px;"></select></td>
+      		<td width=75><select name="cfp7" id="cfp7" onchange="getSemiValues(2)" style="width: 75px;"></select></td>
+      		<td width=75><select name="cfpSemi2" id="cfpSemi2" onchange="getChampValues()" style="width: 75px;"></select></td>
+      		<td width=75><select name="cfpChamp" id="cfpChamp" style="width: 75px;"></select></td>
+      		<td width=75><input type="number" name="cfpChampTotPts" id="cfpChampTotPts" min="0" max="175" size=2/></td>
 		</tr>
 		<tr>
-		<td width=75> <select name="cfp4" id="cfp4" onchange="getQtrValues(4)" style="width: 75px;">
-		</select></td>
-      	<td width=75><select name="cfp8" id="cfp8" onchange="getSemiValues(2)" style="width: 75px;">
-		</select></td>
-		<td></td>
-		<td></td>
-      	<td></td>
+			<td width=75> <select name="cfp4" id="cfp4" onchange="getQtrValues(4)" style="width: 75px;"></select></td>
+      		<td width=75><select name="cfp8" id="cfp8" onchange="getSemiValues(2)" style="width: 75px;"></select></td>
+			<td></td>
+			<td></td>
+			<td></td>
 		</tr>
 	</table>
 	</c:if>
@@ -353,9 +345,10 @@
   	<c:when test="${fn:length(cfpPicksMap[sessionScope.user.userId]) > 0}">
   		My CFP Bracket Picks:<br>
   		<table border=1>
-  			<tr><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th></tr>
+  			<tr><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th><th>Pts</th></tr>
   			<tr>
   			<c:forEach var="cfpPick" items="${cfpPicksMap[sessionScope.user.userId]}">
+  				<c:set var="totPts" value="${cfpPick.totalPoints}"/>
   				<c:set var="winLoseClass" value="class='win'"/>
   				<c:if test="${!cfpGamesMap[cfpPick.cfpGameId].completed}">
   					<c:set var="winLoseClass" value=""/>
@@ -367,6 +360,7 @@
   				</c:if>
   				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
   			</c:forEach>
+  			<td>${totPts}</td>
   			</tr>
   		</table>
   	</c:when>
@@ -379,11 +373,12 @@
   	<c:if test="${sessionScope.readOnly || sessionScope.user.admin}">
   		All CFP Bracket Picks<br>
   		<table border=1>
-  		<tr><th>User</th><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th></tr>
+  		<tr><th>User</th><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th><th>Pts</th></tr>
   		<c:forEach var="cfpPicks" items="${cfpPicksMap}">
   			<tr>
   			<td>${usersMap[cfpPicks.key].userName}</td>
   			<c:forEach var="cfpPick" items="${cfpPicks.value}">
+  				<c:set var="totPts" value="${cfpPick.totalPoints}"/>
   				<c:set var="winLoseClass" value="class='lose'"/>
   				<c:if test="${!cfpGamesMap[cfpPick.cfpGameId].completed}">
   					<c:set var="winLoseClass" value=""/>
@@ -395,6 +390,7 @@
   				</c:if>
   				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
   			</c:forEach>
+  			<td>${totPts}</td>
   			</tr>
   		</c:forEach>
   		</table>

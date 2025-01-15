@@ -8,8 +8,6 @@ public class CFPGame {
 	private String description;
 	private int round;
 	private int gameIndex;
-	private String winner;
-	private String loser;
 	private int pointsValue;
 	private boolean completed;
 	private String home;
@@ -21,14 +19,12 @@ public class CFPGame {
 	private Timestamp dateTime;
 	private int year;
 	
-	public CFPGame (int cfpGameId, String description, int round, int gameIndex, String winner, String loser, int pointsValue, boolean completed, String home, String visitor, int homeScore, int visScore, 
+	public CFPGame (int cfpGameId, String description, int round, int gameIndex, int pointsValue, boolean completed, String home, String visitor, int homeScore, int visScore, 
 			int homeSeed, int visSeed, Timestamp dateTime, int year) {
 		this.cfpGameId = cfpGameId;
 		this.description = description;
 		this.round = round;
 		this.gameIndex = gameIndex;
-		this.winner = winner;
-		this.loser = loser;
 		this.pointsValue = pointsValue;
 		this.home = home;
 		this.visitor = visitor;
@@ -71,22 +67,6 @@ public class CFPGame {
 
 	public void setGameIndex(int gameIndex) {
 		this.gameIndex = gameIndex;
-	}
-
-	public String getWinner() {
-		return winner;
-	}
-
-	public void setWinner(String winner) {
-		this.winner = winner;
-	}
-
-	public String getLoser() {
-		return loser;
-	}
-
-	public void setLoser(String loser) {
-		this.loser = loser;
 	}
 
 	public int getPointsValue() {

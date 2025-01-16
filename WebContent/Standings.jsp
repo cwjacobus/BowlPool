@@ -48,7 +48,8 @@
   	</a>
   	<br><br>
   	<c:if test = "${allowAdmin}">
-  		<a href="/BowlPoolWeb/manageBowlGames">Manage Bowl Games</a>
+  		<a href="/BowlPoolWeb/manageBowlGames">Manage Bowl Games</a><br>
+  		<a href="/BowlPoolWeb/createCFPGames">Create CFP Games</a>
   		<br>
   		<h3>Import Data</h3>
   		<form action="import">

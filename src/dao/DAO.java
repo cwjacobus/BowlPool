@@ -241,9 +241,7 @@ public class DAO {
 		HashMap<Integer, Integer> cfpRound1Winners = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> cfpWinners = new HashMap<Integer, Integer>();
 		boolean useSpreads = pool != null ? pool.isUsePointSpreads() : true;
-		int cfpRound1Pts = 2;
-		int cfpChampPts = 5;
-		int[] pointsPerRound = {2, 3, 5, 10};
+		int[] pointsPerRound = {pool.getPtsRound1CFPGame(), pool.getPtsQtrCFPGame(), pool.getPtsSemiCFPGame(), pool.getPtsChampCFPGame()};
 		
 		try { 
 			Statement stmt1 = conn.createStatement();
@@ -315,10 +313,11 @@ public class DAO {
 				cfpWinners.put(userId, userPoints);
 			}
 			while (rs1.next()) {
-				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? (pool.getYear() != 24 ? 1 : (cfpChampPts - 1)) : 0; 
-				int r1Win = (cfpRound1Winners.get(rs1.getInt(2)) != null) ? (cfpRound1Pts - 1) * cfpRound1Winners.get(rs1.getInt(2)) : 0;
+				int champWin = champGameWinners.get(rs1.getInt(2)) != null ? pool.getPtsChampCFPGame() : 0; 
+				int r1Win = (cfpRound1Winners.get(rs1.getInt(2)) != null) ? (pool.getPtsRound1CFPGame() - 1) * 
+					cfpRound1Winners.get(rs1.getInt(2)) : 0; // -1 since already counted in main count
 				int cfpWin = (cfpWinners.get(rs1.getInt(2)) != null) ? cfpWinners.get(rs1.getInt(2)) : 0;
-				String wins = Integer.toString(rs1.getInt(3) + champWin + r1Win + cfpWin); 
+				String wins = Integer.toString((rs1.getInt(3) * pool.getPtsBowlGame()) + champWin + r1Win + cfpWin); 
 				if ((rs1.getInt(3)  + champWin + r1Win + cfpWin) < 10) {
 					wins = "0" + wins;
 				}
@@ -547,7 +546,9 @@ public class DAO {
 			String sql = "SELECT * FROM Pool where poolId = " + poolId;
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads")/*, rs.getTimestamp("FirstGameDate")*/);
+				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads"), 
+					rs.getInt("PtsBowlGame"), rs.getInt("PtsRound1CFPGame"), rs.getInt("PtsQtrCFPGame"), rs.getInt("PtsSemiCFPGame"),
+					rs.getInt("PtsChampCFPGame"));
 			}
 		}
 		catch (SQLException e) {

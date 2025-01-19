@@ -59,5 +59,11 @@
             <result name="success">/SuccessPage.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
       </action>
+      <action name="createCFPGames" 
+            class="actions.CreateCFPGamesAction" 
+            method="execute">
+            <result name="success">/SuccessPage.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
    </package>
 </struts>

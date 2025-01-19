@@ -47,6 +47,19 @@ public class DAO {
 		}
 	}
 	
+	public static void createCFPGame(String description, Integer round, Integer gameIndex, String home, String visitor, Integer year, Integer homeSeed, Integer visSeed) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "INSERT INTO CFPGame (Description, Round, GameIndex, Home, Visitor, Year, HomeSeed, VisSeed, Completed) VALUES ('" + 
+				description + "', " + round + ", " + gameIndex + ", " + (home != null ? "'" + home + "'" : null) + ", " + 
+				(visitor != null ? "'" + visitor + "'" : null) + ", " + year + ", " + homeSeed + ", " +  visSeed + ", 0);";
+			stmt.execute(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void createBatchPicks(List<Pick> picksList, Integer poolId) {
 		try {
 			conn.setAutoCommit(false);
@@ -205,8 +218,19 @@ public class DAO {
 	public static void deleteChampPickByUserIdAndPoolId(Integer userId, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "DELETE from ChampPick WHERE userId = " + userId + " and poolId = " + poolId;
-			stmt.execute(insertSQL);
+			String deleteSQL = "DELETE from ChampPick WHERE userId = " + userId + " and poolId = " + poolId;
+			stmt.execute(deleteSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void deleteCfpGamesByYear(Integer year) {
+		try {
+			Statement stmt = conn.createStatement();
+			String deleteSQL = "DELETE from CFPGame WHERE year = " + year;
+			stmt.execute(deleteSQL);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
@@ -216,8 +240,8 @@ public class DAO {
 	public static void deleteCfpPickByUserIdAndPoolId(Integer userId, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "DELETE from CFPPick WHERE userId = " + userId + " and poolId = " + poolId;
-			stmt.execute(insertSQL);
+			String deleteSQL = "DELETE from CFPPick WHERE userId = " + userId + " and poolId = " + poolId;
+			stmt.execute(deleteSQL);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
@@ -227,8 +251,8 @@ public class DAO {
 	public static void deletePicksByUserIdAndPoolId(Integer userId, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "DELETE from Pick WHERE userId = " + userId + " and poolId = " + poolId;
-			stmt.execute(insertSQL);
+			String deleteSQL = "DELETE from Pick WHERE userId = " + userId + " and poolId = " + poolId;
+			stmt.execute(deleteSQL);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
@@ -345,9 +369,8 @@ public class DAO {
 			CFPGame cfpGame;
 			while (rs.next()) {
 				cfpGame = new CFPGame(rs.getInt("CFPGameId"), rs.getString("Description"), rs.getInt("Round"), rs.getInt("GameIndex"), 
-					rs.getInt("PointsValue"), rs.getBoolean("Completed"), rs.getString("Home"), 
-					rs.getString("Visitor"), rs.getInt("HomeScore"), rs.getInt("VisScore"), rs.getInt("HomeSeed"), rs.getInt("VisSeed"),
-					rs.getTimestamp("DateTime"), rs.getInt("Year"));
+					rs.getBoolean("Completed"), rs.getString("Home"), rs.getString("Visitor"), rs.getInt("HomeScore"), rs.getInt("VisScore"), 
+					rs.getInt("HomeSeed"), rs.getInt("VisSeed"), rs.getTimestamp("DateTime"), rs.getInt("Year"));
 				cfpGamesMap.put(cfpGame.getCfpGameId(), cfpGame);
 			}
 		}
@@ -767,10 +790,10 @@ public class DAO {
 				Integer homeSeed = rs.getInt(2);
 				String visitor = rs.getString(3);
 				Integer visSeed = rs.getInt(4);
-				if (home != null && home.length() > 0) {
+				if (home != null && home.length() > 0 && (homeSeed != null && homeSeed != 0)) {
 					cfpTeamsMap.put(homeSeed, home);
 				}
-				if (visitor != null && visitor.length() > 0) {
+				if (visitor != null && visitor.length() > 0 && (visSeed != null && visSeed != 0)) {
 					cfpTeamsMap.put(visSeed, visitor);
 				}
 			}

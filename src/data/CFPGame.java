@@ -8,7 +8,6 @@ public class CFPGame {
 	private String description;
 	private int round;
 	private int gameIndex;
-	private int pointsValue;
 	private boolean completed;
 	private String home;
 	private String visitor;
@@ -19,13 +18,12 @@ public class CFPGame {
 	private Timestamp dateTime;
 	private int year;
 	
-	public CFPGame (int cfpGameId, String description, int round, int gameIndex, int pointsValue, boolean completed, String home, String visitor, int homeScore, int visScore, 
+	public CFPGame (int cfpGameId, String description, int round, int gameIndex, boolean completed, String home, String visitor, int homeScore, int visScore, 
 			int homeSeed, int visSeed, Timestamp dateTime, int year) {
 		this.cfpGameId = cfpGameId;
 		this.description = description;
 		this.round = round;
 		this.gameIndex = gameIndex;
-		this.pointsValue = pointsValue;
 		this.home = home;
 		this.visitor = visitor;
 		this.homeScore = homeScore;
@@ -67,14 +65,6 @@ public class CFPGame {
 
 	public void setGameIndex(int gameIndex) {
 		this.gameIndex = gameIndex;
-	}
-
-	public int getPointsValue() {
-		return pointsValue;
-	}
-
-	public void setPointsValue(int pointsValue) {
-		this.pointsValue = pointsValue;
 	}
 
 	public boolean isCompleted() {

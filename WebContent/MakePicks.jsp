@@ -341,6 +341,7 @@
   	</form>
   	
   	<br><br>
+  	<c:set var="cfpPicksMap" value="${sessionScope.cfpPicksMap}"/>
   	<c:choose>
   	<c:when test="${fn:length(cfpPicksMap[sessionScope.user.userId]) > 0}">
   		My CFP Bracket Picks:<br>
@@ -353,9 +354,11 @@
   				<c:if test="${!cfpGamesMap[cfpPick.cfpGameId].completed}">
   					<c:set var="winLoseClass" value=""/>
   				</c:if>
-  				<c:if test="${cfpGamesMap[cfpPick.cfpGameId].completed && 
+  				<c:if test="${(cfpGamesMap[cfpPick.cfpGameId].completed && 
   						((cfpGamesMap[cfpPick.cfpGameId].home == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].homeScore < cfpGamesMap[cfpPick.cfpGameId].visScore) ||
-  						 (cfpGamesMap[cfpPick.cfpGameId].visitor == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visScore < cfpGamesMap[cfpPick.cfpGameId].homeScore))}">
+  						 (cfpGamesMap[cfpPick.cfpGameId].visitor == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visScore < cfpGamesMap[cfpPick.cfpGameId].homeScore) ||
+  						 (cfpGamesMap[cfpPick.cfpGameId].home != cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visitor != cfpPick.winner))) ||
+  						 (!cfpGamesMap[cfpPick.cfpGameId].completed && fn:contains(sessionScope.eliminatedCFPTeamsList, cfpPick.winner))}">
   					<c:set var="winLoseClass" value="class='lose'"/>
   				</c:if>
   				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
@@ -379,14 +382,16 @@
   			<td>${usersMap[cfpPicks.key].userName}</td>
   			<c:forEach var="cfpPick" items="${cfpPicks.value}">
   				<c:set var="totPts" value="${cfpPick.totalPoints}"/>
-  				<c:set var="winLoseClass" value="class='lose'"/>
+  				<c:set var="winLoseClass" value="class='win'"/>
   				<c:if test="${!cfpGamesMap[cfpPick.cfpGameId].completed}">
   					<c:set var="winLoseClass" value=""/>
   				</c:if>
-  				<c:if test="${cfpGamesMap[cfpPick.cfpGameId].completed && 
-  						((cfpGamesMap[cfpPick.cfpGameId].home == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].homeScore > cfpGamesMap[cfpPick.cfpGameId].visScore) ||
-  						 (cfpGamesMap[cfpPick.cfpGameId].visitor == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visScore > cfpGamesMap[cfpPick.cfpGameId].homeScore))}">
-  					<c:set var="winLoseClass" value="class='win'"/>
+  				<c:if test="${(cfpGamesMap[cfpPick.cfpGameId].completed && 
+  						((cfpGamesMap[cfpPick.cfpGameId].home == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].homeScore < cfpGamesMap[cfpPick.cfpGameId].visScore) ||
+  						 (cfpGamesMap[cfpPick.cfpGameId].visitor == cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visScore < cfpGamesMap[cfpPick.cfpGameId].homeScore) ||
+  						 (cfpGamesMap[cfpPick.cfpGameId].home != cfpPick.winner && cfpGamesMap[cfpPick.cfpGameId].visitor != cfpPick.winner))) ||
+  						 (!cfpGamesMap[cfpPick.cfpGameId].completed && fn:contains(sessionScope.eliminatedCFPTeamsList, cfpPick.winner))}">
+  					<c:set var="winLoseClass" value="class='lose'"/>
   				</c:if>
   				<td align=center ${winLoseClass}>${cfpPick.winner}</td>
   			</c:forEach>

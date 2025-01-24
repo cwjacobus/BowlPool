@@ -80,5 +80,9 @@ public class CFPPick {
 	public void setCreatedTime(Timestamp createdTime) {
 		this.createdTime = createdTime;
 	}
+	
+	public String toString() {
+		return userId + ":" + cfpGameId + ":" + winner;
+	}
 
 }

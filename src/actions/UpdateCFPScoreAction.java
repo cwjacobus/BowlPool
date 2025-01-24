@@ -45,6 +45,8 @@ public class UpdateCFPScoreAction extends ActionSupport implements SessionAware 
 	    context.put("cfpGamesList", cfpGamesList);
 	    List<BowlGame> bowlGamesList = DAO.getBowlGamesList(year);
 	    context.put("bowlGamesList", bowlGamesList);
+	    List<String> eliminatedCFPTeamsList = DAO.getEliminatedCFPTeamsList(year);
+		userSession.put("eliminatedCFPTeamsList", eliminatedCFPTeamsList); // Update eliminated CFP teams on the session
 	    stack.push(context);
 	    return "success";
 	}

@@ -31,6 +31,7 @@ import com.opensymphony.xwork2.ActionSupport;
 
 import data.BowlGame;
 import data.CFPGame;
+import data.CFPPick;
 import data.CFTeam;
 import data.ChampPick;
 import data.Pick;
@@ -64,8 +65,11 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	int lastGamePlayedIndex = 9;
 	Map<String, Object> userSession;
 	Map<Integer, BowlGame> bowlGamesMap;
+	Map<Integer, CFPGame> cfpGamesMap;
+	Map<Integer, String> cfpTeamMap;
 	List<Integer> champPickEliminatedList;
 	List<Integer> excludedGameList;
+	List<String> eliminatedCFPTeamsList;
 	
 	final static Logger logger = Logger.getLogger(GetStandingsAction.class);
 	
@@ -85,6 +89,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
         	DAO.setConnection(con);
         }
 		pool = DAO.getPool(poolId);
+		int[] pointsPerRound = {pool.getPtsRound1CFPGame(), pool.getPtsQtrCFPGame(), pool.getPtsSemiCFPGame(), pool.getPtsChampCFPGame()};
 		if (pool == null) {
 			context.put("errorMsg", "Pool does not exist!");
 			stack.push(context);
@@ -106,8 +111,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		}
 		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(pool.getYear(), poolId);
 		userSession.put("picksMap", picksMap);
-		//Map<Integer, List<Pick>> cfPpicksMap = DAO.getCFPPicksMap(pool.getYear(), poolId);
-		//userSession.put("cfPpicksMap", cfPpicksMap);
+		Map<Integer, List<CFPPick>> cfpPicksMap = DAO.getCfpPicksMap(pool.getPoolId());
+		userSession.put("cfpPicksMap", cfpPicksMap);
 		Map<String, CFTeam> cfTeamsMap = DAO.getCFTeamsMap();
 		userSession.put("cfTeamsMap", cfTeamsMap);
 		Map<Integer, ChampPick> champPicksMap = null;
@@ -115,20 +120,21 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 			champPicksMap = DAO.getChampPicksMap(pool.getYear(), poolId);
 			userSession.put("champPicksMap", champPicksMap);
 		}
-		TreeMap<String, Integer> standings = DAO.getStandings(pool);
+		TreeMap<String, Integer> standings = DAO.getStandings(pool, pointsPerRound);
 		TreeMap<String, Standings> displayStandings = new TreeMap<String, Standings>(Collections.reverseOrder());
 		bowlGamesMap = DAO.getBowlGamesMap(pool.getYear());
 		numOfBowlGames = bowlGamesMap.size();
 		List<BowlGame> bowlGamesList = new ArrayList<BowlGame>(bowlGamesMap.values());
 		Collections.sort(bowlGamesList, new SortbyDate()); 
 		userSession.put("bowlGamesList", bowlGamesList);
-		Map<Integer, CFPGame> cfpGamesMap = DAO.getCfpGamesMap(pool.getYear());
+		cfpGamesMap = DAO.getCfpGamesMap(pool.getYear());
 		userSession.put("cfpGamesMap", cfpGamesMap);
+		numOfBowlGames += cfpGamesMap.size();
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
 		excludedGameList = DAO.getExcludedGamesList(poolId);
 		userSession.put("excludedGameList", excludedGameList);
-		Map<Integer, String> cfpTeamMap = DAO.getCFPTeamsMap(pool.getYear());
+		cfpTeamMap = DAO.getCFPTeamsMap(pool.getYear());
 		JSONObject cfpTeamsJSON = new JSONObject(cfpTeamMap);
 	    userSession.put("cfpTeamsJSON", cfpTeamsJSON.toString());
 	    userSession.put("cfpTeamsList", new ArrayList<String>(cfpTeamMap.values()));
@@ -136,6 +142,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool);
 		int numberOfExcludedGames = (excludedGameList != null ? excludedGameList.size() : 0);
 		numOfBowlGames -= numberOfExcludedGames; 
+		eliminatedCFPTeamsList = DAO.getEliminatedCFPTeamsList(pool.getYear());
+		userSession.put("eliminatedCFPTeamsList", eliminatedCFPTeamsList);
 		//Iterate through standings to make formatted display string
 		Iterator<Entry<String, Integer>> it = standings.entrySet().iterator();
     	int standingsIndex = 1;
@@ -173,10 +181,21 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 					userChampPick1 = champPicksMap.get(userId);
 					userChampPick2 = champPicksMap.get(userId2);
 				}
-				int diffPicks =  getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2, champGameCompleted);
-				if ((wins + diffPicks) < wins2) {
-					eliminatedByCount++;
+				if (pool.getYear() <= 24) { 
+					int diffPicks = getUsersRemainingDifferentPicks(userPicks1, userPicks2, userChampPick1, userChampPick2, champGameCompleted);
+					if ((wins + diffPicks) < wins2) {
+						eliminatedByCount++;
+					}
 				}
+				else {
+					List<CFPPick> userCFPPicks1 = cfpPicksMap.get(userId);
+					List<CFPPick> userCFPPicks2 = cfpPicksMap.get(userId2);
+					int pointsDifference = getUsersRemainingPointDifference(userPicks1, userPicks2, userCFPPicks1, userCFPPicks2, pointsPerRound);
+					if (((wins * pool.getPtsBowlGame()) + pointsDifference) < wins2) {
+						eliminatedByCount++;
+					}
+				}
+				
 			}
 			Standings s = new Standings();
 			s.setUserName(userName);
@@ -255,7 +274,6 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		else if (userPicks2 == null) {
 			return userPicks1.size();
 		}
-		
 		for (Pick up1 : userPicks1) {
 			for (Pick up2 : userPicks2) {
 				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && bowlGamesMap.get(up1.getGameId()) != null &&
@@ -264,13 +282,36 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 				}
 			}
 		}
-		
 		if (userChampPick1 != null && userChampPick2 != null) {
 			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !champGameCompleted && !champPickEliminatedList.contains(userChampPick1.getUserId())) {
 				diffPicks++;
 			}
 		}
 		return diffPicks;	
+	}
+	
+	private int getUsersRemainingPointDifference(List<Pick> userPicks1, List<Pick> userPicks2, List<CFPPick> userCFPPicks1, List<CFPPick> userCFPPicks2, int[] pointsPerRound) {
+		int pointsDiff = 0;
+		if (userCFPPicks1 == null) {
+			return userCFPPicks2.size();
+		}
+		else if (userCFPPicks2 == null) {
+			return userCFPPicks1.size();
+		}
+		pointsDiff = getUsersRemainingDifferentPicks(userPicks1, userPicks2, null, null, false);
+		for (CFPPick cp1 : userCFPPicks1) {
+			for (CFPPick cp2 : userCFPPicks2) {
+				CFPGame cfpGame = cfpGamesMap.get(cp1.getCfpGameId());
+				if (cp1.getCfpGameId() == cp2.getCfpGameId() && !cp1.getWinner().equals(cp2.getWinner()) && !cfpGame.isCompleted() && 
+					!eliminatedCFPTeamsList.contains(cp1.getWinner())) {
+						pointsDiff+= pointsPerRound[cfpGame.getRound() - 1];
+				}
+				if (cp1.getCfpGameId() == cp2.getCfpGameId()) {
+					break;
+				}
+			}
+		}
+		return pointsDiff;
 	}
 
 	public void setSession(Map<String, Object> session) {

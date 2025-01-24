@@ -259,13 +259,12 @@ public class DAO {
 		}
 	}
 	
-	public static TreeMap<String, Integer> getStandings(Pool pool) {
+	public static TreeMap<String, Integer> getStandings(Pool pool, int[] pointsPerRound) {
 		TreeMap<String, Integer> standings = new TreeMap<String, Integer>(Collections.reverseOrder());
 		HashMap<Integer, Integer> champGameWinners = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> cfpRound1Winners = new HashMap<Integer, Integer>();
 		HashMap<Integer, Integer> cfpWinners = new HashMap<Integer, Integer>();
 		boolean useSpreads = pool != null ? pool.isUsePointSpreads() : true;
-		int[] pointsPerRound = {pool.getPtsRound1CFPGame(), pool.getPtsQtrCFPGame(), pool.getPtsSemiCFPGame(), pool.getPtsChampCFPGame()};
 		
 		try { 
 			Statement stmt1 = conn.createStatement();
@@ -530,6 +529,21 @@ public class DAO {
 		return picksMap;
 	}
 	
+	public static List<String> getEliminatedCFPTeamsList(Integer year) {
+		List<String> eliminatedCFPTeamsList = new ArrayList<String>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select if (homescore < visscore, home, visitor) from cfpgame where completed = 1 and year=" + year);
+			while (rs.next()) {
+				eliminatedCFPTeamsList.add(rs.getString(1));
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return eliminatedCFPTeamsList;
+	}
+	
 	public static List<Integer> getExcludedGamesList(Integer poolId) {
 		List<Integer> excludedGameList = new ArrayList<Integer>();
 		try {
@@ -643,12 +657,15 @@ public class DAO {
 	public static int getNumberOfCompletedGames(Pool pool) {
 		int numberOfCompletedGames = 0;
 		try {
-			Statement stmt = conn.createStatement();
-			//String firstGameStartSQL = pool.getFirstGameDate() != null ? "DateTime > '" + pool.getFirstGameDate() + "' and " : "";
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and GameId not in (select GameId from ExcludedGame where poolId = " + 
-				pool.getPoolId() + ") and " + getYearClause(pool.getYear(), null)); // and " + firstGameStartSQL + getYearClause(pool.getYear(), null));
-			rs.next();
-			numberOfCompletedGames = rs.getInt(1);
+			Statement stmt1 = conn.createStatement();
+			ResultSet rs1 = stmt1.executeQuery("select count(*) from BowlGame where Completed = 1 and GameId not in (select GameId from ExcludedGame where poolId = " + 
+				pool.getPoolId() + ") and " + getYearClause(pool.getYear(), null));
+			rs1.next();
+			numberOfCompletedGames = rs1.getInt(1);
+			Statement stmt2 = conn.createStatement();
+			ResultSet rs2 = stmt2.executeQuery("select count(*) from CFPGame where Completed = 1 and year = " + pool.getYear());
+			rs2.next();
+			numberOfCompletedGames += rs2.getInt(1);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();

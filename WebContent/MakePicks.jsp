@@ -40,14 +40,35 @@
 			var champTeam = document.getElementById("champGame").value.trim();
 			var champTotPts = document.getElementById("champTotPts").value.trim();
 			if (champTeam.length == 0) {
-				errorMsg += "No Championship Game Winner\n"
+				errorMsg += "No Championship Game Winner\n";
 			}
 			if (champTotPts.length == 0) {
-				errorMsg += "No Championship Game Total Points\n"
+				errorMsg += "No Championship Game Total Points\n";
 			}
 	    }
 		if ((favsChecked + dogsChecked) != favorites.length) {
-			errorMsg += "Not All Games Picked"
+			errorMsg += "Not All Games Picked\n";
+		}
+		var missingCfpPicks = 0;
+		var missingCfpChampTotPts = 0;
+		if (document.getElementById("cfp1").value.trim().length < 4 || document.getElementById("cfp2").value.trim().length < 4 ||
+			document.getElementById("cfp3").value.trim().length < 4 || document.getElementById("cfp4").value.trim().length < 4 || 
+			document.getElementById("cfp5").value.trim().length < 4 || document.getElementById("cfp6").value.trim().length < 4 ||
+			document.getElementById("cfp7").value.trim().length < 4 || document.getElementById("cfp8").value.trim().length < 4 ||
+			document.getElementById("cfpSemi1").value.trim().length < 4 || document.getElementById("cfpSemi2").value.trim().length < 4 ||
+			document.getElementById("cfpChamp").value.trim().length < 4) {
+				missingCfpPicks = 1;
+		}
+		if (document.getElementById("cfpChampTotPts").value.trim().length == 0) {
+			missingCfpChampTotPts = 1;
+		}
+		if (missingCfpPicks) {
+			alert("Missing CFP Bracket Selections");
+			return false;
+		}
+		if (missingCfpChampTotPts) {
+			alert("Missing Championship Game Total Points");
+			return false;
 		}
 		if (errorMsg.length > 0) {
 			errorMsg = "Are you sure you want to save your picks?  The following are missing: \n" + errorMsg;

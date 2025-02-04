@@ -65,5 +65,11 @@
             <result name="success">/SuccessPage.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
       </action>
+      <action name="createPool" 
+            class="actions.CreatePoolAction" 
+            method="execute">
+            <result name="success">/index.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
    </package>
 </struts>

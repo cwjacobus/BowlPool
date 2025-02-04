@@ -51,7 +51,7 @@ PoolId int(5)
 
 CREATE TABLE Pool
 (
-PoolId int(5) PRIMARY KEY,
+PoolId int(5) PRIMARY KEY AUTO_INCREMENT,
 PoolName varchar(255) NOT NULL,
 Year int(5) NOT NULL,
 UsePointSpreads boolean NOT NULL,
@@ -59,7 +59,8 @@ PtsBowlGame int(5) NOT NULL DEFAULT 1,
 PtsRound1CFPGame int(5) NOT NULL DEFAULT 0,
 PtsQtrCFPGame int(5) NOT NULL DEFAULT 0,
 PtsSemiCFPGame int(5) NOT NULL DEFAULT 0,
-PtsChampCFPGame int(5) NOT NULL DEFAULT 1
+PtsChampCFPGame int(5) NOT NULL DEFAULT 1,
+CONSTRAINT P_CONST1 UNIQUE (PoolName, Year)
 );
 
 CREATE TABLE CFTeam

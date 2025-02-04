@@ -58,8 +58,9 @@ class SortbyDate implements Comparator<BowlGame>
 public class GetStandingsAction extends ActionSupport implements Serializable, SessionAware {
 	
 	private static final long serialVersionUID = 1L;
-	private String name;
-	private Integer poolId = null;
+	private String userName;
+	private Integer year;
+	private String poolName;
 	private Pool pool;
 	int numOfBowlGames = 1;
 	int lastGamePlayedIndex = 9;
@@ -88,7 +89,10 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
         	con = bowlPoolDB.reconnectAfterTimeout();
         	DAO.setConnection(con);
         }
-		pool = DAO.getPool(poolId);
+        if (year < 100) {  // Adjust 2 digit years
+			year = 2000 + year;
+		}
+		pool = DAO.getPoolByPoolName(poolName + " " + year);
 		int[] pointsPerRound = {pool.getPtsRound1CFPGame(), pool.getPtsQtrCFPGame(), pool.getPtsSemiCFPGame(), pool.getPtsChampCFPGame()};
 		if (pool == null) {
 			context.put("errorMsg", "Pool does not exist!");
@@ -98,10 +102,10 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		userSession.put("pool", pool);
 		userSession.put("year", pool.getYear());
 		
-		System.out.println("Login: " + name + " year: " + pool.getYear() + " poolId: " + poolId + " time: " + new Timestamp(new Date().getTime()));
-		logger.info("Login: " + name + " year: " + pool.getYear() + " poolId: " + poolId);
-		User user  = DAO.getUser(name, pool.getYear(), poolId);
-		if (user != null || name.equalsIgnoreCase("admin")) { // Always allow admin to login to import users
+		System.out.println("Login: " + userName + " year: " + pool.getYear() + " poolId: " + pool.getPoolId() + " time: " + new Timestamp(new Date().getTime()));
+		logger.info("Login: " + userName + " year: " + pool.getYear() + " poolId: " + pool.getPoolId());
+		User user  = DAO.getUser(userName, pool.getYear(), pool.getPoolId());
+		if (user != null || userName.equalsIgnoreCase("admin")) { // Always allow admin to login to import users
 			userSession.put("user", user);
 		}
 		else {
@@ -109,7 +113,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 			stack.push(context);
 			return "error";
 		}
-		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(pool.getYear(), poolId);
+		Map<Integer, List<Pick>> picksMap = DAO.getPicksMap(pool.getYear(), pool.getPoolId());
 		userSession.put("picksMap", picksMap);
 		Map<Integer, List<CFPPick>> cfpPicksMap = DAO.getCfpPicksMap(pool.getPoolId());
 		userSession.put("cfpPicksMap", cfpPicksMap);
@@ -117,7 +121,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		userSession.put("cfTeamsMap", cfTeamsMap);
 		Map<Integer, ChampPick> champPicksMap = null;
 		if (DAO.useYearClause(pool.getYear())) {
-			champPicksMap = DAO.getChampPicksMap(pool.getYear(), poolId);
+			champPicksMap = DAO.getChampPicksMap(pool.getYear(), pool.getPoolId());
 			userSession.put("champPicksMap", champPicksMap);
 		}
 		TreeMap<String, Integer> standings = DAO.getStandings(pool, pointsPerRound);
@@ -132,7 +136,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		numOfBowlGames += cfpGamesMap.size();
 		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		userSession.put("potentialChampionsList", potentialChampionsList);
-		excludedGameList = DAO.getExcludedGamesList(poolId);
+		excludedGameList = DAO.getExcludedGamesList(pool.getPoolId());
 		userSession.put("excludedGameList", excludedGameList);
 		cfpTeamMap = DAO.getCFPTeamsMap(pool.getYear());
 		JSONObject cfpTeamsJSON = new JSONObject(cfpTeamMap);
@@ -151,7 +155,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
     	int place = 1;
     	int eliminatedByCount = 0;
     	boolean champGameCompleted = DAO.isChampGameCompleted(pool.getYear());
-    	champPickEliminatedList = DAO.getChampPickEliminatedList(poolId);
+    	champPickEliminatedList = DAO.getChampPickEliminatedList(pool.getPoolId());
     	Map <String, Integer> eliminatedMap = new HashMap<String, Integer>();
 		while (it.hasNext()) {
 			Map.Entry<String, Integer> line = (Map.Entry<String, Integer>)it.next();
@@ -225,7 +229,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 
 	    context.put("standings", displayStandings);
 	    boolean allowAdmin = false;
-	    if ((user != null && user.isAdmin()) || name.equalsIgnoreCase("admin") || name.equalsIgnoreCase("Jacobus")) {
+	    if ((user != null && user.isAdmin()) || userName.equalsIgnoreCase("admin") || userName.equalsIgnoreCase("Jacobus")) {
 	    	allowAdmin = true;
 	    }
 	    context.put("allowAdmin", allowAdmin);  
@@ -248,23 +252,31 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	    stack.push(context);
 	    return "success";
 	}
-	   
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-	   this.name = name;
-	}
-	
-	public Integer getPoolId() {
-		return poolId;
-	}
-
-	public void setPoolId(Integer poolId) {
-	   this.poolId = poolId;
-	}
 		
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public Integer getYear() {
+		return year;
+	}
+
+	public void setYear(Integer year) {
+		this.year = year;
+	}
+
+	public String getPoolName() {
+		return poolName;
+	}
+
+	public void setPoolName(String poolName) {
+		this.poolName = poolName;
+	}
+
 	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2, 
 			boolean champGameCompleted /*, List<Integer> champPickEliminatedList*/) {
 		int diffPicks = 0;	

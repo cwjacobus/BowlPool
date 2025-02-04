@@ -3,6 +3,7 @@ package dao;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -26,6 +27,23 @@ import data.User;
 public class DAO {
 	
 	public static Connection conn; 
+	
+	public static void copyUsersFromPreviousYear(Integer year, String fromPoolNameBase) {
+		// Assumes pool name is Jacobus/Sculley 20XX
+		try {
+			Statement stmt = conn.createStatement();
+			String toPoolIdSQL = "(SELECT poolId FROM Pool where year=" + year + " AND poolName = '" + (fromPoolNameBase + " 20" + year) + "')";
+			String fromPoolIdSQL = "(SELECT poolId FROM Pool where year=" + (year-1) + " AND poolName = '" + (fromPoolNameBase + " 20" + (year-1)) + "')";
+			String insertSQL = "INSERT INTO User (UserName, LastName, FirstName, Year, Admin, PoolId) " + 
+				"SELECT User.UserName, User.LastName, User.FirstName, " + year + ", User.admin," + toPoolIdSQL + 
+				" FROM User WHERE User.poolId = " + fromPoolIdSQL;
+			stmt.executeUpdate(insertSQL);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return;
+	}
 	
 	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, 
 		Integer dogScore, boolean completed, boolean cancelled, Integer favoriteTeamId, Integer underdogTeamId, boolean cfpSemiGame, boolean cfpChampGame,
@@ -194,6 +212,24 @@ public class DAO {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static boolean createPool(String poolName, Integer year, Integer ptsBowlGame, Integer ptsRound1CFPGame, Integer ptsQtrCFPGame, Integer ptsSemiCFPGame,
+		Integer ptsChampCFPGame, boolean usePointSpreads) {
+		try {
+			Statement stmt = conn.createStatement();
+			String insertSQL = "INSERT INTO Pool (PoolName, Year, UsePointSpreads, PtsBowlGame, PtsRound1CFPGame, PtsQtrCFPGame, PtsSemiCFPGame, PtsChampCFPGame) " +
+				"VALUES ('" + poolName + "', " + year + ", " + usePointSpreads + "," + ptsBowlGame + ", " + ptsRound1CFPGame + ", " + ptsQtrCFPGame + ", " + 
+				ptsSemiCFPGame + ", " + ptsChampCFPGame + ");";
+			stmt.execute(insertSQL);
+		}
+		catch (SQLIntegrityConstraintViolationException ie) {
+			return false;
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return true;
 	}
 	
 	public static int createUser(String userName, Integer year, Integer poolId) {
@@ -576,11 +612,11 @@ public class DAO {
 		return user;
 	}
 	
-	public static Pool getPool(Integer poolId) {
+	public static Pool getPoolByPoolName(String poolName) {
 		Pool pool = null;
 		try {
 			Statement stmt = conn.createStatement();
-			String sql = "SELECT * FROM Pool where poolId = " + poolId;
+			String sql = "SELECT * FROM Pool where PoolName = '" + poolName + "'";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				pool = new Pool(rs.getInt("PoolId"), rs.getString("PoolName"), rs.getInt("Year"), rs.getBoolean("UsePointSpreads"), 

@@ -7,7 +7,7 @@
 	<title>Bowl Pool</title>
 </head>
 <body>
-	<h2>20${year} Standings</h2>
+	<h2>20${sessionScope.pool.year} Standings</h2>
 	<!--<c:out value="User: ${sessionScope.user.userName} ${sessionScope.user.admin}"/>-->
 	<table style="padding: 0; border-spacing: 0;">
 	<c:set var="color" value="white" />

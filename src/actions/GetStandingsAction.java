@@ -68,7 +68,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	Map<Integer, BowlGame> bowlGamesMap;
 	Map<Integer, CFPGame> cfpGamesMap;
 	Map<Integer, String> cfpTeamMap;
-	List<Integer> champPickEliminatedList;
+	//List<Integer> champPickEliminatedList;
 	List<Integer> excludedGameList;
 	List<String> eliminatedCFPTeamsList;
 	
@@ -134,8 +134,8 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		cfpGamesMap = DAO.getCfpGamesMap(pool.getYear());
 		userSession.put("cfpGamesMap", cfpGamesMap);
 		numOfBowlGames += cfpGamesMap.size();
-		List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
-		userSession.put("potentialChampionsList", potentialChampionsList);
+		//List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
+		//userSession.put("potentialChampionsList", potentialChampionsList);
 		excludedGameList = DAO.getExcludedGamesList(pool.getPoolId());
 		userSession.put("excludedGameList", excludedGameList);
 		cfpTeamMap = DAO.getCFPTeamsMap(pool.getYear());
@@ -155,7 +155,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
     	int place = 1;
     	int eliminatedByCount = 0;
     	boolean champGameCompleted = DAO.isChampGameCompleted(pool.getYear());
-    	champPickEliminatedList = DAO.getChampPickEliminatedList(pool.getPoolId());
+    	//champPickEliminatedList = DAO.getChampPickEliminatedList(pool.getPoolId());
     	Map <String, Integer> eliminatedMap = new HashMap<String, Integer>();
 		while (it.hasNext()) {
 			Map.Entry<String, Integer> line = (Map.Entry<String, Integer>)it.next();
@@ -278,7 +278,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	}
 
 	private int getUsersRemainingDifferentPicks(List<Pick> userPicks1, List<Pick> userPicks2, ChampPick userChampPick1, ChampPick userChampPick2, 
-			boolean champGameCompleted /*, List<Integer> champPickEliminatedList*/) {
+			boolean champGameCompleted) {
 		int diffPicks = 0;	
 		if (userPicks1 == null) {
 			return userPicks2.size();
@@ -295,7 +295,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 			}
 		}
 		if (userChampPick1 != null && userChampPick2 != null) {
-			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !champGameCompleted && !champPickEliminatedList.contains(userChampPick1.getUserId())) {
+			if (!userChampPick1.getWinner().equalsIgnoreCase(userChampPick2.getWinner()) && !champGameCompleted/* && !champPickEliminatedList.contains(userChampPick1.getUserId())*/) {
 				diffPicks++;
 			}
 		}

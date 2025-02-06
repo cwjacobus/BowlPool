@@ -53,7 +53,7 @@ public class DAO {
 		try {
 			Statement stmt = conn.createStatement();
 			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime, Cancelled, " +
-				"FavoriteTeamId, UnderdogTeamId, CFPSemiGame, CFPChampGame, CFPRound1Game, CFPQuarterGame) VALUES ('" + gameName + "', '" + favorite + "', '" + 
+				"FavoriteTeamId, UnderdogTeamId) VALUES ('" + gameName + "', '" + favorite + "', '" + 
 				underdog + "' , " + line + ", " + favScore + ", " +  dogScore + ", " + completed + ", " + year + "," + (dateTime != null ? "'" + 
 				dateTime + "'" : null) + ", " + cancelled + ", " + favoriteTeamId +  ", " + underdogTeamId + ");";
 			stmt.execute(insertSQL);
@@ -803,7 +803,7 @@ public class DAO {
 		return dt;
 	}
 	
-	public static List<String> getPotentialChampionsList(int year) {
+	/*public static List<String> getPotentialChampionsList(int year) {
 		List<String>potentialChampionsList = new ArrayList<String>();
 		try {
 			Statement stmt = conn.createStatement();
@@ -825,7 +825,7 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return potentialChampionsList;
-	}
+	}*/
 	
 	public static HashMap<Integer, String> getCFPTeamsMap(int year) {
 		HashMap<Integer, String> cfpTeamsMap = new HashMap<>();
@@ -870,7 +870,7 @@ public class DAO {
 		int numberOfCompletedGames = 0;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and CFPChampGame=1 and " + getYearClause(year, null));
+			ResultSet rs = stmt.executeQuery("select count(*) from BowlGame where Completed = 1 and BowlName='Championship' and " + getYearClause(year, null));
 			rs.next();
 			numberOfCompletedGames = rs.getInt(1);
 		}
@@ -881,7 +881,7 @@ public class DAO {
 	}
 	
 	// Create List of userIds with eliminated champ picks (lost in CFP Semi) for a pool
-	public static List<Integer> getChampPickEliminatedList(Integer poolId) {
+	/*public static List<Integer> getChampPickEliminatedList(Integer poolId) {
 		List<Integer> champPickEliminatedList = new ArrayList<>();
 		try {
 			Statement stmt = conn.createStatement();
@@ -897,7 +897,7 @@ public class DAO {
 			e.printStackTrace();
 		}
 		return champPickEliminatedList;
-	}
+	}*/
 	
 	public static void updateBowlGameSpread(Integer gameId, Double spread) {
 		try {

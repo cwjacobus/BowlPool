@@ -36,7 +36,7 @@ import com.opensymphony.xwork2.util.ValueStack;
 import dao.DAO;
 import data.BowlGame;
 import data.CFTeam;
-import data.ChampPick;
+//import data.ChampPick;
 import data.Pick;
 import data.Pool;
 import data.User;
@@ -175,7 +175,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		List<BowlGame> bowlGameList = (List<BowlGame>) userSession.get("bowlGamesList");
 		List<User> userList = DAO.getUsersList(year, pool.getPoolId());
 		List<Pick> picksList = new ArrayList<Pick>();
-		HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
+		//HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
 		try {  
 			Iterator<Row> rowIterator = null;
 			if (xWorkbook != null) {
@@ -248,7 +248,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		        				}
 	        					continue;
 	        				}
-	        				if (!bowlGame.isCfpChampGame()) {
+	        				//if (!bowlGame.isCfpChampGame()) {
 	        					if ((pick != null && pick.length() > 0) && (cellColumnIndex % 2 == 0)) {
 	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
 	        						// create fav Pick
@@ -261,8 +261,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
 	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), false, pool.getPoolId(), null));
 	        					}
-	        				}
-	        				else {
+	        				//}
+	        				/*else {
 	        					if (cellColumnIndex % 2 == 0) {
 	        						System.out.print("CHAMP WINNER-" + pick + " ");
 	        						// TBD TEST Translate pick to full team name (school + mascot) for ChampPick
@@ -285,7 +285,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        							champPicksMap.put(cp.getUserId(), cp);
 	        						}
 	        					}
-	        				}
+	        				}*/
 	        				if (cellColumnIndex % 2 != 0) {
 	        					gameIndex++;
 	        				}
@@ -301,9 +301,9 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        if (picksList.size() > 0) {
 	        	DAO.createBatchPicks(picksList, pool.getPoolId());
 	        }
-	        if (champPicksMap.size() > 0) {
+	        /*if (champPicksMap.size() > 0) {
 	        	DAO.createBatchChampPicks(champPicksMap, pool.getPoolId());
-	        }
+	        }*/
 	    }
 	    catch (Exception e) {
 	    	e.printStackTrace();
@@ -340,7 +340,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			if (gamesFound && ((gameName == null && prevGame == null)) || (gameName != null && gameName.indexOf("Championship") == 0)) {
 				// Create a blank Championship game place holder and break;
 				if (!updateBowlGames) {
-					DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false, false, null, null, false, true, false, false);
+					//DAO.createBowlGame("Championship", "", "", null, year, null, 0, 0, false, false, null, null);
 				}
 				break;
 			}
@@ -356,8 +356,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					String favorite = getStringFromCell(row, 3).trim();
 					
 					String underdog = getStringFromCell(row, 7).trim();
-					// TBD get fav, dog ids and semi
-					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null, false, false, false, false); //TBD)
+					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null); 
 				}
 				else {
 					BowlGame bg = getBowlGameFromShortName(bowlGamesList, gameName);
@@ -386,7 +385,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date parsedDate;
 			Timestamp timestamp;
-			boolean champGameCreated = false;
+			//boolean champGameCreated = false;
 			
 			for (int i = 0; i < all.length(); i++) {
 				JSONObject game = all.getJSONObject(i);
@@ -448,21 +447,13 @@ public class ImportAction extends ActionSupport implements SessionAware {
 					favoriteTeamId = Integer.parseInt(game.getString("AwayTeamID"));
 					underdogTeamId = Integer.parseInt(game.getString("HomeTeamID"));
 				}
-				boolean cfpSemiGame = (bowlGameTitle != null && bowlGameTitle.contains("CFP Semifinal")) ? true : false;
-				boolean cfpChampGame = false;
-				if (bowlGameTitle != null && bowlGameTitle.contains("Championship")) {
-					cfpChampGame = true;
-					champGameCreated = true;
-				}
 				Double pointSpread = avgHomeSpread != null ? Math.abs(roundToHalf(avgHomeSpread)) : null;
-				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false, favoriteTeamId, 
-					underdogTeamId, cfpSemiGame, cfpChampGame, false, false); //TBD
+				DAO.createBowlGame(bowlGameTitle, favorite, underdog, pointSpread, year, timestamp, 0, 0, false, false, favoriteTeamId, underdogTeamId); 
 			}
-			if (!champGameCreated) {
+			/*if (!champGameCreated) {
 				Date championshipDate = dateFormat.parse("2021-01-11 20:00:00");
-				DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false, null, 
-					null, false, true, false, false);
-			}
+				DAO.createBowlGame("Championship", "", "", null, year, new Timestamp(championshipDate.getTime()), 0, 0, false, false, null, null);
+			}*/
 		 }
 		catch (Exception e) {
 			e.printStackTrace();

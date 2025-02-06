@@ -46,8 +46,7 @@ public class DAO {
 	}
 	
 	public static void createBowlGame(String gameName, String favorite, String underdog, Double line, Integer year, Timestamp dateTime, Integer favScore, 
-		Integer dogScore, boolean completed, boolean cancelled, Integer favoriteTeamId, Integer underdogTeamId, boolean cfpSemiGame, boolean cfpChampGame,
-		boolean cfpRound1Game, boolean cfpQuarterGame) {
+		Integer dogScore, boolean completed, boolean cancelled, Integer favoriteTeamId, Integer underdogTeamId) {
 		gameName = gameName.replaceAll("'", "");
 		favorite = favorite.replaceAll("'", "");
 		underdog = underdog.replaceAll("'", "");
@@ -56,8 +55,7 @@ public class DAO {
 			String insertSQL = "INSERT INTO BowlGame (BowlName, Favorite, Underdog, Spread, FavoriteScore, UnderdogScore, Completed, Year, DateTime, Cancelled, " +
 				"FavoriteTeamId, UnderdogTeamId, CFPSemiGame, CFPChampGame, CFPRound1Game, CFPQuarterGame) VALUES ('" + gameName + "', '" + favorite + "', '" + 
 				underdog + "' , " + line + ", " + favScore + ", " +  dogScore + ", " + completed + ", " + year + "," + (dateTime != null ? "'" + 
-				dateTime + "'" : null) + ", " + cancelled + ", " + favoriteTeamId +  ", " + underdogTeamId +  ", " + cfpSemiGame +  ", " + 
-				cfpChampGame + ", " + cfpRound1Game +  ", " + cfpQuarterGame + ");";
+				dateTime + "'" : null) + ", " + cancelled + ", " + favoriteTeamId +  ", " + underdogTeamId + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {
@@ -343,8 +341,6 @@ public class DAO {
 			}
 			// CFPGames
 			else if (pool.getYear() > 24) {
-				//SELECT u.UserId, round, count(*) from CFPPick p, User u, CFPGame pg where  p.userId= u.userId and pg.cfpgameId = p.cfpgameId and pg.completed = true and pg.year = 25 and p.PoolId = 19 and 
-				//		(p.winner = home and (pg.homeScore - 0 > pg.VisScore) or (p.winner = visitor and (pg.VisScore + 0 > pg.homeScore))) group by u.UserName, round
 				Statement stmt4 = conn.createStatement();
 				String query4String = "SELECT u.UserId, round, count(*) from CFPPick p, User u, CFPGame pg where  " +
 					"p.userId = u.userId and pg.cfpgameId = p.cfpgameId and pg.completed = true and pg.year = " + pool.getYear() + 
@@ -425,8 +421,7 @@ public class DAO {
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"), rs.getString("Underdog"), 
 					rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
-					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"), 
-					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"),rs.getBoolean("CFPRound1Game"), rs.getBoolean("CFPQuarterGame"));
+					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"));
 				bowlGameList.add(bowlGame);
 			}
 		}
@@ -448,8 +443,7 @@ public class DAO {
 			while (rs.next()) {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"), rs.getString("Underdog"), 
 					rs.getDouble("Spread"), rs.getInt("FavoriteScore"), rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), rs.getInt("Year"), 
-					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"),
-					rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"),rs.getBoolean("CFPRound1Game"), rs.getBoolean("CFPQuarterGame"));
+					rs.getTimestamp("DateTime"), rs.getBoolean("Cancelled"), rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"));
 				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
 			}
 		}

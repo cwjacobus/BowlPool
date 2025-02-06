@@ -208,8 +208,7 @@ public class MigrateDB {
 				bowlGame = new BowlGame(rs.getInt("GameId"), rs.getString("BowlName"), rs.getString("Favorite"),
 					rs.getString("Underdog"), rs.getDouble("Spread"), rs.getInt("FavoriteScore"), 
 					rs.getInt("UnderDogScore"), rs.getBoolean("Completed"), year, null, rs.getBoolean("Cancelled"),
-					rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"), rs.getBoolean("CFPSemiGame"), rs.getBoolean("CFPChampGame"),
-					rs.getBoolean("CFPRound1Game"), rs.getBoolean("CFPQuarterGame"));
+					rs.getInt("FavoriteTeamId"), rs.getInt("UnderdogTeamId"));
 				bowlGamesMap.put(bowlGame.getGameId(), bowlGame);
 			}
 		}

@@ -17,13 +17,9 @@ public class BowlGame {
 	private boolean cancelled;
 	private int favoriteTeamId;
 	private int underdogTeamId;
-	private boolean cfpSemiGame;
-	private boolean cfpChampGame;
-	private boolean cfpRound1Game;
-	private boolean cfpQuarterGame;
 	
 	public BowlGame (int gameId, String bowlName, String favorite, String underdog, double spread, int favoriteScore, int underDogScore, boolean completed, int year, 
-			Timestamp dateTime, boolean cancelled, int favoriteTeamId, int underdogTeamId, boolean cfpSemiGame, boolean cfpChampGame, boolean cfpRound1Game, boolean cfpQuarterGame) {
+			Timestamp dateTime, boolean cancelled, int favoriteTeamId, int underdogTeamId) {
 		this.gameId = gameId;
 		this.bowlName = bowlName;
 		this.favorite = favorite;
@@ -37,10 +33,6 @@ public class BowlGame {
 		this.cancelled = cancelled;
 		this.favoriteTeamId = favoriteTeamId;
 		this.underdogTeamId = underdogTeamId;
-		this.cfpSemiGame = cfpSemiGame;
-		this.cfpChampGame = cfpChampGame;
-		this.cfpRound1Game = cfpRound1Game;
-		this.cfpQuarterGame = cfpQuarterGame;
 	}
 	
 	public int getGameId() {
@@ -130,38 +122,6 @@ public class BowlGame {
 
 	public void setUnderdogTeamId(int underdogTeamId) {
 		this.underdogTeamId = underdogTeamId;
-	}
-
-	public boolean isCfpSemiGame() {
-		return cfpSemiGame;
-	}
-
-	public void setCfpSemiGame(boolean cfpSemiGame) {
-		this.cfpSemiGame = cfpSemiGame;
-	}
-
-	public boolean isCfpChampGame() {
-		return cfpChampGame;
-	}
-
-	public void setCfpChampGame(boolean cfpChampGame) {
-		this.cfpChampGame = cfpChampGame;
-	}
-
-	public boolean isCfpRound1Game() {
-		return cfpRound1Game;
-	}
-
-	public void setCfpRound1Game(boolean cfpRound1Game) {
-		this.cfpRound1Game = cfpRound1Game;
-	}
-
-	public boolean isCfpQuarterGame() {
-		return cfpQuarterGame;
-	}
-
-	public void setCfpQuarterGame(boolean cfpQuarterGame) {
-		this.cfpQuarterGame = cfpQuarterGame;
 	}
 
 }

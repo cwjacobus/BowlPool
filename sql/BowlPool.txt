@@ -216,12 +216,16 @@ SET GLOBAL interactive_timeout=604800;
 // 2024
 update bowlgame set bowlname='Hawaii Bowl' where gameid=1742;
 
+// Change a year to 2026
+select DATE_FORMAT(datetime ,'2026-%m-%d') from bowlgame where gameid=1887;
+
 // Instructions for starting a new year
 1. http://localhost:8080/BowlPoolWeb/CreatePool.jsp to create pool (copy users for Jacobus)
 2. Login to new pool as Chris
-3. Create CFP Games (provide first game date/time)
-4. Enter CFP Teams by seed using CFTeam.ShortName
-5. Make picks
+3. Import bowl games from WS
+4. Create CFP Games (provide first game date/time)
+5. Enter CFP Teams by seed using CFTeam.ShortName
+6. Make picks
 
 
 

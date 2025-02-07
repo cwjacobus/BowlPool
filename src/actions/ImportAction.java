@@ -390,6 +390,14 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			for (int i = 0; i < all.length(); i++) {
 				JSONObject game = all.getJSONObject(i);
 				String bowlGameTitle = "";
+				boolean canceled = game.getString("Status").toUpperCase().contains("CANCEL");
+				boolean cfpGame = game.getString("Title").toUpperCase().contains("PLAYOFF");
+				if (canceled || cfpGame) {
+					System.out.print("Game skipped: ");
+					System.out.print(canceled ? "Canceled: " : "CFP game: ");
+					System.out.println(game.getString("AwayTeamName") + " at " + game.getString("HomeTeamName"));
+					continue;
+				}
 				parsedDate = dateFormat.parse(game.getString("DateTime").replaceAll("T", " "));
 				/* TBD Subtract an hour from parsedDate to convert from eastern to central
 				Calendar calendar = Calendar.getInstance();

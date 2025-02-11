@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 // Note .xls files are HSSF and .xlsx files are XSSF
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -345,23 +346,46 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				break;
 			}
 			if (gameName != null) {
-				System.out.println(gameName);
+				if (gameName.contains("SemiFinal") || gameName.contains("National Champion")) {
+					System.out.println("Skip " + gameName);
+					continue;
+				}
+				System.out.print(gameName);
 				String lineString = getStringFromCell(row, 5);
 				double line = 0;
 				if (lineString != null && !lineString.equalsIgnoreCase("pick") && !lineString.equalsIgnoreCase("p") && !lineString.equalsIgnoreCase("No spread")) {
 					lineString = lineString.trim().replace("-", "");
 					line = Double.parseDouble(lineString);
 				}
+				String favorite = getStringFromCell(row, 3).trim();
+				String underdog = getStringFromCell(row, 7).trim();
 				if (!updateBowlGames) {
-					String favorite = getStringFromCell(row, 3).trim();
-					
-					String underdog = getStringFromCell(row, 7).trim();
-					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null); 
+					//DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null); 
+					System.out.println(" created " + underdog + " v " + favorite);
 				}
 				else {
 					BowlGame bg = getBowlGameFromShortName(bowlGamesList, gameName);
 					if (bg != null) {
-						DAO.updateBowlGameSpread(bg.getGameId(), line);
+						//DAO.updateBowlGameSpread(bg.getGameId(), line);
+						System.out.println(" spread updated to " + line);
+						CFTeam cfFavoriteFromSS = cfTeamsMap.get(getAlternativeSchoolName(favorite).toUpperCase());
+						if (cfFavoriteFromSS == null) {
+							System.out.println(favorite + " NOT FOUND IN DB!");
+							continue;
+						}
+						CFTeam cfFavoriteFromDB = null;
+						List<CFTeam> cfTeamList = new ArrayList<CFTeam>(cfTeamsMap.values());
+						Optional<CFTeam> cfFavoriteFromDBOpt = 
+								cfTeamList
+							.stream()
+							.filter((p) -> p.getCfTeamId() == bg.getFavoriteTeamId())
+							.findAny();
+						if (cfFavoriteFromDBOpt.isPresent()) {
+							cfFavoriteFromDB = cfFavoriteFromDBOpt.get();
+						}
+						if (!cfFavoriteFromDB.getSchool().equalsIgnoreCase(cfFavoriteFromSS.getSchool())) {
+							System.out.println("***WARNING Favorite: " + bg.getFavorite() + " was changed to: " + cfFavoriteFromSS.getSchool());
+						}
 					}
 				}
 			}
@@ -595,6 +619,21 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		System.out.println("Bowl game not found: " + shortName);
 				
 		return bowlGame;
+	};
+	
+	private String getAlternativeSchoolName(String schoolName) {
+		// Special cases where school name spellings differ in Sculley spreadsheet v WS data
+		String altShortName = schoolName;
+		if (schoolName.equals("Miami Ohio")) {
+			altShortName = "Miami (OH)";
+		}
+		else if (schoolName.equals("UNC")) {
+			altShortName = "North Carolina";
+		}
+		if (schoolName.endsWith(" St")) {
+			altShortName = schoolName.replace(" St", " State");
+		}
+		return altShortName;
 	}
 	
 	private String getAlternativeShortName(String shortName) {

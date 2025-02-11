@@ -123,5 +123,9 @@ public class BowlGame {
 	public void setUnderdogTeamId(int underdogTeamId) {
 		this.underdogTeamId = underdogTeamId;
 	}
+	
+	public String toString() {
+		return bowlName + " (" + underdog + " v " + favorite + ")";
+	}
 
 }

@@ -58,5 +58,9 @@ public class CFTeam {
 	public void setShortName(String shortName) {
 		this.shortName = shortName;
 	}
+	
+	public String toString() {
+		return shortName + " (" + cfTeamId + ")";
+	}
 
 }

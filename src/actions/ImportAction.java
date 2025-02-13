@@ -10,6 +10,7 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,6 +37,8 @@ import com.opensymphony.xwork2.util.ValueStack;
 
 import dao.DAO;
 import data.BowlGame;
+import data.CFPGame;
+import data.CFPPick;
 import data.CFTeam;
 //import data.ChampPick;
 import data.Pick;
@@ -56,6 +59,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	boolean picksImport = false;
 	boolean bowlGamesImport = false;
 	boolean cfTeamsImport = false;
+	String[] cfpBowlGames = {"Peach","Rose","Fiesta","Orange","Cotton","Sugar","Round 1","SemiFinal","Championship"};
 	
 	Map<String, Object> userSession;
 	
@@ -171,11 +175,14 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	    return "success";
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void importUsersAndPicks(XSSFWorkbook xWorkbook, HSSFWorkbook hWorkbook) {
-		@SuppressWarnings("unchecked")
 		List<BowlGame> bowlGameList = (List<BowlGame>) userSession.get("bowlGamesList");
+		Map<Integer, CFPGame> cfpGamesMap = (Map<Integer, CFPGame>)userSession.get("cfpGamesMap");
+		List<CFPGame> cfpGamesList = new ArrayList<CFPGame>(cfpGamesMap.values());
 		List<User> userList = DAO.getUsersList(year, pool.getPoolId());
-		List<Pick> picksList = new ArrayList<Pick>();
+		List<Pick> picksList = new ArrayList<>();
+		List<CFPPick> cfpPicksList = new ArrayList<>();
 		//HashMap<Integer, ChampPick> champPicksMap = new HashMap<Integer, ChampPick>();
 		try {  
 			Iterator<Row> rowIterator = null;
@@ -217,11 +224,6 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        			userCreationStarted = true;
 	        		}
 	        		if (picksImport) {
-	        			//Iterator<Entry<Integer, String>> it = bowlGameNameMap.entrySet().iterator();
-	        			//while (it.hasNext()) {
-	        				//Map.Entry<Integer, String> game = (Map.Entry<Integer, String>)it.next();
-	        				//System.out.println("game: " + game.getValue() + " " + game.getKey());
-	        			//}
 	        			User user = null;
 	        			for (User u : userList) {
         					if (u.getUserName().equalsIgnoreCase(userName)) {
@@ -231,18 +233,57 @@ public class ImportAction extends ActionSupport implements SessionAware {
         				}
 	        			Iterator<Cell> cellIter = row.cellIterator();
 	        			int gameIndex = 0;
-	        			while (cellIter.hasNext()){
+	        			boolean semi1Found = false;
+	        			boolean champFound = false;
+	        			while (cellIter.hasNext()) {
+	        				final int semiRound = semi1Found ? 2 : 1;
 	        				Cell cell = (Cell)cellIter.next();
 	        				int cellColumnIndex = cell.getColumnIndex();
 	        				if (cellColumnIndex == 0 || cellColumnIndex == 1) {
 	        					continue;
 	        				}
 	        				String pick = getStringFromCell(row, cellColumnIndex);
-	        				if (bowlGameNameMap.get(gameIndex).equals("SemiFinal") && year == 24) {
+	        				bowlGameName = bowlGameNameMap.get(gameIndex);
+	        				
+	        				if (Arrays.asList(cfpBowlGames).contains(bowlGameName)) {
+	        					CFPGame cfpGame = null;
+	        					if (bowlGameName.contains("SemiFinal")) {
+	        						Optional<CFPGame> gameMatch = 
+	        								cfpGamesList
+	        							.stream()
+	        							.filter((p) -> p.getRound() == 3 && p.getGameIndex() == semiRound)
+	        							.findAny();
+	        						if (gameMatch.isPresent()) {
+	        							cfpGame = gameMatch.get();
+	        						}
+	        						semi1Found = true;
+	        					}
+	        					else if (bowlGameName.contains("Championship")) {
+	        						Optional<CFPGame> gameMatch = 
+	        								cfpGamesList
+	        							.stream()
+	        							.filter((p) -> p.getRound() == 4)
+	        							.findAny();
+	        						if (gameMatch.isPresent()) {
+	        							cfpGame = gameMatch.get();
+	        						}
+	        					}
+	        					if (cfpGame != null) {
+	        						System.out.print(bowlGameName + " " + pick + " ");
+	        						cfpPicksList.add(new CFPPick(0, user.getUserId(), cfpGame.getCfpGameId(), pick, 0, pool.getPoolId(), null));
+	        					}
 	        					gameIndex++;
+	        					if (!semi1Found) {
+	        						cellIter.next();
+	        					}
 	        					continue;
 	        				}
-	        				BowlGame bowlGame = getBowlGameFromShortName(bowlGameList, bowlGameNameMap.get(gameIndex));
+	        				
+	        				if (gameIndex == bowlGameNameMap.size()) {
+	        					break;
+	        				}
+	        				
+	        				BowlGame bowlGame = getBowlGameFromShortName(bowlGameList, bowlGameName);
 	        				if (bowlGame == null) {
 	        					if (cellColumnIndex % 2 != 0) {
 		        					gameIndex++;
@@ -251,15 +292,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        				}
 	        				//if (!bowlGame.isCfpChampGame()) {
 	        					if ((pick != null && pick.length() > 0) && (cellColumnIndex % 2 == 0)) {
-	        						System.out.print("FAV-" + bowlGameNameMap.get(gameIndex) + " ");
-	        						// create fav Pick
-	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), true);
+	        						System.out.print("FAV-" + bowlGameName + " ");
 	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), true, pool.getPoolId(), null));
 	        					}
 	        					if ((pick != null && pick.length() > 0) && (cellColumnIndex % 2 != 0)) {
-	        						System.out.print("DOG-" + bowlGameNameMap.get(gameIndex) + " ");
-	        						// create dog Pick
-	        						//DAO.createPick(user.getUserId(), bowlGame.getGameId(), false);
+	        						System.out.print("DOG-" + bowlGameName + " ");
 	        						picksList.add(new Pick(0, user.getUserId(), bowlGame.getGameId(), false, pool.getPoolId(), null));
 	        					}
 	        				//}
@@ -272,13 +309,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        							pick = cfTeam != null ? cfTeam.getSchool() + " " + cfTeam.getMascot() : pick;
 	        						}
 	        						// create Winner ChampPick
-	        						//DAO.createChampPick(user.getUserId(), bowlGame.getGameId(), pick);
 	        						champPicksMap.put(new Integer(user.getUserId()), new ChampPick(0, user.getUserId(), bowlGame.getGameId(), pick, 0, pool.getPoolId(), null));
 	        					}
 	        					else if (cellColumnIndex % 2 != 0) { // Assumes ChampPick record has been created previously to update
 	        						System.out.print("CHAMP TOTAL POINTS-" + pick + " ");
 	        						// create Winner ChampPick
-	        						//DAO.updateChampPickTotPts(user.getUserId(), pick);
 	        						ChampPick cp = champPicksMap.get(user.getUserId());
 	        						if (cp != null) {
 	        							Integer totPts = new Double(pick).intValue();
@@ -300,7 +335,8 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        	prevUser = userName;
 	        }
 	        if (picksList.size() > 0) {
-	        	DAO.createBatchPicks(picksList, pool.getPoolId());
+	        	// Temp commented
+	        	//DAO.createBatchPicks(picksList, pool.getPoolId());
 	        }
 	        /*if (champPicksMap.size() > 0) {
 	        	DAO.createBatchChampPicks(champPicksMap, pool.getPoolId());
@@ -360,13 +396,13 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				String favorite = getStringFromCell(row, 3).trim();
 				String underdog = getStringFromCell(row, 7).trim();
 				if (!updateBowlGames) {
-					//DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null); 
+					DAO.createBowlGame(gameName, favorite, underdog, line, year, null, 0, 0, false, false, null, null); 
 					System.out.println(" created " + underdog + " v " + favorite);
 				}
 				else {
 					BowlGame bg = getBowlGameFromShortName(bowlGamesList, gameName);
 					if (bg != null) {
-						//DAO.updateBowlGameSpread(bg.getGameId(), line);
+						DAO.updateBowlGameSpread(bg.getGameId(), line);
 						System.out.println(" spread updated to " + line);
 						CFTeam cfFavoriteFromSS = cfTeamsMap.get(getAlternativeSchoolName(favorite).toUpperCase());
 						if (cfFavoriteFromSS == null) {
@@ -383,7 +419,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 						if (cfFavoriteFromDBOpt.isPresent()) {
 							cfFavoriteFromDB = cfFavoriteFromDBOpt.get();
 						}
-						if (!cfFavoriteFromDB.getSchool().equalsIgnoreCase(cfFavoriteFromSS.getSchool())) {
+						if (cfFavoriteFromDB!= null && !cfFavoriteFromDB.getSchool().equalsIgnoreCase(cfFavoriteFromSS.getSchool())) {
 							System.out.println("***WARNING Favorite: " + bg.getFavorite() + " was changed to: " + cfFavoriteFromSS.getSchool());
 						}
 					}

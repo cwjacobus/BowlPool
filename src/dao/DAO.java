@@ -345,8 +345,7 @@ public class DAO {
 				String query4String = "SELECT u.UserId, round, count(*) from CFPPick p, User u, CFPGame pg where  " +
 					"p.userId = u.userId and pg.cfpgameId = p.cfpgameId and pg.completed = true and pg.year = " + pool.getYear() + 
 					" and p.poolId = " + pool.getPoolId() + " and (p.winner = home and " +
-					"(pg.HomeScore - " + (useSpreads ? "pg.Spread" : "0") + " > pg.VisScore) or " + 
-					"(p.winner = visitor and (pg.VisScore + " + (useSpreads ? "pg.Spread" : "0") + " > pg.HomeScore))) " + 
+					"(pg.HomeScore  > pg.VisScore) or (p.winner = visitor and (pg.VisScore > pg.HomeScore))) " + 
 					"GROUP BY u.UserName, round ORDER BY u.UserName, round";
 				ResultSet rs4 = stmt4.executeQuery(query4String);
 				Integer prevUserId = 0;

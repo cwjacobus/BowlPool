@@ -106,6 +106,36 @@ public class DAO {
 		}
 	}
 	
+	public static void createBatchCFPPicks(List<CFPPick> cfpPicksList, Integer poolId) {
+		try {
+			conn.setAutoCommit(false);
+			Statement stmt = conn.createStatement();
+			int picksCount = 0;
+			for (CFPPick p : cfpPicksList) {
+				String insertSQL = "INSERT INTO CFPPick (UserId, CFPGameId, Winner, TotalPoints, PoolId, CreatedTime) VALUES (" + 
+					p.getUserId() + ", " + p.getCfpGameId() + ", '" + p.getWinner() + "', " + p.getTotalPoints() + ", " + poolId + ", NOW());";
+				stmt.addBatch(insertSQL);
+				picksCount++;
+				// Every 500 lines, insert the records
+				if (picksCount % 250 == 0) {
+					System.out.println("Insert cfp picks " + (picksCount - 250) + " : " + picksCount);
+					stmt.executeBatch();
+					conn.commit();
+					stmt.close();
+					stmt = conn.createStatement();
+				}
+			}
+			// Insert the remaining records
+			System.out.println("Insert remaining cfp picks " + (picksCount - (picksCount % 250)) + " : " + picksCount);
+			stmt.executeBatch();
+			conn.commit();
+			conn.setAutoCommit(true); // set auto commit back to true for next inserts
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void createBatchCfpPicks(List<String> cfpPicksList, Integer cfpChampTotPts, Pool pool, Integer userId) {
 		try {
 			conn.setAutoCommit(false);

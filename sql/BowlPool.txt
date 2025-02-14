@@ -226,6 +226,9 @@ select DATE_FORMAT(datetime ,'2026-%m-%d') from bowlgame where gameid=1887;
 4. Create CFP Games (provide first game date/time)
 5. Enter CFP Teams by seed using CFTeam.ShortName
 6. Make picks
+7. If Sculley pool is similar to 2024, manually insert 4 CFP QF as bowl games (Peach, Rose, Cotton, Orange, Fiesta or Sugar) and exclude in Jacobus
+8. Sculley import games to update spreads
+9. Sculley import users and picks
 
 
 

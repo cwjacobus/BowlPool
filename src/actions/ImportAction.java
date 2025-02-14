@@ -234,7 +234,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        			Iterator<Cell> cellIter = row.cellIterator();
 	        			int gameIndex = 0;
 	        			boolean semi1Found = false;
-	        			boolean champFound = false;
+	        			int champTotPts = 0;
 	        			while (cellIter.hasNext()) {
 	        				final int semiRound = semi1Found ? 2 : 1;
 	        				Cell cell = (Cell)cellIter.next();
@@ -266,11 +266,13 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        							.findAny();
 	        						if (gameMatch.isPresent()) {
 	        							cfpGame = gameMatch.get();
+	        							champTotPts = new Double(getStringFromCell(row, cellColumnIndex + 1)).intValue();
 	        						}
 	        					}
 	        					if (cfpGame != null) {
+	        						pick = getCFPShortNameFromSchoolName(getAlternativeSchoolName(pick));
 	        						System.out.print(bowlGameName + " " + pick + " ");
-	        						cfpPicksList.add(new CFPPick(0, user.getUserId(), cfpGame.getCfpGameId(), pick, 0, pool.getPoolId(), null));
+	        						cfpPicksList.add(new CFPPick(0, user.getUserId(), cfpGame.getCfpGameId(), pick, champTotPts, pool.getPoolId(), null));
 	        					}
 	        					gameIndex++;
 	        					if (!semi1Found) {
@@ -336,7 +338,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        }
 	        if (picksList.size() > 0) {
 	        	// Temp commented
-	        	//DAO.createBatchPicks(picksList, pool.getPoolId());
+	        	DAO.createBatchPicks(picksList, pool.getPoolId());
+	        }
+	        if (cfpPicksList.size() > 0) {
+	        	// Temp commented
+	        	DAO.createBatchCFPPicks(cfpPicksList, pool.getPoolId());
 	        }
 	        /*if (champPicksMap.size() > 0) {
 	        	DAO.createBatchChampPicks(champPicksMap, pool.getPoolId());
@@ -660,11 +666,20 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	private String getAlternativeSchoolName(String schoolName) {
 		// Special cases where school name spellings differ in Sculley spreadsheet v WS data
 		String altShortName = schoolName;
-		if (schoolName.equals("Miami Ohio")) {
+		if (schoolName.equalsIgnoreCase("Miami Ohio")) {
 			altShortName = "Miami (OH)";
 		}
-		else if (schoolName.equals("UNC")) {
+		else if (schoolName.equalsIgnoreCase("UNC")) {
 			altShortName = "North Carolina";
+		}
+		else if (schoolName.equalsIgnoreCase("PSU")) {
+			altShortName = "Penn State";
+		}
+		else if (schoolName.equalsIgnoreCase("ND")) {
+			altShortName = "Notre Dame";
+		}
+		else if (schoolName.equalsIgnoreCase("Ohio") || schoolName.equals("OSU")) { // If Ohio University ever makes CFP this needs to be removed
+			altShortName = "Ohio State";
 		}
 		if (schoolName.endsWith(" St")) {
 			altShortName = schoolName.replace(" St", " State");
@@ -715,7 +730,22 @@ public class ImportAction extends ActionSupport implements SessionAware {
 			altShortName = "AutoZone";
 		}
 		return altShortName;
+	}
+	
+	private String getCFPShortNameFromSchoolName(String schoolName) {
+		String cfpTeamShortName= null;
+		List<CFTeam> cfTeamsList = (List<CFTeam>)new ArrayList<CFTeam>(cfTeamsMap.values());
 		
+		Optional<CFTeam> gameMatch = 
+				cfTeamsList
+			.stream()
+			.filter((p) -> p.getSchool().equalsIgnoreCase(schoolName))
+			.findAny();
+		if (gameMatch.isPresent()) {
+			cfpTeamShortName = gameMatch.get().getShortName();
+		}
+				
+	    return cfpTeamShortName;
 	}
 	
 	private double roundToHalf(double d) {

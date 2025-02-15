@@ -223,6 +223,21 @@ insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogSc
 values ('Fiesta Bowl','Boise State Broncos',null,null,0,0,false,25,'2025-12-31 19:30:00',false,215,null);
 insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId) 
 values ('Sugar Bowl','Georgia Bulldogs',null,null,0,0,false,25,'2026-01-01 20:45:00',false,272,null);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Peach Bowl','Arizona State Sun Devils',null,null,0,0,false,24,'2025-01-01 13:00:00',false,255,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Rose Bowl','Oregon Ducks',null,null,0,0,false,24,'2025-01-01 17:00:00',false,245,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Fiesta Bowl','Boise State Broncos',null,null,0,0,false,24,'2024-12-31 19:30:00',false,215,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Sugar Bowl','Georgia Bulldogs',null,null,0,0,false,24,'2025-01-01 20:45:00',false,272,null,false,true,false,false);
+update bowlgame set Underdog ='Arizona State Sun Devils', UnderdogTeamId=255 where gameid=xxxx;
+update bowlgame set Favorite ='Texas Longhorns', FavoriteTeamId=109 where gameid=xxxx;
+update bowlgame set Underdog ='Oregon Ducks', UnderdogTeamId=245 where gameid=xxxx;
+update bowlgame set Favorite ='Ohio State Buckeyes', FavoriteTeamId=98 where gameid=xxxx;
+update bowlgame set Underdog ='Boise State Broncos', UnderdogTeamId=215 where gameid=xxxx;
+update bowlgame set Favorite ='Penn State Nittany Lions', FavoriteTeamId=101 where gameid=xxxx;
+update bowlgame set Underdog = 'Notre Dame Fighting Irish', UnderdogTeamId=25 where gameid=xxxx;
 
 // Change a year to 2026
 select DATE_FORMAT(datetime ,'2026-%m-%d') from bowlgame where gameid=1887;
@@ -235,8 +250,10 @@ select DATE_FORMAT(datetime ,'2026-%m-%d') from bowlgame where gameid=1887;
 5. Enter CFP Teams by seed using CFTeam.ShortName
 6. Make picks
 7. If Sculley pool is similar to 2024, manually insert 4 CFP QF as bowl games (Peach, Rose, Cotton, Orange, Fiesta or Sugar) and exclude in Jacobus
-8. Sculley import games to update spreads
-9. Sculley import users and picks
+8. Creat Sculley pool (do not copy users)
+9. Sculley import games to update spreads
+10. Sculley import users and picks
+11. Adjust Jacobus bowl game picks if favorite changed
 
 
 

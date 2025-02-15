@@ -215,6 +215,14 @@ SET GLOBAL interactive_timeout=604800;
 
 // 2024
 update bowlgame set bowlname='Hawaii Bowl' where gameid=1742;
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Peach Bowl','Arizona State Sun Devils',null,null,0,0,false,24,'2025-01-01 13:00:00',false,255,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Rose Bowl','Oregon Ducks',null,null,0,0,false,24,'2025-01-01 17:00:00',false,245,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Fiesta Bowl','Boise State Broncos',null,null,0,0,false,24,'2024-12-31 19:30:00',false,215,null,false,true,false,false);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId,CFPRound1Game,CFPQuarterGame,CFPSemiGame,CFPChampGame) 
+values ('Sugar Bowl','Georgia Bulldogs',null,null,0,0,false,24,'2025-01-01 20:45:00',false,272,null,false,true,false,false);
 
 // Change a year to 2026
 select DATE_FORMAT(datetime ,'2026-%m-%d') from bowlgame where gameid=1887;

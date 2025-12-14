@@ -67,7 +67,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	Pool pool;
 	Map<String, CFTeam> cfTeamsMap;
 	
-	String key = "712e473edfa34aaf82cdf73469a772b7";
+	String key = "7c9f46ad873142f3a30395151b4bbdd9";
 
 	@SuppressWarnings("unchecked")
 	public String execute() throws Exception {

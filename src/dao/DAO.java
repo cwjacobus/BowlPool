@@ -818,11 +818,12 @@ public class DAO {
 		return numberOfCFTeams;
 	}
 	
-	public static Timestamp getFirstGameDateTime(int year) {
+	public static Timestamp getFirstGameDateTime(Pool pool) {
 		Timestamp dt = null;
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select min(dateTime) from BowlGame where year = " + year + " and Cancelled = 0");
+			ResultSet rs = stmt.executeQuery("select min(dateTime) from BowlGame where year = " + pool.getYear() + " and Cancelled = 0 and " + 
+				"gameid not in (select gameid from excludedgame where poolid = " + pool.getPoolId() +  ")");
 			rs.next();
 			dt = rs.getTimestamp(1);
 		}

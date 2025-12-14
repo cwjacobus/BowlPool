@@ -236,7 +236,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	    // SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm");
 	    // Date date1 = sdf.parse("12-15-21" + pool.getYear() + " 11:00"); // Time of first game
 	    //Timestamp ts = pool.getFirstGameDate() == null ? DAO.getFirstGameDateTime(pool.getYear()) : pool.getFirstGameDate();
-	    Timestamp ts = DAO.getFirstGameDateTime(pool.getYear());
+	    Timestamp ts = DAO.getFirstGameDateTime(pool);
 	    Date date1 = ts != null ? new Date(ts.getTime()) : null; // Time of first game
 	    Calendar cal = Calendar.getInstance();
 	   //TBD check times of games

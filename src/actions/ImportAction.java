@@ -235,6 +235,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        			int gameIndex = 0;
 	        			boolean semi1Found = false;
 	        			int champTotPts = 0;
+	        			int cfpRound1Count = 1;
 	        			while (cellIter.hasNext()) {
 	        				final int semiRound = semi1Found ? 2 : 1;
 	        				Cell cell = (Cell)cellIter.next();
@@ -285,10 +286,18 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        					break;
 	        				}
 	        				
+	        				// Look for CFP round 1 games and add count
+	        				if (bowlGameName.equalsIgnoreCase("CFP")) {
+	        					bowlGameName += cfpRound1Count;
+	        				}
+	        				
 	        				BowlGame bowlGame = getBowlGameFromShortName(bowlGameList, bowlGameName);
 	        				if (bowlGame == null) {
 	        					if (cellColumnIndex % 2 != 0) {
 		        					gameIndex++;
+		        					if (bowlGameName.equalsIgnoreCase("CFP")) {
+			        					cfpRound1Count++;
+			        				}
 		        				}
 	        					continue;
 	        				}
@@ -326,6 +335,9 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        				}*/
 	        				if (cellColumnIndex % 2 != 0) {
 	        					gameIndex++;
+	        					if (bowlGameName.contains("CFP")) {
+		        					cfpRound1Count++;
+		        				}
 	        				}
 	        				if (gameIndex == bowlGameNameMap.size()) {
 	        					break;
@@ -337,11 +349,9 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        	prevUser = userName;
 	        }
 	        if (picksList.size() > 0) {
-	        	// Temp commented
 	        	DAO.createBatchPicks(picksList, pool.getPoolId());
 	        }
 	        if (cfpPicksList.size() > 0) {
-	        	// Temp commented
 	        	DAO.createBatchCFPPicks(cfpPicksList, pool.getPoolId());
 	        }
 	        /*if (champPicksMap.size() > 0) {
@@ -388,7 +398,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 				break;
 			}
 			if (gameName != null) {
-				if (gameName.contains("SemiFinal") || gameName.contains("National Champion")) {
+				if (gameName.contains("SemiFinal") || gameName.contains("National Champion") || gameName.equalsIgnoreCase("CFP")) {
 					System.out.println("Skip " + gameName);
 					continue;
 				}
@@ -413,6 +423,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 						CFTeam cfFavoriteFromSS = cfTeamsMap.get(getAlternativeSchoolName(favorite).toUpperCase());
 						if (cfFavoriteFromSS == null) {
 							System.out.println(favorite + " NOT FOUND IN DB!");
+							prevGame = gameName;
 							continue;
 						}
 						CFTeam cfFavoriteFromDB = null;
@@ -678,7 +689,22 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		else if (schoolName.equalsIgnoreCase("ND")) {
 			altShortName = "Notre Dame";
 		}
-		else if (schoolName.equalsIgnoreCase("Ohio") || schoolName.equals("OSU")) { // If Ohio University ever makes CFP this needs to be removed
+		else if (schoolName.equalsIgnoreCase("Western Kent")) {
+			altShortName = "Western Kentucky";
+		}
+		else if (schoolName.equalsIgnoreCase("Pitt")) {
+			altShortName = "Pittsburgh";
+		}
+		else if (schoolName.equalsIgnoreCase("Tenn")) {
+			altShortName = "Tennessee";
+		}
+		else if (schoolName.equalsIgnoreCase("Miss St")) {
+			altShortName = "Mississippi";
+		}
+		else if (schoolName.equalsIgnoreCase("Tex Tech")) {
+			altShortName = "Texas Tech";
+		}
+		else if (schoolName.equals("OSU")) { 
 			altShortName = "Ohio State";
 		}
 		if (schoolName.endsWith(" St")) {
@@ -705,7 +731,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		else if (shortName.equalsIgnoreCase("Lending Tree")) {
 			altShortName = "Lendingtree";
 		}
-		else if (shortName.equalsIgnoreCase("Duke Mayo")) {
+		else if (shortName.equalsIgnoreCase("Duke Mayo") || shortName.equalsIgnoreCase("Duke's Mayo")) {
 			altShortName = "Dukes Mayo";
 		}
 		else if (shortName.equals("FRISCO")) {
@@ -728,6 +754,12 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		}
 		else if (shortName.equalsIgnoreCase("Auto Zone")) {
 			altShortName = "AutoZone";
+		}
+		else if (shortName.equalsIgnoreCase("Game Above")) {
+			altShortName = "GameAbove";
+		}
+		else if (shortName.equalsIgnoreCase("Liberty")) {
+			altShortName = "Liberty Bowl";
 		}
 		return altShortName;
 	}

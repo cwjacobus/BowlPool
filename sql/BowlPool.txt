@@ -255,5 +255,24 @@ select DATE_FORMAT(datetime ,'2026-%m-%d') from bowlgame where gameid=1887;
 10. Sculley import users and picks
 11. Adjust Jacobus bowl game picks if favorite changed
 
+// 2025 first round CFP games for Sculley 25 - must be in same order as his spreadsheet.  Exclude for Jacobus 25
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId) 
+values ('CFP1','Alabama Crimson Tide','Oklahoma Sooners',1.5,0,0,false,25,'2025-12-19 20:00:00',false,275,105);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId) 
+values ('CFP2','Texas A&M Aggies','Miami Hurricanes',3.5,0,0,false,25,'2025-12-20 12:00:00',false,270,23);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId) 
+values ('CFP3','Ole Miss Rebels','Tulane Green Wave',17.5,0,0,false,25,'2025-12-20 15:30:00',false,274,10);
+insert into bowlgame (BowlName,Favorite,Underdog,Spread,FavoriteScore,UnderDogScore,Completed,year,DateTime,Cancelled,FavoriteTeamId,UnderdogTeamId) 
+values ('CFP4','Oregon Ducks','James Madison Dukes',21.5,0,0,false,25,'2025-12-20 19:30:00',false,245,126);
+
+UPDATE bowlgame SET favorite=(@temp:=favorite), favorite = underdog, underdog = @temp where GameId = 1926 or GameId = 1945 or GameId = 1953;
+UPDATE bowlgame SET favoriteteamid=(@temp:=favoriteteamid), favoriteteamid = underdogteamid, underdogteamid = @temp where GameId = 1926 or GameId = 1945 or GameId = 1953;
+
+// ADD CFPGameId column to Excluded game
+ALTER TABLE ExcludedGame RENAME COLUMN GameId TO BowlGameId;
+ALTER TABLE ExcludedGame ADD CFPGameId INT(11);
+
+
+
 
 

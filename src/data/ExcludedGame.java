@@ -4,15 +4,17 @@ public class ExcludedGame {
 	
 	private int excludedGameId;
 	private int poolId;
-	private int gameId;
+	private int bowlGameId;
+	private int cfpGameId;
 	
 	public ExcludedGame () {
 	}
 	
-	public ExcludedGame (int excludedGameId, int poolId, int gameId) {
+	public ExcludedGame (int excludedGameId, int poolId, int bowlGameId, int cfpGameId) {
 		this.excludedGameId = excludedGameId;
 		this.poolId = poolId;
-		this.gameId = gameId;
+		this.bowlGameId = bowlGameId;
+		this.cfpGameId = cfpGameId;
 	}
 
 	public int getExcludedGameId() {
@@ -31,12 +33,20 @@ public class ExcludedGame {
 		this.poolId = poolId;
 	}
 
-	public int getGameId() {
-		return gameId;
+	public int getBowlGameId() {
+		return bowlGameId;
 	}
 
-	public void setGameId(int gameId) {
-		this.gameId = gameId;
+	public void setBowlGameId(int bowlGameId) {
+		this.bowlGameId = bowlGameId;
+	}
+
+	public int getCfpGameId() {
+		return cfpGameId;
+	}
+
+	public void setCfpGameId(int cfpGameId) {
+		this.cfpGameId = cfpGameId;
 	}
 
 }

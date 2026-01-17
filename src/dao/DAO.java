@@ -334,7 +334,7 @@ public class DAO {
 			Statement stmt1 = conn.createStatement();
 			String query1String = "SELECT u.UserName, u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
 				"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and bg.cancelled = false and " + 
-				"bg.gameId not in (select bowlGameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
+				"bg.gameId not in (select gameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
 				getYearClause("bg", pool.getYear(), "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
 				"(bg.FavoriteScore - " + (useSpreads ? "bg.Spread" : "0") + " > bg.UnderdogScore) or " +
 				"(p.Favorite = false and (bg.UnderdogScore + " + (useSpreads ? "bg.Spread" : "0") + " > bg.FavoriteScore))) " + 
@@ -358,7 +358,7 @@ public class DAO {
 				Statement stmt3 = conn.createStatement();
 				String query3String = "SELECT u.UserId, count(*) from Pick p, User u, BowlGame bg where  " +
 					"p.userId= u.userId and bg.gameId = p.gameId and bg.completed = true and bg.cancelled = false and " + 
-					"bg.gameId not in (select bowlGameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
+					"bg.gameId not in (select gameId from ExcludedGame where poolId = " + pool.getPoolId() + ") and " +
 					"bg.bowlName like '%Playoff%' and " + 
 					getYearClause("bg", pool.getYear(), "p", pool.getPoolId()) + " and " + "(p.Favorite = true and " +  
 					"(bg.FavoriteScore - " + (useSpreads ? "bg.Spread" : "0") + " > bg.UnderdogScore) or " +
@@ -603,19 +603,34 @@ public class DAO {
 		return eliminatedCFPTeamsList;
 	}
 	
-	public static List<Integer> getExcludedGamesList(Integer poolId) {
-		List<Integer> excludedGameList = new ArrayList<Integer>();
+	public static List<Integer> getExcludedBowlGamesList(Integer poolId) {
+		List<Integer> excludedBowlGamesList = new ArrayList<Integer>();
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM ExcludedGame where poolId = " + poolId);
+			ResultSet rs = stmt.executeQuery("SELECT * FROM ExcludedGame where cfpGame = 0 and poolId = " + poolId);
 			while (rs.next()) {
-				excludedGameList.add(new Integer(rs.getInt("BowlGameId")));
+				excludedBowlGamesList.add(new Integer(rs.getInt("GameId")));
 			}
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return excludedGameList;
+		return excludedBowlGamesList;
+	}
+	
+	public static List<Integer> getExcludedCFPGamesList(Integer poolId) {
+		List<Integer> excludedCFPGamesList = new ArrayList<Integer>();
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM ExcludedGame where cfpGame = 1 and poolId = " + poolId);
+			while (rs.next()) {
+				excludedCFPGamesList.add(new Integer(rs.getInt("GameId")));
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return excludedCFPGamesList;
 	}
 	
 	public static User getUser(String name, Integer year, Integer poolId) {
@@ -713,23 +728,34 @@ public class DAO {
 		return userList;
 	}
 	
-	public static int getNumberOfCompletedGames(Pool pool) {
-		int numberOfCompletedGames = 0;
+	public static int getNumberOfCompletedBowlGames(Pool pool) {
+		int numberOfCompletedBowlGames = 0;
 		try {
 			Statement stmt1 = conn.createStatement();
-			ResultSet rs1 = stmt1.executeQuery("select count(*) from BowlGame where Completed = 1 and GameId not in (select bowlGameId from ExcludedGame where poolId = " + 
-				pool.getPoolId() + ") and " + getYearClause(pool.getYear(), null));
+			ResultSet rs1 = stmt1.executeQuery("select count(*) from BowlGame where Completed = 1 and GameId not in (select gameId from ExcludedGame where cfpGame = 0 and "
+				+ "poolId = " + pool.getPoolId() + ") and " + getYearClause(pool.getYear(), null));
 			rs1.next();
-			numberOfCompletedGames = rs1.getInt(1);
-			Statement stmt2 = conn.createStatement();
-			ResultSet rs2 = stmt2.executeQuery("select count(*) from CFPGame where Completed = 1 and year = " + pool.getYear());
-			rs2.next();
-			numberOfCompletedGames += rs2.getInt(1);
+			numberOfCompletedBowlGames = rs1.getInt(1);
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return numberOfCompletedGames;
+		return numberOfCompletedBowlGames;
+	}
+	
+	public static int getNumberOfCompletedCFPGames(Pool pool) {
+		int numberOfCompletedCFPGames = 0;
+		try {
+			Statement stmt1 = conn.createStatement();
+			ResultSet rs1 = stmt1.executeQuery("select count(*) from CFPGame where Completed = 1 and CFPGameId not in (select gameId from ExcludedGame where cfpGame = 1 and "
+				+ "poolId = " + pool.getPoolId() + ") and " + getYearClause(pool.getYear(), null));
+			rs1.next();
+			numberOfCompletedCFPGames = rs1.getInt(1);
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return numberOfCompletedCFPGames;
 	}
 	
 	public static int getUsersCount(Integer year, Integer poolId) {
@@ -823,7 +849,7 @@ public class DAO {
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select min(dateTime) from BowlGame where year = " + pool.getYear() + " and Cancelled = 0 and " + 
-				"gameid not in (select bowlGameId from excludedgame where poolId = " + pool.getPoolId() +  ")");
+				"gameid not in (select gameId from excludedgame where poolId = " + pool.getPoolId() +  ")");
 			rs.next();
 			dt = rs.getTimestamp(1);
 		}
@@ -984,7 +1010,7 @@ public class DAO {
 	public static void excludeBowlGame(Integer gameId, Integer poolId) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO ExcludedGame (BowlGameId, PoolId) VALUES (" + gameId + ", " + poolId + ");";
+			String insertSQL = "INSERT INTO ExcludedGame (GameId, PoolId) VALUES (" + gameId + ", " + poolId + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {

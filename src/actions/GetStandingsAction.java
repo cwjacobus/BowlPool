@@ -63,13 +63,15 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	private String poolName;
 	private Pool pool;
 	int numOfBowlGames = 1;
+	int numOfTotalGames = 1;
 	int lastGamePlayedIndex = 9;
 	Map<String, Object> userSession;
 	Map<Integer, BowlGame> bowlGamesMap;
 	Map<Integer, CFPGame> cfpGamesMap;
 	Map<Integer, String> cfpTeamMap;
 	//List<Integer> champPickEliminatedList;
-	List<Integer> excludedGameList;
+	List<Integer> excludedBowlGamesList;
+	List<Integer> excludedCFPGamesList;
 	List<String> eliminatedCFPTeamsList;
 	
 	final static Logger logger = Logger.getLogger(GetStandingsAction.class);
@@ -133,19 +135,22 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		userSession.put("bowlGamesList", bowlGamesList);
 		cfpGamesMap = DAO.getCfpGamesMap(pool.getYear());
 		userSession.put("cfpGamesMap", cfpGamesMap);
-		numOfBowlGames += cfpGamesMap.size();
+		numOfTotalGames = numOfBowlGames + cfpGamesMap.size();
 		//List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		//userSession.put("potentialChampionsList", potentialChampionsList);
-		excludedGameList = DAO.getExcludedGamesList(pool.getPoolId());
-		userSession.put("excludedGameList", excludedGameList);
+		excludedBowlGamesList = DAO.getExcludedBowlGamesList(pool.getPoolId());
+		excludedCFPGamesList = DAO.getExcludedCFPGamesList(pool.getPoolId());
+		userSession.put("excludedBowlGamesList", excludedBowlGamesList);
 		cfpTeamMap = DAO.getCFPTeamsMap(pool.getYear());
 		JSONObject cfpTeamsJSON = new JSONObject(cfpTeamMap);
 	    userSession.put("cfpTeamsJSON", cfpTeamsJSON.toString());
 	    userSession.put("cfpTeamsList", new ArrayList<String>(cfpTeamMap.values()));
 		
-		int numOfCompletedGames = DAO.getNumberOfCompletedGames(pool);
-		int numberOfExcludedGames = (excludedGameList != null ? excludedGameList.size() : 0);
-		numOfBowlGames -= numberOfExcludedGames; 
+		int numOfCompletedBowlGames = DAO.getNumberOfCompletedBowlGames(pool);
+		int numOfCompletedCFPGames = DAO.getNumberOfCompletedCFPGames(pool);
+		int numberOfExcludedBowlGames = (excludedBowlGamesList != null ? excludedBowlGamesList.size() : 0);
+		int numberOfExcludedCFPGames = (excludedCFPGamesList != null ? excludedCFPGamesList.size() : 0);
+		numOfTotalGames -= (numberOfExcludedBowlGames + numberOfExcludedCFPGames); 
 		eliminatedCFPTeamsList = DAO.getEliminatedCFPTeamsList(pool.getYear());
 		userSession.put("eliminatedCFPTeamsList", eliminatedCFPTeamsList);
 		//Iterate through standings to make formatted display string
@@ -240,14 +245,14 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 	    Date date1 = ts != null ? new Date(ts.getTime()) : null; // Time of first game
 	    Calendar cal = Calendar.getInstance();
 	   //TBD check times of games
-	    if ((user != null && user.isAdmin()) || (numOfBowlGames > 0 && date1.after(cal.getTime()))) {
+	    if ((user != null && user.isAdmin()) || (numOfTotalGames > 0 && date1.after(cal.getTime()))) {
 	    	userSession.put("readOnly", false);
 	    }
 	    else {
 	    	userSession.put("readOnly", true);
 	    }
-	    context.put("numOfCompletedGames", numOfCompletedGames);
-	    int numOfRemainingGames = numOfBowlGames-numOfCompletedGames;
+	    context.put("numOfCompletedGames", (numOfCompletedBowlGames + numOfCompletedCFPGames));
+	    int numOfRemainingGames = numOfTotalGames-(numOfCompletedBowlGames + numOfCompletedCFPGames);
 	    context.put("numOfRemainingGames", numOfRemainingGames);
 	    stack.push(context);
 	    return "success";
@@ -289,7 +294,7 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		for (Pick up1 : userPicks1) {
 			for (Pick up2 : userPicks2) {
 				if (up1.getGameId() == up2.getGameId() && up1.getFavorite() != up2.getFavorite() && bowlGamesMap.get(up1.getGameId()) != null &&
-						!bowlGamesMap.get(up1.getGameId()).isCompleted() && !bowlGamesMap.get(up1.getGameId()).isCancelled() && !excludedGameList.contains(up1.getGameId())) {
+						!bowlGamesMap.get(up1.getGameId()).isCompleted() && !bowlGamesMap.get(up1.getGameId()).isCancelled() && !excludedBowlGamesList.contains(up1.getGameId())) {
 					diffPicks++;
 				}
 			}

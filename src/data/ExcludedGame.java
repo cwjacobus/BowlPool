@@ -4,17 +4,19 @@ public class ExcludedGame {
 	
 	private int excludedGameId;
 	private int poolId;
-	private int bowlGameId;
+	private int gameId;
 	private int cfpGameId;
+	private boolean cfpGame;
 	
 	public ExcludedGame () {
 	}
 	
-	public ExcludedGame (int excludedGameId, int poolId, int bowlGameId, int cfpGameId) {
+	public ExcludedGame (int excludedGameId, int poolId, int gameId, int cfpGameId, boolean cfpGame) {
 		this.excludedGameId = excludedGameId;
 		this.poolId = poolId;
-		this.bowlGameId = bowlGameId;
+		this.gameId = gameId;
 		this.cfpGameId = cfpGameId;
+		this.cfpGame = cfpGame;
 	}
 
 	public int getExcludedGameId() {
@@ -33,12 +35,12 @@ public class ExcludedGame {
 		this.poolId = poolId;
 	}
 
-	public int getBowlGameId() {
-		return bowlGameId;
+	public int getGameId() {
+		return gameId;
 	}
 
-	public void setBowlGameId(int bowlGameId) {
-		this.bowlGameId = bowlGameId;
+	public void setGameId(int gameId) {
+		this.gameId = gameId;
 	}
 
 	public int getCfpGameId() {
@@ -47,6 +49,14 @@ public class ExcludedGame {
 
 	public void setCfpGameId(int cfpGameId) {
 		this.cfpGameId = cfpGameId;
+	}
+
+	public boolean isCfpGame() {
+		return cfpGame;
+	}
+
+	public void setCfpGame(boolean cfpGame) {
+		this.cfpGame = cfpGame;
 	}
 
 }

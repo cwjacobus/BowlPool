@@ -60,7 +60,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	boolean bowlGamesImport = false;
 	boolean cfTeamsImport = false;
 	String[] cfpBowlGames = {"Peach","Rose","Fiesta","Orange","Cotton","Sugar","Round 1","SemiFinal","Championship"};
-	
+	HashMap<Integer, String> cfpTeamsMap;
 	Map<String, Object> userSession;
 	
 	Integer year;
@@ -81,6 +81,7 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		pool = (Pool) userSession.get("pool");
 		year = (Integer) userSession.get("year");
 		cfTeamsMap = (Map<String, CFTeam>)userSession.get("cfTeamsMap");
+		cfpTeamsMap = DAO.getCFPTeamsMap(year);
 		System.out.println("Import: " + year + " " + pool.getPoolName());
 		
 		InputStream input = ServletActionContext.getServletContext().getResourceAsStream("/WEB-INF/BowlPool.properties");
@@ -237,7 +238,6 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        			int champTotPts = 0;
 	        			int cfpRound1Count = 1;
 	        			while (cellIter.hasNext()) {
-	        				final int semiRound = semi1Found ? 2 : 1;
 	        				Cell cell = (Cell)cellIter.next();
 	        				int cellColumnIndex = cell.getColumnIndex();
 	        				if (cellColumnIndex == 0 || cellColumnIndex == 1) {
@@ -249,10 +249,11 @@ public class ImportAction extends ActionSupport implements SessionAware {
 	        				if (Arrays.asList(cfpBowlGames).contains(bowlGameName)) {
 	        					CFPGame cfpGame = null;
 	        					if (bowlGameName.contains("SemiFinal")) {
+	        						int semiGameIndex = getSemiGameIndexFromShortTeamName(getCFPShortNameFromSchoolName(getAlternativeSchoolName(pick)));
 	        						Optional<CFPGame> gameMatch = 
 	        								cfpGamesList
 	        							.stream()
-	        							.filter((p) -> p.getRound() == 3 && p.getGameIndex() == semiRound)
+	        							.filter((p) -> p.getRound() == 3 && p.getGameIndex() == semiGameIndex)
 	        							.findAny();
 	        						if (gameMatch.isPresent()) {
 	        							cfpGame = gameMatch.get();
@@ -778,6 +779,23 @@ public class ImportAction extends ActionSupport implements SessionAware {
 		}
 				
 	    return cfpTeamShortName;
+	}
+	
+	public int getSemiGameIndexFromShortTeamName(String shortTeamName) {
+		int semiGameIndex = 0;
+		int teamSeed = 0;
+		for (Map.Entry<Integer, String> entry : cfpTeamsMap.entrySet()) {
+			if (entry.getValue().equalsIgnoreCase(shortTeamName)) {
+				teamSeed = entry.getKey();
+				break;
+			}
+        }
+		// Semi games
+		// 1 4 5 12 8 9 play in game round 3 index 2
+		// 2 3 6 11 7 10 play in game round 3 index 1
+		semiGameIndex = (teamSeed == 1 || teamSeed == 4 || teamSeed == 5 || teamSeed == 12 || teamSeed == 8 || teamSeed == 9) ? 2 : 1;
+		
+		return semiGameIndex;
 	}
 	
 	private double roundToHalf(double d) {

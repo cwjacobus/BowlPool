@@ -162,6 +162,8 @@
     }
     
     function getSemiValues(semiGameIndex) {
+    	// Reverse semi game indices since top of bracket on page is game 2 and bottom is game 1
+    	var semiGameIndexForDropDown = semiGameIndex == 2 ? 1 : 2;
     	var round = 3;
     	var cfpChamp = document.getElementById("cfpChamp");
     	removeAllFromDropDown(cfpChamp);
@@ -176,15 +178,15 @@
 			cfpSemi1 = document.getElementById("cfpSemi1");
 			removeAllFromDropDown(cfpSemi1);
 			cfpSemi1.add(emptyOption);
-			addDropDown(cfp5.options[cfp5.selectedIndex].text, round, semiGameIndex, cfpSemi1);
-			addDropDown(cfp6.options[cfp6.selectedIndex].text, round, semiGameIndex, cfpSemi1);
+			addDropDown(cfp5.options[cfp5.selectedIndex].text, round, semiGameIndexForDropDown, cfpSemi1);
+			addDropDown(cfp6.options[cfp6.selectedIndex].text, round, semiGameIndexForDropDown, cfpSemi1);
 		}
 		else if (semiGameIndex == 2 && cfp7.selectedIndex != 0 && cfp8.selectedIndex != 0) {
 			cfpSemi2 = document.getElementById("cfpSemi2");
 			removeAllFromDropDown(cfpSemi2);
 			cfpSemi2.add(emptyOption);
-			addDropDown(cfp7.options[cfp7.selectedIndex].text, round, semiGameIndex, cfpSemi2);
-			addDropDown(cfp8.options[cfp8.selectedIndex].text, round, semiGameIndex, cfpSemi2);
+			addDropDown(cfp7.options[cfp7.selectedIndex].text, round, semiGameIndexForDropDown, cfpSemi2);
+			addDropDown(cfp8.options[cfp8.selectedIndex].text, round, semiGameIndexForDropDown, cfpSemi2);
 		}
     }
     
@@ -221,7 +223,7 @@
 	<tr><th>Bowl</th><th>Time(EST)</th><th>Favorite</th><th>Underdog</th><th>Spread</th></tr>
 	<tr><td>
 	<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">
-		<c:if test="${!fn:contains(sessionScope.excludedGameList, bowlGame.gameId)}">
+		<c:if test="${!fn:contains(sessionScope.excludedBowlGamesList, bowlGame.gameId)}">
 		<c:set var="favChecked" value = ""/>
 		<c:set var="dogChecked" value = ""/>
 		<c:set var="winLoseClass" value=""/>
@@ -324,7 +326,7 @@
   		<table border=1>
   			<tr><th colspan=4>Round 1</th><th colspan=4>Quarters</th><th colspan=2>Semi</th><th align=left>Championship</th><th>Pts</th></tr>
   			<tr>
-  			<c:forEach var="cfpPick" items="${cfpPicksMap[sessionScope.user.userId]}">
+  			<c:forEach var="cfpPick" items="${cfpPicksMap[sessionScope.user.userId]}"> 
   				<c:set var="totPts" value="${cfpPick.totalPoints}"/>
   				<c:set var="winLoseClass" value="class='win'"/>
   				<c:if test="${!cfpGamesMap[cfpPick.cfpGameId].completed}">

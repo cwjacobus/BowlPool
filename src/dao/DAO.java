@@ -1007,10 +1007,10 @@ public class DAO {
 		}
 	}
 	
-	public static void excludeBowlGame(Integer gameId, Integer poolId) {
+	public static void excludeGame(Integer gameId, Integer poolId, Integer cfpGame) {
 		try {
 			Statement stmt = conn.createStatement();
-			String insertSQL = "INSERT INTO ExcludedGame (GameId, PoolId) VALUES (" + gameId + ", " + poolId + ");";
+			String insertSQL = "INSERT INTO ExcludedGame (GameId, PoolId, CFPGame) VALUES (" + gameId + ", " + poolId + ", " + cfpGame + ");";
 			stmt.execute(insertSQL);
 		}
 		catch (SQLException e) {

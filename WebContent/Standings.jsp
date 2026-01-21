@@ -61,23 +61,32 @@
 			<input type="checkbox" name="picksCB" value="Picks"> Picks<br>
 			<input type="submit" value="Import">
   		</form>
-  		<h3>Cancel Game</h3>
+  		<h3>Cancel Bowl Game</h3>
   		<form action="cancelGame">
   			<select name="bowlGame">	
       			<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">
       				<option value="${bowlGame.gameId}">${bowlGame.bowlName}</option>
       			</c:forEach>
       		</select><br>
-  			<input type="submit" value="Cancel Game">
+  			<input type="submit" value="Cancel Bowl Game">
   		</form>
-  		<h3>Exclude Game</h3>
-  		<form action="excludeGame">
+  		<h3>Exclude Bowl Game</h3>
+  		<form action="excludeBowlGame">
   			<select name="bowlGame">	
       			<c:forEach var="bowlGame" items="${sessionScope.bowlGamesList}">
       				<option value="${bowlGame.gameId}">${bowlGame.bowlName}</option>
       			</c:forEach>
       		</select><br>
-  			<input type="submit" value="Exclude Game">
+  			<input type="submit" value="Exclude Bowl Game">
+  		</form>
+  		<h3>Exclude CFP Game</h3>
+  		<form action="excludeCFPGame">
+  			<select name="cfpGame">	
+      			<c:forEach var="cfpGame" items="${sessionScope.cfpGamesList}">
+      				<option value="${cfpGame.cfpGameId}">${cfpGame.description}</option>
+      			</c:forEach>
+      		</select><br>
+  			<input type="submit" value="Exclude CFP Game">
   		</form>
   		<br>
   	</c:if>

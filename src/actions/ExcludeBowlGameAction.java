@@ -16,7 +16,7 @@ import data.BowlGame;
 import data.Pool;
 import dao.DAO;
 
-public class ExcludeGameAction extends ActionSupport implements SessionAware {
+public class ExcludeBowlGameAction extends ActionSupport implements SessionAware {
 	
 	private static final long serialVersionUID = 1L;
 	Map<String, Object> userSession;
@@ -31,7 +31,7 @@ public class ExcludeGameAction extends ActionSupport implements SessionAware {
 			return "error";
 		}
 		Pool pool = (Pool)userSession.get("pool");
-		DAO.excludeBowlGame(bowlGame, pool.getPoolId());
+		DAO.excludeGame(bowlGame, pool.getPoolId(), 0);
 		@SuppressWarnings("unchecked")
 		List<BowlGame> bowlGameList = (List<BowlGame>) userSession.get("bowlGamesList");
 		String bowlName = null;

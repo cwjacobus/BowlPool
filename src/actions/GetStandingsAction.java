@@ -136,6 +136,14 @@ public class GetStandingsAction extends ActionSupport implements Serializable, S
 		cfpGamesMap = DAO.getCfpGamesMap(pool.getYear());
 		userSession.put("cfpGamesMap", cfpGamesMap);
 		numOfTotalGames = numOfBowlGames + cfpGamesMap.size();
+		
+		List<CFPGame> cfpGamesList = new ArrayList<CFPGame>(cfpGamesMap.values());
+		Comparator<CFPGame> multiFieldComparator = Comparator
+	            .comparingInt(CFPGame::getRound)
+	            .thenComparingInt(CFPGame::getGameIndex);
+		cfpGamesList.sort(multiFieldComparator);
+		userSession.put("cfpGamesList", cfpGamesList);
+		
 		//List<String> potentialChampionsList = DAO.getPotentialChampionsList(pool.getYear());
 		//userSession.put("potentialChampionsList", potentialChampionsList);
 		excludedBowlGamesList = DAO.getExcludedBowlGamesList(pool.getPoolId());

@@ -53,8 +53,14 @@
             <result name="success">/SuccessPage.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
       </action>
-      <action name="excludeGame" 
-            class="actions.ExcludeGameAction" 
+      <action name="excludeBowlGame" 
+            class="actions.ExcludeBowlGameAction" 
+            method="execute">
+            <result name="success">/SuccessPage.jsp</result>
+            <result name="error">/ErrorPage.jsp</result>
+      </action>
+      <action name="excludeCFPGame" 
+            class="actions.ExcludeCFPGameAction" 
             method="execute">
             <result name="success">/SuccessPage.jsp</result>
             <result name="error">/ErrorPage.jsp</result>
